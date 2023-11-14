@@ -1,13 +1,18 @@
-import express, { Express, Request, Response } from "express";
+import express, { Request, Response } from "express";
 import dotenv from "dotenv";
+import expressWs from "express-ws";
 
+const { app } = expressWs(express());
 dotenv.config();
-
-const app: Express = express();
 const port = process.env.PORT;
 
 app.get("/", (req: Request, res: Response) => {
-  res.send("Express + TypeScript Server");
+  app.emit("message", { hello: "world" });
+  res.send("Hello, World!");
+});
+
+app.on("message", (msg) => {
+  console.log(msg);
 });
 
 app.listen(port, () => {
