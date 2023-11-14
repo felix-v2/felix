@@ -1,27 +1,42 @@
 import express, { Request, Response } from "express";
+import * as http from "http";
 import dotenv from "dotenv";
-import expressWs from "express-ws";
+import { Server } from "socket.io";
 import { randActivity } from "./neural-net";
 
-const { app } = expressWs(express());
 dotenv.config();
 const port = process.env.PORT;
 
-// register an endpoint for our web server
-app.get("/", (req: Request, res: Response) => {
-  res.send("Hello, World!");
-
-  // every 600ms, emit an event containing the simulated network activity
-  setInterval(() => {
-    app.emit("new-activity", { area1: randActivity() });
-  }, 600);
+const app = express();
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: "http://localhost:3000",
+    methods: ["GET", "POST"],
+  },
 });
 
-app.on("new-activity", (msg) => {
-  console.log("Received new activity!");
+// register an endpoint for our web server
+app.get("/", (req: Request, res: Response) => {
+  res.end();
+});
+
+io.on("connection", (socket) => {
+  console.log("a user connected");
+
+  socket.on("disconnect", () => {
+    console.log("user disconnected");
+  });
+
+  socket.on("msg-from-client", (msg) => {
+    console.log("message received: " + JSON.stringify(msg));
+    socket.emit("msg-from-server", {
+      message: "Thanks for the message, client!",
+    });
+  });
 });
 
 // run the web server
-app.listen(port, () => {
+server.listen(port, () => {
   console.log(`⚡️[server]: Server is running at http://localhost:${port}`);
 });
