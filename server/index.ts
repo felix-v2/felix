@@ -28,12 +28,10 @@ io.on("connection", (socket) => {
     console.log("user disconnected");
   });
 
-  socket.on("msg-from-client", (msg) => {
-    console.log("message received: " + JSON.stringify(msg));
-    socket.emit("msg-from-server", {
-      message: "Thanks for the message, client!",
-    });
-  });
+  // emit a random activity matrix to the client periodically
+  setInterval(() => {
+    socket.emit("new-activity", randActivity());
+  }, 1000);
 });
 
 // run the web server
