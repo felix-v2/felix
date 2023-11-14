@@ -1,26 +1,13 @@
 import express, { Request, Response } from "express";
 import dotenv from "dotenv";
 import expressWs from "express-ws";
+import { randActivity } from "./neural-net";
 
 const { app } = expressWs(express());
 dotenv.config();
 const port = process.env.PORT;
 
-// generates a 2d matrix of X x Y neurons, each with a random activity value between 0 and 1
-const randActivity = (
-  opts: {
-    neuronsX?: number;
-    neuronsY?: number;
-    silent?: boolean;
-  } = { neuronsX: 25, neuronsY: 25 }
-) => {
-  return Array.from(Array(opts.neuronsX)).map(() =>
-    Array.from(Array(opts.neuronsY)).map(() =>
-      opts.silent ? 0 : Math.random()
-    )
-  );
-};
-
+// register an endpoint for our web server
 app.get("/", (req: Request, res: Response) => {
   res.send("Hello, World!");
 
@@ -31,9 +18,10 @@ app.get("/", (req: Request, res: Response) => {
 });
 
 app.on("new-activity", (msg) => {
-  console.log(msg);
+  console.log("Received new activity!");
 });
 
+// run the web server
 app.listen(port, () => {
   console.log(`⚡️[server]: Server is running at http://localhost:${port}`);
 });
