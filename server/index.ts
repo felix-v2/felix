@@ -23,7 +23,6 @@ app.get("/", (req: Request, res: Response) => {
 
 io.on("connection", (socket) => {
   console.log("a user connected");
-  console.log({ randActivity: randActivity() });
 
   socket.on("disconnect", () => {
     console.log("user disconnected");

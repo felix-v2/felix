@@ -34,6 +34,7 @@ export const randActivity = (
  * @todo Make responsive
  * @todo Remove bloody controls from Plotly heatmap (appears on hover)
  * @todo Add sensory and motor inputs
+ * @todo Have the heatmaps respond correctly to server connection/disconnection
  */
 export default function App() {
   // server connection
