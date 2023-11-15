@@ -109,7 +109,7 @@ export default function App() {
         <Row style={{ marginBottom: 20 }}>
           <Col sm={10}>
             <Button
-              variant="outline-primary"
+              variant="outline-dark"
               size="sm"
               onClick={() => setShowControlPanel(true)}
             >
@@ -142,12 +142,12 @@ export default function App() {
             >
               <Card.Header style={{ paddingTop: 30, paddingBottom: 30 }}>
                 <Row>
-                  <Col>{Heatmap({ activity: area1 })}</Col>
-                  <Col>{Heatmap({ activity: area2 })}</Col>
-                  <Col>{Heatmap({ activity: area3 })}</Col>
-                  <Col>{Heatmap({ activity: area4 })}</Col>
-                  <Col>{Heatmap({ activity: area5 })}</Col>
-                  <Col>{Heatmap({ activity: area6 })}</Col>
+                  <Col>{Heatmap({ title: 'Area 1', activity: area1 })}</Col>
+                  <Col>{Heatmap({ title: 'Area 2', activity: area2 })}</Col>
+                  <Col>{Heatmap({ title: 'Area 3', activity: area3 })}</Col>
+                  <Col>{Heatmap({ title: 'Area 4', activity: area4 })}</Col>
+                  <Col>{Heatmap({ title: 'Area 5', activity: area5 })}</Col>
+                  <Col>{Heatmap({ title: 'Area 6', activity: area6 })}</Col>
                 </Row>
               </Card.Header>
               <Card.Body>
@@ -235,7 +235,13 @@ export default function App() {
   );
 }
 
-const Heatmap = ({ activity }: { activity: number[][] }) => {
+const Heatmap = ({
+  activity,
+  title,
+}: {
+  activity: number[][];
+  title: string;
+}) => {
   // scales the value domain (min neural activation - max neural activation) to a colour range
   const colourScale: Plotly.ColorScale = [
     [0, '#b0ceff'],
@@ -256,32 +262,45 @@ const Heatmap = ({ activity }: { activity: number[][] }) => {
   ];
 
   return (
-    <Plot
-      style={{
-        marginLeft: 'auto',
-        marginRight: 'auto',
-      }}
-      data={data}
-      layout={{
-        plot_bgcolor: '#e2e3e5',
-        showlegend: false,
-        margin: { t: 0, b: 0, l: 0, r: 0 },
-        hidesources: true,
-        height: 200,
-        width: 200,
-        xaxis: {
-          showgrid: false,
-          zeroline: false,
-          visible: false,
-        },
-        yaxis: {
-          automargin: true,
-          showgrid: false,
-          zeroline: false,
-          visible: false,
-        },
-      }}
-    />
+    <>
+      <Plot
+        style={{
+          marginLeft: 'auto',
+          marginRight: 'auto',
+        }}
+        data={data}
+        layout={{
+          plot_bgcolor: '#e2e3e5',
+          showlegend: false,
+          margin: { t: 0, b: 0, l: 0, r: 0 },
+          hidesources: true,
+          height: 200,
+          width: 200,
+          xaxis: {
+            showgrid: false,
+            zeroline: false,
+            visible: false,
+          },
+          yaxis: {
+            automargin: true,
+            showgrid: false,
+            zeroline: false,
+            visible: false,
+          },
+        }}
+      />
+      <Button
+        style={{
+          width: 200,
+          marginLeft: 'auto',
+          marginRight: 'auto',
+          marginTop: '10px',
+        }}
+        variant="outline-primary"
+      >
+        {title}
+      </Button>
+    </>
   );
 };
 
