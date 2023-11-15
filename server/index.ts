@@ -29,10 +29,14 @@ io.on("connection", (socket) => {
   });
 
   socket.on("start-simulation", (data) => {
+    console.log(`Starting simulation with duration ${data.stepDuration}`);
+
     // emit a random activity matrix to the client periodically
     setInterval(() => {
-      console.log("Sending new activity to the GUI...");
-      socket.emit("new-activity", randActivity());
+      socket.emit("new-activity", {
+        activity: randActivity(),
+        stepDuration: data.stepDuration,
+      });
     }, data.stepDuration);
   });
 });
