@@ -20,15 +20,18 @@ export const randActivity = (
 };
 
 export default function App() {
+  const [stepDuration, setStepDuration] = useState(1000);
   const [activity, setActivity] = useState(randActivity({ silent: true }));
 
-  const connect = () => {
-    if (!socket.connected) {
-      socket.connect();
+  const startSimulation = () => {
+    if (socket.connected) {
+      socket.disconnect();
     }
+    socket.connect();
+    socket.emit('start-simulation', { stepDuration });
   };
 
-  const disconnect = () => {
+  const stopSimulation = () => {
     socket.disconnect();
   };
 
@@ -64,14 +67,14 @@ export default function App() {
 
   return (
     <div className="App">
-      <button onClick={connect}>Start</button>
-      <button onClick={disconnect}>Stop</button>
-      <div>
-        <Plot
-          data={data}
-          layout={{ width: 500, height: 500, title: 'Area 1' }}
-        />
-      </div>
+      <Plot data={data} layout={{ width: 500, height: 500, title: 'Area 1' }} />
+      <button onClick={startSimulation}>Start</button>
+      <input
+        value={stepDuration}
+        type="number"
+        onChange={(e) => setStepDuration(Number(e.target.value))}
+      ></input>
+      <button onClick={stopSimulation}>Stop</button>
     </div>
   );
 }

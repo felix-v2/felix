@@ -18,7 +18,7 @@ const io = new Server(server, {
 
 // register an endpoint for our web server
 app.get("/", (req: Request, res: Response) => {
-  res.end();
+  res.send("Hello, World!");
 });
 
 io.on("connection", (socket) => {
@@ -28,10 +28,13 @@ io.on("connection", (socket) => {
     console.log("user disconnected");
   });
 
-  // emit a random activity matrix to the client periodically
-  setInterval(() => {
-    socket.emit("new-activity", randActivity());
-  }, 1000);
+  socket.on("start-simulation", (data) => {
+    // emit a random activity matrix to the client periodically
+    setInterval(() => {
+      console.log("Sending new activity to the GUI...");
+      socket.emit("new-activity", randActivity());
+    }, data.stepDuration);
+  });
 });
 
 // run the web server
