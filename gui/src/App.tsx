@@ -238,8 +238,8 @@ export default function App() {
 const Heatmap = ({ activity }: { activity: number[][] }) => {
   // scales the value domain (min neural activation - max neural activation) to a colour range
   const colourScale: Plotly.ColorScale = [
-    [0, '#3D9970'],
-    [1, '#001f3f'],
+    [0, '#b0ceff'],
+    [1, '#0a2f6b'],
   ];
 
   const data: Plotly.Data[] = [
