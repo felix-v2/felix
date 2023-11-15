@@ -23,6 +23,7 @@ app.get("/", (req: Request, res: Response) => {
 
 io.on("connection", (socket) => {
   console.log("a user connected");
+  console.log({ randActivity: randActivity() });
 
   socket.on("disconnect", () => {
     console.log("user disconnected");
@@ -34,7 +35,15 @@ io.on("connection", (socket) => {
     // emit a random activity matrix to the client periodically
     setInterval(() => {
       socket.emit("new-activity", {
-        activity: randActivity(),
+        sensoryInput1: randActivity(),
+        area1: randActivity(),
+        area2: randActivity(),
+        area3: randActivity(),
+        area4: randActivity(),
+        area5: randActivity(),
+        area6: randActivity(),
+        motorInput1: randActivity(),
+
         stepDuration: data.stepDuration,
       });
     }, data.stepDuration);

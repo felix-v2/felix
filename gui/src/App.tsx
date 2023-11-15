@@ -3,11 +3,8 @@ import { io } from 'socket.io-client';
 import Plot from 'react-plotly.js';
 import Button from 'react-bootstrap/Button';
 import {
-  ButtonGroup,
   Card,
   Col,
-  Dropdown,
-  DropdownButton,
   Offcanvas,
   Pagination,
   ProgressBar,
@@ -36,13 +33,25 @@ export const randActivity = (
  * @todo Add Zod parsing to WebSocket handlers on both client and server
  * @todo Make responsive
  * @todo Remove bloody controls from Plotly heatmap (appears on hover)
+ * @todo Add sensory and motor inputs
  */
 export default function App() {
-  // server
+  // server connection
   const [connected, setConnected] = useState(socket.connected);
   const [running, setRunning] = useState(false);
   const [stepDuration, setStepDuration] = useState(1000);
-  const [activity, setActivity] = useState(randActivity({ silent: true }));
+
+  // activity
+  const silence = randActivity({ silent: true });
+
+  const [sensoryInput1, setSensoryInput1] = useState<number[][]>(silence);
+  const [area1, setArea1] = useState<number[][]>(silence);
+  const [area2, setArea2] = useState<number[][]>(silence);
+  const [area3, setArea3] = useState<number[][]>(silence);
+  const [area4, setArea4] = useState<number[][]>(silence);
+  const [area5, setArea5] = useState<number[][]>(silence);
+  const [area6, setArea6] = useState<number[][]>(silence);
+  const [motorInput1, setMotorInput1] = useState<number[][]>(silence);
 
   // control panel
   const [showControlPanel, setShowControlPanel] = useState(false);
@@ -73,8 +82,16 @@ export default function App() {
         serverStepDuration: data.stepDuration,
         clientStepDuration: stepDuration,
       });
+
       if (data.stepDuration === stepDuration) {
-        setActivity(data.activity);
+        setSensoryInput1(data.sensoryInput1);
+        setArea1(data.area1);
+        setArea2(data.area2);
+        setArea3(data.area3);
+        setArea4(data.area4);
+        setArea5(data.area5);
+        setArea6(data.area6);
+        setMotorInput1(data.motorInput1);
       }
     });
   }, [socket, stepDuration, connected]);
@@ -82,25 +99,6 @@ export default function App() {
   useEffect(() => {
     startSimulation();
   }, [stepDuration]);
-
-  // scales the value domain (min neural activation - max neural activation) to a colour range
-  const colourScale: Plotly.ColorScale = [
-    [0, '#3D9970'],
-    [1, '#001f3f'],
-  ];
-
-  const data: Plotly.Data[] = [
-    {
-      type: 'heatmap',
-      z: activity,
-      colorscale: colourScale,
-      showscale: false,
-      showlegend: false,
-      hoverinfo: 'none',
-      mode: 'none',
-      hovertext: 'none',
-    },
-  ];
 
   return (
     <div className="App">
@@ -143,12 +141,12 @@ export default function App() {
             >
               <Card.Header style={{ paddingTop: 30, paddingBottom: 30 }}>
                 <Row>
-                  <Col sm={2}>{Heatmap(data)}</Col>
-                  <Col sm={2}>{Heatmap(data)}</Col>
-                  <Col sm={2}>{Heatmap(data)}</Col>
-                  <Col sm={2}>{Heatmap(data)}</Col>
-                  <Col sm={2}>{Heatmap(data)}</Col>
-                  <Col sm={2}>{Heatmap(data)}</Col>
+                  <Col>{Heatmap({ activity: area1 })}</Col>
+                  <Col>{Heatmap({ activity: area2 })}</Col>
+                  <Col>{Heatmap({ activity: area3 })}</Col>
+                  <Col>{Heatmap({ activity: area4 })}</Col>
+                  <Col>{Heatmap({ activity: area5 })}</Col>
+                  <Col>{Heatmap({ activity: area6 })}</Col>
                 </Row>
               </Card.Header>
               <Card.Body>
@@ -236,7 +234,26 @@ export default function App() {
   );
 }
 
-const Heatmap = (data: Plotly.Data[]) => {
+const Heatmap = ({ activity }: { activity: number[][] }) => {
+  // scales the value domain (min neural activation - max neural activation) to a colour range
+  const colourScale: Plotly.ColorScale = [
+    [0, '#3D9970'],
+    [1, '#001f3f'],
+  ];
+
+  const data: Plotly.Data[] = [
+    {
+      type: 'heatmap',
+      z: activity,
+      colorscale: colourScale,
+      showscale: false,
+      showlegend: false,
+      hoverinfo: 'none',
+      mode: 'none',
+      hovertext: 'none',
+    },
+  ];
+
   return (
     <Plot
       style={{
