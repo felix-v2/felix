@@ -10,8 +10,10 @@ import {
   ProgressBar,
   Row,
 } from 'react-bootstrap';
+import { start } from 'repl';
+import { utcFormat } from 'd3';
 
-const socket = io('ws://localhost:8080', { autoConnect: false });
+const socket = io('ws://localhost:8080', { autoConnect: true });
 
 // generates a 2d matrix of X x Y neurons, each with a random activity value between 0 and 1
 export const randActivity = (
@@ -40,7 +42,6 @@ export default function App() {
   // server connection
   const [connected, setConnected] = useState(socket.connected);
   const [running, setRunning] = useState(false);
-  const [stepDuration, setStepDuration] = useState(1000);
 
   // activity
   const silence = randActivity({ silent: true });
@@ -59,47 +60,40 @@ export default function App() {
 
   // simulation functions
   const startSimulation = () => {
-    stopSimulation();
-    socket.connect();
-    socket.emit('start-simulation', { stepDuration });
-  };
-
-  const stopSimulation = () => {
     socket.disconnect();
+    socket.connect();
+    socket.emit('start-simulation');
   };
 
   useEffect(() => {
+    if (running) {
+      startSimulation();
+    } else {
+      socket.disconnect();
+    }
+  }, [running]);
+
+  useEffect(() => {
     socket.on('connect', () => {
-      console.log('Connected to server!');
       setConnected(true);
     });
 
     socket.on('disconnect', () => {
-      stopSimulation();
+      setConnected(false);
     });
 
     socket.on('new-activity', (data) => {
-      console.log('Activity from server with step duration', {
-        serverStepDuration: data.stepDuration,
-        clientStepDuration: stepDuration,
-      });
-
-      if (data.stepDuration === stepDuration) {
-        setSensoryInput1(data.sensoryInput1);
-        setArea1(data.area1);
-        setArea2(data.area2);
-        setArea3(data.area3);
-        setArea4(data.area4);
-        setArea5(data.area5);
-        setArea6(data.area6);
-        setMotorInput1(data.motorInput1);
-      }
+      if (!running) return;
+      setSensoryInput1(data.sensoryInput1);
+      setArea1(data.area1);
+      setArea2(data.area2);
+      setArea3(data.area3);
+      setArea4(data.area4);
+      setArea5(data.area5);
+      setArea6(data.area6);
+      setMotorInput1(data.motorInput1);
     });
-  }, [socket, stepDuration, connected]);
-
-  useEffect(() => {
-    startSimulation();
-  }, [stepDuration]);
+  }, [socket, connected]);
 
   return (
     <div className="App">
@@ -127,7 +121,9 @@ export default function App() {
               variant={connected ? 'success' : 'danger'}
               now={100}
               label={
-                connected ? 'Connected to server' : 'Not connected to server'
+                connected
+                  ? 'Neural net connection live'
+                  : 'Not connected to neural net'
               }
             />
           </Col>
@@ -158,51 +154,9 @@ export default function App() {
                 </Card.Text>
                 <Row>
                   <Col sm={2}>
-                    <Pagination size="sm">
-                      <Pagination.Item
-                        active={stepDuration === 100}
-                        onClick={() => {
-                          setRunning(true);
-                          setStepDuration(100);
-                        }}
-                      >
-                        {100}
-                      </Pagination.Item>
-                      <Pagination.Item
-                        active={stepDuration === 200}
-                        onClick={() => {
-                          setRunning(true);
-                          setStepDuration(200);
-                        }}
-                      >
-                        {200}
-                      </Pagination.Item>
-                      <Pagination.Ellipsis />
-                      <Pagination.Item
-                        active={stepDuration === 1000}
-                        onClick={() => {
-                          setRunning(true);
-                          setStepDuration(1000);
-                        }}
-                      >
-                        {1000}
-                      </Pagination.Item>
-                      <Pagination.Item
-                        active={stepDuration === 2000}
-                        onClick={() => {
-                          setRunning(true);
-                          setStepDuration(2000);
-                        }}
-                      >
-                        {2000}
-                      </Pagination.Item>
-                    </Pagination>
-                  </Col>
-                  <Col sm={2}>
                     <Button
                       onClick={() => {
                         setRunning(true);
-                        startSimulation();
                       }}
                       disabled={running}
                       variant="success"
@@ -214,7 +168,6 @@ export default function App() {
                     <Button
                       onClick={() => {
                         setRunning(false);
-                        stopSimulation();
                       }}
                       disabled={!running}
                       variant="danger"
