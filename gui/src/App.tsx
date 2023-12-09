@@ -288,24 +288,51 @@ const ControlPanel = ({
           <Col>
             <Slider title="IO" min={0} max={1000} value={550}></Slider>
             <Slider title="Noise" min={-1000} max={1000} value={0}></Slider>
+            <Slider title="Steps" min={1} max={100} value={20}></Slider>
+            <Slider title="Display steps" min={1} max={100} value={10}></Slider>
+          </Col>
+          <Col>
             <Slider
               title="Sensory input row"
               min={1}
               max={2}
-              value={1}
+              value={2}
             ></Slider>
             <Slider
               title="Sensory input col"
               min={1}
               max={3}
-              value={1}
+              value={2}
             ></Slider>
             <Slider title="Motor input row" min={1} max={2} value={1}></Slider>
             <Slider title="Motor input col" min={1} max={6} value={4}></Slider>
+            <Slider
+              title="Sensory stim. amp"
+              min={0}
+              max={1000}
+              value={300}
+            ></Slider>
+            <Slider
+              title="Motor stim. amp"
+              min={0}
+              max={1000}
+              value={300}
+            ></Slider>
           </Col>
-          <Col></Col>
-          <Col></Col>
-          <Col></Col>
+          <Col>
+            <Slider title="Pattern #" min={0} max={13} value={13}></Slider>
+            <Slider title="Learn" min={0} max={1000} value={8}></Slider>
+            <Slider title="Dilute prob" min={0} max={100} value={15}></Slider>
+            <Slider title="Dilute area" min={0} max={6} value={3}></Slider>
+          </Col>
+          <Col>
+            <Slider title="Jffb" min={0} max={5000} value={400}></Slider>
+            <Slider title="Jrec" min={0} max={5000} value={2000}></Slider>
+            <Slider title="Jinh" min={0} max={5000} value={5000}></Slider>
+            <Slider title="J-slow" min={0} max={5000} value={1500}></Slider>
+            <Slider title="Gain" min={0} max={5000} value={600}></Slider>
+            <Slider title="Theta" min={0} max={5000} value={20}></Slider>
+          </Col>
         </Row>
       </Offcanvas.Body>
     </Offcanvas>
@@ -326,16 +353,15 @@ const Slider = ({
   title: string;
   min: number;
   max: number;
-  step: number;
   value: number;
 }) => {
   return (
     <Container style={{ marginTop: '10px' }}>
       <Row>
-        <Col>
+        <Col sm={5}>
           <p>{title}</p>
         </Col>
-        <Col>
+        <Col sm={7}>
           <ProgressBar now={value} label={value} min={min} max={max} />
         </Col>
       </Row>
