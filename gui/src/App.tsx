@@ -5,13 +5,12 @@ import Button from 'react-bootstrap/Button';
 import {
   Card,
   Col,
+  Container,
   Offcanvas,
-  Pagination,
   ProgressBar,
   Row,
 } from 'react-bootstrap';
-import { start } from 'repl';
-import { utcFormat } from 'd3';
+import { FaCogs } from 'react-icons/fa';
 
 const socket = io('ws://localhost:8080', { autoConnect: true });
 
@@ -188,6 +187,9 @@ export default function App() {
   );
 }
 
+/**
+ * @todo move to separate file
+ */
 const Heatmap = ({
   activity,
   title,
@@ -257,6 +259,9 @@ const Heatmap = ({
   );
 };
 
+/**
+ * @todo move to separate file
+ */
 const ControlPanel = ({
   visible,
   onHide,
@@ -265,13 +270,75 @@ const ControlPanel = ({
   onHide: () => void;
 }) => {
   return (
-    <Offcanvas show={visible} onHide={onHide}>
+    <Offcanvas
+      show={visible}
+      onHide={onHide}
+      placement="bottom"
+      scroll={true}
+      style={{ height: '50%' }}
+    >
       <Offcanvas.Header closeButton>
-        <Offcanvas.Title>Felix Control Panel</Offcanvas.Title>
+        <Offcanvas.Title>
+          <FaCogs />
+          {'  Control Panel'}
+        </Offcanvas.Title>
       </Offcanvas.Header>
       <Offcanvas.Body>
-        All the toggles and sliders for configuring the simulation parameters.
+        <Row>
+          <Col>
+            <Slider title="IO" min={0} max={1000} value={550}></Slider>
+            <Slider title="Noise" min={-1000} max={1000} value={0}></Slider>
+            <Slider
+              title="Sensory input row"
+              min={1}
+              max={2}
+              value={1}
+            ></Slider>
+            <Slider
+              title="Sensory input col"
+              min={1}
+              max={3}
+              value={1}
+            ></Slider>
+            <Slider title="Motor input row" min={1} max={2} value={1}></Slider>
+            <Slider title="Motor input col" min={1} max={6} value={4}></Slider>
+          </Col>
+          <Col></Col>
+          <Col></Col>
+          <Col></Col>
+        </Row>
       </Offcanvas.Body>
     </Offcanvas>
+  );
+};
+
+/**
+ * @todo move to separate file
+ * @todo Add lower range and upper range lables on left and right
+ * @todo Add buttons to toggle
+ */
+const Slider = ({
+  min,
+  max,
+  value,
+  title,
+}: {
+  title: string;
+  min: number;
+  max: number;
+  step: number;
+  value: number;
+}) => {
+  return (
+    <Container style={{ marginTop: '10px' }}>
+      <Row>
+        <Col>
+          <p>{title}</p>
+        </Col>
+        <Col>
+          <ProgressBar now={value} label={value} min={min} max={max} />
+        </Col>
+      </Row>
+    </Container>
   );
 };
