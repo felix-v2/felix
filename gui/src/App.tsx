@@ -6,11 +6,15 @@ import {
   Card,
   Col,
   Container,
+  Form,
   Offcanvas,
   ProgressBar,
   Row,
 } from 'react-bootstrap';
-import { FaCogs } from 'react-icons/fa';
+import { FaCogs, FaChessBoard } from 'react-icons/fa';
+import RangeSlider from 'react-bootstrap-range-slider';
+
+import 'react-bootstrap-range-slider/dist/react-bootstrap-range-slider.css';
 
 const socket = io('ws://localhost:8080', { autoConnect: true });
 
@@ -269,69 +273,187 @@ const ControlPanel = ({
   visible: boolean;
   onHide: () => void;
 }) => {
+  const [io, setIo] = useState<number>(0);
+  const [noise, setNoise] = useState<number>(0);
+  const [steps, setSteps] = useState<number>(0);
+  const [displaySteps, setDisplaySteps] = useState<number>(0);
+  const [sensoryInputRow, setSensoryInputRow] = useState<number>(0);
+  const [sensoryInputCol, setSensoryInputCol] = useState<number>(0);
+  const [motorInputRow, setMotorInputRow] = useState<number>(0);
+  const [motorInputCol, setMotorInputCol] = useState<number>(0);
+  const [gain, setGain] = useState<number>(0);
+  const [theta, setTheta] = useState<number>(0);
+  const [sensoryStimAmp, setSensoryStimAmp] = useState<number>(0);
+  const [motorStimAmp, setMotorStimAmp] = useState<number>(0);
+  const [pattern, setPattern] = useState<number>(0);
+  const [learn, setLearn] = useState<number>(0);
+  const [diluteProb, setDiluteProb] = useState<number>(0);
+  const [diluteArea, setDiluteArea] = useState<number>(0);
+  const [jFfb, setJffb] = useState<number>(0);
+  const [jRec, setJRec] = useState<number>(0);
+  const [jInh, setJInh] = useState<number>(0);
+  const [jSlow, setJSlow] = useState<number>(0);
+
   return (
     <Offcanvas
       show={visible}
       onHide={onHide}
       placement="bottom"
       scroll={true}
-      style={{ height: '50%' }}
+      style={{ height: '60%' }}
     >
       <Offcanvas.Header closeButton>
-        <Offcanvas.Title>
-          <FaCogs />
-          {'  Control Panel'}
-        </Offcanvas.Title>
+        <Offcanvas.Title>Control Panel</Offcanvas.Title>
       </Offcanvas.Header>
       <Offcanvas.Body>
         <Row>
-          <Col>
-            <Slider title="IO" min={0} max={1000} value={550}></Slider>
-            <Slider title="Noise" min={-1000} max={1000} value={0}></Slider>
-            <Slider title="Steps" min={1} max={100} value={20}></Slider>
-            <Slider title="Display steps" min={1} max={100} value={10}></Slider>
+          <Col lg={3}>
+            <Slider
+              title="IO"
+              min={0}
+              max={1000}
+              value={io}
+              setValue={setIo}
+            ></Slider>
+            <Slider
+              title="Noise"
+              min={-1000}
+              max={1000}
+              value={noise}
+              setValue={setNoise}
+            ></Slider>
+            <Slider
+              title="Steps"
+              min={1}
+              max={100}
+              value={steps}
+              setValue={setSteps}
+            ></Slider>
+            <Slider
+              title="Display steps"
+              min={1}
+              max={100}
+              value={displaySteps}
+              setValue={setDisplaySteps}
+            ></Slider>
+            <Slider
+              title="Jffb"
+              min={0}
+              max={5000}
+              value={jFfb}
+              setValue={setJffb}
+            ></Slider>
           </Col>
-          <Col>
+          <Col lg={3}>
             <Slider
               title="Sensory input row"
               min={1}
               max={2}
-              value={2}
+              value={sensoryInputRow}
+              setValue={setSensoryInputRow}
             ></Slider>
             <Slider
               title="Sensory input col"
               min={1}
               max={3}
-              value={2}
+              value={sensoryInputCol}
+              setValue={setSensoryInputCol}
             ></Slider>
-            <Slider title="Motor input row" min={1} max={2} value={1}></Slider>
-            <Slider title="Motor input col" min={1} max={6} value={4}></Slider>
+            <Slider
+              title="Motor input row"
+              min={1}
+              max={2}
+              value={motorInputRow}
+              setValue={setMotorInputRow}
+            ></Slider>
+            <Slider
+              title="Motor input col"
+              min={1}
+              max={6}
+              value={motorInputCol}
+              setValue={setMotorInputCol}
+            ></Slider>
+            <Slider
+              title="Jrec"
+              min={0}
+              max={5000}
+              value={jRec}
+              setValue={setJRec}
+            ></Slider>
+          </Col>
+          <Col lg={3}>
+            <Slider
+              title="Gain"
+              min={0}
+              max={5000}
+              value={gain}
+              setValue={setGain}
+            ></Slider>
+            <Slider
+              title="Theta"
+              min={0}
+              max={5000}
+              value={theta}
+              setValue={setTheta}
+            ></Slider>
             <Slider
               title="Sensory stim. amp"
               min={0}
               max={1000}
-              value={300}
+              value={sensoryStimAmp}
+              setValue={setSensoryStimAmp}
             ></Slider>
             <Slider
               title="Motor stim. amp"
               min={0}
               max={1000}
-              value={300}
+              value={motorStimAmp}
+              setValue={setMotorStimAmp}
+            ></Slider>
+            <Slider
+              title="Jinh"
+              min={0}
+              max={5000}
+              value={jInh}
+              setValue={setJInh}
             ></Slider>
           </Col>
-          <Col>
-            <Slider title="Pattern #" min={0} max={13} value={13}></Slider>
-            <Slider title="Learn" min={0} max={1000} value={8}></Slider>
-            <Slider title="Dilute prob" min={0} max={100} value={15}></Slider>
-            <Slider title="Dilute area" min={0} max={6} value={3}></Slider>
-          </Col>
-          <Col>
-            <Slider title="Jffb" min={0} max={5000} value={400}></Slider>
-            <Slider title="Jrec" min={0} max={5000} value={2000}></Slider>
-            <Slider title="Jinh" min={0} max={5000} value={5000}></Slider>
-            <Slider title="J-slow" min={0} max={5000} value={1500}></Slider>
-            <Slider title="Gain" min={0} max={5000} value={600}></Slider>
-            <Slider title="Theta" min={0} max={5000} value={20}></Slider>
+          <Col lg={3}>
+            <Slider
+              title="Pattern #"
+              min={0}
+              max={13}
+              value={pattern}
+              setValue={setPattern}
+            ></Slider>
+            <Slider
+              title="Learn"
+              min={0}
+              max={1000}
+              value={learn}
+              setValue={setLearn}
+            ></Slider>
+            <Slider
+              title="Dilute prob"
+              min={0}
+              max={100}
+              value={diluteProb}
+              setValue={setDiluteProb}
+            ></Slider>
+            <Slider
+              title="Dilute area"
+              min={0}
+              max={6}
+              value={diluteArea}
+              setValue={setDiluteArea}
+            ></Slider>
+            <Slider
+              title="J-slow"
+              min={0}
+              max={5000}
+              value={jSlow}
+              setValue={setJSlow}
+            ></Slider>
           </Col>
         </Row>
       </Offcanvas.Body>
@@ -341,30 +463,40 @@ const ControlPanel = ({
 
 /**
  * @todo move to separate file
- * @todo Add lower range and upper range lables on left and right
- * @todo Add buttons to toggle
  */
 const Slider = ({
+  title,
   min,
   max,
   value,
-  title,
+  setValue,
 }: {
   title: string;
   min: number;
   max: number;
   value: number;
+  setValue: (v: number) => void;
 }) => {
   return (
-    <Container style={{ marginTop: '10px' }}>
-      <Row>
-        <Col sm={5}>
-          <p>{title}</p>
+    <Form style={{ marginTop: '10px', marginRight: '10px' }}>
+      <Form.Group as={Row}>
+        <Form.Label>{title}</Form.Label>
+        <Col xs="8">
+          <RangeSlider
+            value={value}
+            min={min}
+            max={max}
+            onChange={(e) => setValue(Number(e.target.value))}
+          />
         </Col>
-        <Col sm={7}>
-          <ProgressBar now={value} label={value} min={min} max={max} />
+        <Col xs="4">
+          <Form.Control
+            size="sm"
+            value={`${value} / ${max}`}
+            disabled={false}
+          />
         </Col>
-      </Row>
-    </Container>
+      </Form.Group>
+    </Form>
   );
 };

@@ -16,6 +16,7 @@
     "plotly.js": "^1.58.5",
     "react": "^18.2.0",
     "react-bootstrap": "^2.9.1",
+    "react-bootstrap-range-slider": "^3.0.8",
     "react-dom": "^18.2.0",
     "react-grid-heatmapjs": "^1.0.0",
     "react-icons": "^4.12.0",
