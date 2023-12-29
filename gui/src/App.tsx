@@ -91,10 +91,15 @@ export default function App() {
 
   return (
     <div className="App">
-      <Col
-        style={{ marginLeft: '100px', marginRight: '100px', marginTop: '30px' }}
-      >
-        <Row style={{ marginBottom: '30px' }}>
+      <Col style={{ marginTop: '30px' }}>
+        <Row
+          style={{
+            marginTop: '30px',
+            marginLeft: '100px',
+            marginRight: '100px',
+            marginBottom: '30px',
+          }}
+        >
           <Col sm={4}>
             <Card
               style={{
@@ -160,7 +165,77 @@ export default function App() {
             </Card>
           </Col>
         </Row>
-        <Row>
+        <Row
+          style={{
+            marginBottom: '30px',
+            marginLeft: '20px',
+            marginRight: '20px',
+          }}
+        >
+          <Col sm={6}>
+            <Card
+              style={{
+                marginLeft: 'auto',
+                marginRight: 'auto',
+              }}
+            >
+              <Card.Header style={{ paddingTop: 30, paddingBottom: 30 }}>
+                <Row>
+                  <Col>{Heatmap({ title: 'Area 1', activity: silence })}</Col>
+                  <Col>{Heatmap({ title: 'Area 2', activity: silence })}</Col>
+                  <Col>{Heatmap({ title: 'Area 3', activity: silence })}</Col>
+                  <Col>{Heatmap({ title: 'Area 4', activity: silence })}</Col>
+                  <Col>{Heatmap({ title: 'Area 5', activity: silence })}</Col>
+                  <Col>{Heatmap({ title: 'Area 6', activity: silence })}</Col>
+                </Row>
+              </Card.Header>
+              <Card.Body>
+                <Card.Title
+                  style={{
+                    fontSize: '15px',
+                  }}
+                >
+                  CA #1
+                </Card.Title>
+              </Card.Body>
+            </Card>
+          </Col>
+          <Col sm={6}>
+            <Card
+              style={{
+                marginLeft: 'auto',
+                marginRight: 'auto',
+              }}
+            >
+              <Card.Header style={{ paddingTop: 30, paddingBottom: 30 }}>
+                <Row>
+                  <Col>{Heatmap({ title: 'Area 1', activity: silence })}</Col>
+                  <Col>{Heatmap({ title: 'Area 2', activity: silence })}</Col>
+                  <Col>{Heatmap({ title: 'Area 3', activity: silence })}</Col>
+                  <Col>{Heatmap({ title: 'Area 4', activity: silence })}</Col>
+                  <Col>{Heatmap({ title: 'Area 5', activity: silence })}</Col>
+                  <Col>{Heatmap({ title: 'Area 6', activity: silence })}</Col>
+                </Row>
+              </Card.Header>
+              <Card.Body>
+                <Card.Title
+                  style={{
+                    fontSize: '15px',
+                  }}
+                >
+                  CA #2
+                </Card.Title>
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
+        <Row
+          style={{
+            marginBottom: '30px',
+            marginLeft: '100px',
+            marginRight: '100px',
+          }}
+        >
           <Col>
             <Card
               style={{
@@ -174,16 +249,33 @@ export default function App() {
                     {Heatmap({
                       title: 'Sensory Input 1',
                       activity: sensoryInput1,
+                      size: 150,
                     })}
                   </Col>
-                  <Col>{Heatmap({ title: 'Area 1', activity: area1 })}</Col>
-                  <Col>{Heatmap({ title: 'Area 2', activity: area2 })}</Col>
-                  <Col>{Heatmap({ title: 'Area 3', activity: area3 })}</Col>
-                  <Col>{Heatmap({ title: 'Area 4', activity: area4 })}</Col>
-                  <Col>{Heatmap({ title: 'Area 5', activity: area5 })}</Col>
-                  <Col>{Heatmap({ title: 'Area 6', activity: area6 })}</Col>
                   <Col>
-                    {Heatmap({ title: 'Motor Input 1', activity: motorInput1 })}
+                    {Heatmap({ title: 'Area 1', activity: area1, size: 150 })}
+                  </Col>
+                  <Col>
+                    {Heatmap({ title: 'Area 2', activity: area2, size: 150 })}
+                  </Col>
+                  <Col>
+                    {Heatmap({ title: 'Area 3', activity: area3, size: 150 })}
+                  </Col>
+                  <Col>
+                    {Heatmap({ title: 'Area 4', activity: area4, size: 150 })}
+                  </Col>
+                  <Col>
+                    {Heatmap({ title: 'Area 5', activity: area5, size: 150 })}
+                  </Col>
+                  <Col>
+                    {Heatmap({ title: 'Area 6', activity: area6, size: 150 })}
+                  </Col>
+                  <Col>
+                    {Heatmap({
+                      title: 'Motor Input 1',
+                      activity: motorInput1,
+                      size: 150,
+                    })}
                   </Col>
                 </Row>
               </Card.Header>
@@ -205,9 +297,11 @@ export default function App() {
 const Heatmap = ({
   activity,
   title,
+  size = 100,
 }: {
   activity: number[][];
   title: string;
+  size?: number;
 }) => {
   // scales the value domain (min neural activation - max neural activation) to a colour range
   const colourScale: Plotly.ColorScale = [
@@ -241,8 +335,8 @@ const Heatmap = ({
           showlegend: false,
           margin: { t: 0, b: 0, l: 0, r: 0 },
           hidesources: true,
-          height: 150,
-          width: 150,
+          height: size,
+          width: size,
           xaxis: {
             showgrid: false,
             zeroline: false,
@@ -258,7 +352,7 @@ const Heatmap = ({
       />
       <Button
         style={{
-          width: 150,
+          width: size,
           marginLeft: 'auto',
           marginRight: 'auto',
           marginTop: '10px',
