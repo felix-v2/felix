@@ -2,16 +2,7 @@ import { useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
 import Plot from 'react-plotly.js';
 import Button from 'react-bootstrap/Button';
-import {
-  Card,
-  Col,
-  Container,
-  Form,
-  Offcanvas,
-  ProgressBar,
-  Row,
-} from 'react-bootstrap';
-import { FaCogs, FaChessBoard } from 'react-icons/fa';
+import { Card, Col, Form, Offcanvas, ProgressBar, Row } from 'react-bootstrap';
 import RangeSlider from 'react-bootstrap-range-slider';
 
 import 'react-bootstrap-range-slider/dist/react-bootstrap-range-slider.css';
@@ -179,12 +170,21 @@ export default function App() {
             >
               <Card.Header style={{ paddingTop: 30, paddingBottom: 30 }}>
                 <Row>
+                  <Col>
+                    {Heatmap({
+                      title: 'Sensory Input 1',
+                      activity: sensoryInput1,
+                    })}
+                  </Col>
                   <Col>{Heatmap({ title: 'Area 1', activity: area1 })}</Col>
                   <Col>{Heatmap({ title: 'Area 2', activity: area2 })}</Col>
                   <Col>{Heatmap({ title: 'Area 3', activity: area3 })}</Col>
                   <Col>{Heatmap({ title: 'Area 4', activity: area4 })}</Col>
                   <Col>{Heatmap({ title: 'Area 5', activity: area5 })}</Col>
                   <Col>{Heatmap({ title: 'Area 6', activity: area6 })}</Col>
+                  <Col>
+                    {Heatmap({ title: 'Motor Input 1', activity: motorInput1 })}
+                  </Col>
                 </Row>
               </Card.Header>
               <Card.Body>
@@ -241,8 +241,8 @@ const Heatmap = ({
           showlegend: false,
           margin: { t: 0, b: 0, l: 0, r: 0 },
           hidesources: true,
-          height: 200,
-          width: 200,
+          height: 150,
+          width: 150,
           xaxis: {
             showgrid: false,
             zeroline: false,
@@ -258,12 +258,13 @@ const Heatmap = ({
       />
       <Button
         style={{
-          width: 200,
+          width: 150,
           marginLeft: 'auto',
           marginRight: 'auto',
           marginTop: '10px',
         }}
         variant="outline-primary"
+        size="sm"
       >
         {title}
       </Button>
