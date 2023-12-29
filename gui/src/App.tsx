@@ -412,14 +412,14 @@ const ControlPanel = ({
           <Col lg={3}>
             <Slider
               title="IO"
-              min={0}
+              min={-1000}
               max={1000}
               value={io}
               setValue={setIo}
             ></Slider>
             <Slider
               title="Noise"
-              min={-1000}
+              min={0}
               max={1000}
               value={noise}
               setValue={setNoise}
