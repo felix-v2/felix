@@ -243,7 +243,7 @@ export default function App() {
               }}
             >
               <Accordion.Item eventKey="0">
-                <Accordion.Header>CA #1</Accordion.Header>
+                <Accordion.Header>Potentials</Accordion.Header>
                 <Accordion.Body style={{ paddingTop: 30, paddingBottom: 30 }}>
                   <Row>
                     <Col>
