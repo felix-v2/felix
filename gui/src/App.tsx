@@ -101,34 +101,72 @@ export default function App() {
   return (
     <div className="App">
       <Col
-        style={{ marginLeft: '100px', marginRight: '100px', marginTop: '50px' }}
+        style={{ marginLeft: '100px', marginRight: '100px', marginTop: '30px' }}
       >
-        <Row style={{ marginBottom: 20 }}>
-          <Col sm={10}>
-            <Button
-              variant="outline-dark"
-              size="sm"
-              onClick={() => setShowControlPanel(true)}
+        <Row style={{ marginBottom: '30px' }}>
+          <Col sm={4}>
+            <Card
+              style={{
+                marginLeft: 'auto',
+                marginRight: 'auto',
+              }}
             >
-              Control Panel
-            </Button>
-            <ControlPanel
-              visible={showControlPanel}
-              onHide={() => setShowControlPanel(false)}
-            ></ControlPanel>
-          </Col>
-          <Col sm={2} offset={10}>
-            <ProgressBar
-              style={{ height: '2rem' }}
-              animated
-              variant={connected ? 'success' : 'danger'}
-              now={100}
-              label={
-                connected
-                  ? 'Neural net connection live'
-                  : 'Not connected to neural net'
-              }
-            />
+              <Card.Header style={{ paddingTop: 15, paddingBottom: 15 }}>
+                <Row>
+                  <Col sm={6}>
+                    <Button
+                      onClick={() => setShowControlPanel(true)}
+                      variant="outline-dark"
+                      size="sm"
+                    >
+                      Control Panel
+                    </Button>
+                  </Col>
+                  <ControlPanel
+                    visible={showControlPanel}
+                    onHide={() => setShowControlPanel(false)}
+                  ></ControlPanel>
+                  <Col sm={6}>
+                    <ProgressBar
+                      style={{ height: '2rem' }}
+                      animated
+                      variant={connected ? 'success' : 'danger'}
+                      now={100}
+                      label={
+                        connected
+                          ? 'Neural net connection live'
+                          : 'Not connected to neural net'
+                      }
+                    />
+                  </Col>
+                </Row>
+              </Card.Header>
+              <Card.Body>
+                <Card.Title>Simulation</Card.Title>
+                <Button
+                  onClick={() => {
+                    setRunning(true);
+                  }}
+                  disabled={running}
+                  variant="success"
+                  size="sm"
+                  style={{ marginRight: 10, width: '5rem' }}
+                >
+                  Start
+                </Button>
+                <Button
+                  onClick={() => {
+                    setRunning(false);
+                  }}
+                  disabled={!running}
+                  variant="danger"
+                  size="sm"
+                  style={{ marginRight: 5, width: '5rem' }}
+                >
+                  Stop
+                </Button>
+              </Card.Body>
+            </Card>
           </Col>
         </Row>
         <Row>
@@ -150,37 +188,7 @@ export default function App() {
                 </Row>
               </Card.Header>
               <Card.Body>
-                <Card.Title>Current Network Activity</Card.Title>
-                <Card.Text>
-                  You can start a simulation at your chosen step duration, and
-                  stop it anytime you like.
-                </Card.Text>
-                <Row>
-                  <Col sm={2}>
-                    <Button
-                      onClick={() => {
-                        setRunning(true);
-                      }}
-                      disabled={running}
-                      variant="success"
-                      size="sm"
-                      style={{ marginRight: 10, width: '5rem' }}
-                    >
-                      Start
-                    </Button>
-                    <Button
-                      onClick={() => {
-                        setRunning(false);
-                      }}
-                      disabled={!running}
-                      variant="danger"
-                      size="sm"
-                      style={{ marginRight: 5, width: '5rem' }}
-                    >
-                      Stop
-                    </Button>
-                  </Col>
-                </Row>
+                <Card.Title>Potentials</Card.Title>
               </Card.Body>
             </Card>
           </Col>
