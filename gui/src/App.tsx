@@ -102,7 +102,7 @@ export default function App() {
       <Col style={{ marginTop: '30px' }}>
         <Row
           style={{
-            marginTop: '30px',
+            marginTop: '50px',
             marginLeft: '100px',
             marginRight: '100px',
             marginBottom: '30px',
