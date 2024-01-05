@@ -63,10 +63,13 @@ export default function App() {
 
   // simulation functions
   useEffect(() => {
-    console.log('use effect');
     if (running) {
-      console.log('use effect: running');
       socket.emit('start-simulation');
+    }
+
+    if (connected && !running) {
+      socket.disconnect();
+      socket.connect();
     }
   }, [socket, running]);
 
@@ -144,7 +147,7 @@ export default function App() {
                 <Card.Title>Simulation</Card.Title>
                 <Button
                   onClick={() => setRunning(true)}
-                  disabled={running || !connected}
+                  disabled={running}
                   variant="success"
                   size="sm"
                   style={{ marginRight: 10, width: '5rem' }}
@@ -154,6 +157,14 @@ export default function App() {
                 <Button
                   onClick={() => {
                     setRunning(false);
+                    setSensoryInput1(silence);
+                    setArea1(silence);
+                    setArea2(silence);
+                    setArea3(silence);
+                    setArea4(silence);
+                    setArea5(silence);
+                    setArea6(silence);
+                    setMotorInput1(silence);
                   }}
                   disabled={!running}
                   variant="danger"
