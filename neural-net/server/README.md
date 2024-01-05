@@ -1,0 +1,3 @@
+- Python 3.9.6
+- Pip 23.3.2
+- websockets 12.0
