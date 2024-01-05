@@ -14,6 +14,7 @@ import {
 import RangeSlider from 'react-bootstrap-range-slider';
 
 import 'react-bootstrap-range-slider/dist/react-bootstrap-range-slider.css';
+import { start } from 'repl';
 
 const socket = io('ws://localhost:9000', { autoConnect: true });
 
@@ -61,19 +62,13 @@ export default function App() {
   const [showControlPanel, setShowControlPanel] = useState(false);
 
   // simulation functions
-  const startSimulation = () => {
-    socket.disconnect();
-    socket.connect();
-    socket.emit('start-simulation');
-  };
-
-  // useEffect(() => {
-  //   if (running) {
-  //     startSimulation();
-  //   } else {
-  //     socket.disconnect();
-  //   }
-  // }, [running]);
+  useEffect(() => {
+    console.log('use effect');
+    if (running) {
+      console.log('use effect: running');
+      socket.emit('start-simulation');
+    }
+  }, [socket, running]);
 
   useEffect(() => {
     socket.on('connect', () => {
@@ -86,7 +81,6 @@ export default function App() {
 
     socket.on('new-activity', (data) => {
       console.log('New activity received from server', { area1: data.area1 });
-      // if (!running) return;
       setSensoryInput1(data.sensoryInput1);
       setArea1(data.area1);
       setArea2(data.area2);
@@ -149,10 +143,8 @@ export default function App() {
               <Card.Body>
                 <Card.Title>Simulation</Card.Title>
                 <Button
-                  onClick={() => {
-                    setRunning(true);
-                  }}
-                  disabled={running}
+                  onClick={() => setRunning(true)}
+                  disabled={running || !connected}
                   variant="success"
                   size="sm"
                   style={{ marginRight: 10, width: '5rem' }}

@@ -1,13 +1,16 @@
-from flask import Flask, request
-from flask_socketio import SocketIO, emit
 import random
-from threading import Timer
+from flask_socketio import SocketIO, emit
+from flask import Flask, request
+import eventlet
+# https://stackoverflow.com/questions/34581255/python-flask-socketio-send-message-from-thread-not-always-working
+eventlet.monkey_patch()
+
 
 """initialise websocket server"""
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
-socketio = SocketIO(app, cors_allowed_origins='*')
+socketio = SocketIO(app, async_mode='eventlet', cors_allowed_origins='*')
 
 
 """
@@ -37,37 +40,12 @@ def home():
     return 'Home'
 
 
-def sendActivity():
-    emit('new-activity', {
-        'sensoryInput1': randActivity(),
-        'area1': randActivity(),
-        'area2': randActivity(),
-        'area3': randActivity(),
-        'area4': randActivity(),
-        'area5': randActivity(),
-        'area6': randActivity(),
-        'motorInput1': randActivity(),
-    })
-
-
 """Handle connection from gui client"""
 
 
 @socketio.on('connect')
 def handle_connection():
     print(f'Client {request.sid} connected!')
-    sendActivity()
-    sendActivity()
-    sendActivity()
-    sendActivity()
-    sendActivity()
-    sendActivity()
-    sendActivity()
-    sendActivity()
-    sendActivity()
-    sendActivity()
-    sendActivity()
-    sendActivity()
 
 
 """Handle disconnection by gui client"""
@@ -81,9 +59,19 @@ def handle_disconnection():
 """Handle message from gui client"""
 
 
-@socketio.on('message')
-def handle_message(message):
-    print(f'Message received from client {request.sid}: {message}')
+@socketio.on('start-simulation')
+def handle_start_simulation():
+    print(f'Start-sim request received from client {request.sid}')
+    emit('new-activity', {
+        'sensoryInput1': randActivity(),
+        'area1': randActivity(),
+        'area2': randActivity(),
+        'area3': randActivity(),
+        'area4': randActivity(),
+        'area5': randActivity(),
+        'area6': randActivity(),
+        'motorInput1': randActivity(),
+    })
 
 
 if __name__ == '__main__':
