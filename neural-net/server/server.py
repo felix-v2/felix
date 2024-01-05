@@ -62,16 +62,18 @@ def handle_disconnection():
 @socketio.on('start-simulation')
 def handle_start_simulation():
     print(f'Start-sim request received from client {request.sid}')
-    emit('new-activity', {
-        'sensoryInput1': randActivity(),
-        'area1': randActivity(),
-        'area2': randActivity(),
-        'area3': randActivity(),
-        'area4': randActivity(),
-        'area5': randActivity(),
-        'area6': randActivity(),
-        'motorInput1': randActivity(),
-    })
+    while True:
+        socketio.sleep(1)
+        emit('new-activity', {
+            'sensoryInput1': randActivity(),
+            'area1': randActivity(),
+            'area2': randActivity(),
+            'area3': randActivity(),
+            'area4': randActivity(),
+            'area5': randActivity(),
+            'area6': randActivity(),
+            'motorInput1': randActivity(),
+        })
 
 
 if __name__ == '__main__':
