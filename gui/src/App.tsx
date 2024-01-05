@@ -67,18 +67,17 @@ export default function App() {
     socket.emit('start-simulation');
   };
 
-  useEffect(() => {
-    if (running) {
-      startSimulation();
-    } else {
-      socket.disconnect();
-    }
-  }, [running]);
+  // useEffect(() => {
+  //   if (running) {
+  //     startSimulation();
+  //   } else {
+  //     socket.disconnect();
+  //   }
+  // }, [running]);
 
   useEffect(() => {
     socket.on('connect', () => {
       setConnected(true);
-      socket.send('hello from client!');
     });
 
     socket.on('disconnect', () => {
@@ -86,8 +85,8 @@ export default function App() {
     });
 
     socket.on('new-activity', (data) => {
-      console.log('New activity received from server', { data });
-      if (!running) return;
+      console.log('New activity received from server', { area1: data.area1 });
+      // if (!running) return;
       setSensoryInput1(data.sensoryInput1);
       setArea1(data.area1);
       setArea2(data.area2);

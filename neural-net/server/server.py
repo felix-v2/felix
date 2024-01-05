@@ -1,19 +1,35 @@
-from flask import Flask
-from flask_socketio import SocketIO, send
+from flask import Flask, request
+from flask_socketio import SocketIO, emit
 import random
+from threading import Timer
+
+"""initialise websocket server"""
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
 socketio = SocketIO(app, cors_allowed_origins='*')
 
-# get between 1 and 100 randomly sampled neurons from the network of 625
-# activate each neuron in the sample with a random activity level between 0 and 1
+
+"""
+get between 1 and 100 randomly sampled neurons from the network of 625
+activate each neuron in the sample with a random activity level between 0 and 1
+"""
 
 
 def randActivity(neuronsX=25, neuronsY=25):
     neurons = range(neuronsX * neuronsY)
     sample = random.sample(neurons, random.randint(1, 100))
-    return [0 if i not in sample else random.uniform(0, 1) for i in neurons]
+    matrix = []
+    for i in range(neuronsX):
+        row = []
+        for j in range(neuronsY):
+            neuron = (i+1)*(j+1)
+            row.append(0 if neuron not in sample else random.uniform(0, 1))
+        matrix.append(row)
+    return matrix
+
+
+"""web server handler for root"""
 
 
 @app.route('/')
@@ -21,12 +37,9 @@ def home():
     return 'Home'
 
 
-@socketio.on('connect')
-def handle_connection():
-    print('Client connected!')
-    socketio.emit('new-activity', {'hi': 'hey'})
-    socketio.emit('new-activity', {
-        'sensoryInput': randActivity(),
+def sendActivity():
+    emit('new-activity', {
+        'sensoryInput1': randActivity(),
         'area1': randActivity(),
         'area2': randActivity(),
         'area3': randActivity(),
@@ -37,15 +50,40 @@ def handle_connection():
     })
 
 
-@socketio.on('disconnext')
+"""Handle connection from gui client"""
+
+
+@socketio.on('connect')
+def handle_connection():
+    print(f'Client {request.sid} connected!')
+    sendActivity()
+    sendActivity()
+    sendActivity()
+    sendActivity()
+    sendActivity()
+    sendActivity()
+    sendActivity()
+    sendActivity()
+    sendActivity()
+    sendActivity()
+    sendActivity()
+    sendActivity()
+
+
+"""Handle disconnection by gui client"""
+
+
+@socketio.on('disconnect')
 def handle_disconnection():
-    print('Client disconnected!')
+    print(f'Client {request.sid} disconnected!')
+
+
+"""Handle message from gui client"""
 
 
 @socketio.on('message')
 def handle_message(message):
-    print('Message Received: ' + message)
-    send(message)
+    print(f'Message received from client {request.sid}: {message}')
 
 
 if __name__ == '__main__':
