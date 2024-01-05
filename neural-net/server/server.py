@@ -12,8 +12,8 @@ socketio = SocketIO(app, cors_allowed_origins='*')
 
 def randActivity(neuronsX=25, neuronsY=25):
     neurons = range(neuronsX * neuronsY)
-    neuronSample = random.sample(neurons, random.randint(1, 100))
-    return [0 if i not in neuronSample else random.uniform(0, 1) for i in neurons]
+    sample = random.sample(neurons, random.randint(1, 100))
+    return [0 if i not in sample else random.uniform(0, 1) for i in neurons]
 
 
 @app.route('/')
