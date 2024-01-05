@@ -80,6 +80,14 @@ export default function App() {
 
     socket.on('disconnect', () => {
       setConnected(false);
+      setSensoryInput1(silence);
+      setArea1(silence);
+      setArea2(silence);
+      setArea3(silence);
+      setArea4(silence);
+      setArea5(silence);
+      setArea6(silence);
+      setMotorInput1(silence);
     });
 
     socket.on('new-activity', (data) => {
@@ -147,7 +155,7 @@ export default function App() {
                 <Card.Title>Simulation</Card.Title>
                 <Button
                   onClick={() => setRunning(true)}
-                  disabled={running}
+                  disabled={!connected || running}
                   variant="success"
                   size="sm"
                   style={{ marginRight: 10, width: '5rem' }}
@@ -166,7 +174,7 @@ export default function App() {
                     setArea6(silence);
                     setMotorInput1(silence);
                   }}
-                  disabled={!running}
+                  disabled={!connected || !running}
                   variant="danger"
                   size="sm"
                   style={{ marginRight: 5, width: '5rem' }}
