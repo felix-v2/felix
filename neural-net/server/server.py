@@ -6,8 +6,6 @@ import eventlet
 eventlet.monkey_patch()
 
 
-"""initialise websocket server"""
-
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
 socketio = SocketIO(app, async_mode='eventlet', cors_allowed_origins='*')
@@ -32,15 +30,9 @@ def randActivity(neuronsX=25, neuronsY=25):
     return matrix
 
 
-"""web server handler for root"""
-
-
 @app.route('/')
 def home():
     return 'Home'
-
-
-"""Handle connection from gui client"""
 
 
 @socketio.on('connect')
@@ -48,15 +40,9 @@ def handle_connection():
     print(f'Client {request.sid} connected!')
 
 
-"""Handle disconnection by gui client"""
-
-
 @socketio.on('disconnect')
 def handle_disconnection():
     print(f'Client {request.sid} disconnected!')
-
-
-"""Handle message from gui client"""
 
 
 @socketio.on('start-simulation')

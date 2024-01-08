@@ -1,20 +1,22 @@
 import { useEffect, useState } from 'react';
-import { io } from 'socket.io-client';
+import { Socket, io } from 'socket.io-client';
 import Plot from 'react-plotly.js';
 import Button from 'react-bootstrap/Button';
 import {
   Accordion,
+  ButtonGroup,
   Card,
   Col,
   Form,
   Offcanvas,
   ProgressBar,
   Row,
+  ToggleButtonGroup,
 } from 'react-bootstrap';
 import RangeSlider from 'react-bootstrap-range-slider';
+import ToggleButton from 'react-bootstrap/ToggleButton';
 
 import 'react-bootstrap-range-slider/dist/react-bootstrap-range-slider.css';
-import { start } from 'repl';
 
 const socket = io('ws://localhost:9000', { autoConnect: true });
 
@@ -61,10 +63,27 @@ export default function App() {
   // control panel
   const [showControlPanel, setShowControlPanel] = useState(false);
 
+  /**
+   * @todo refactor, this was hacked for demo purposes. should live in control
+   */
+  const [applySensoryInput, setApplySensoryInput] = useState<boolean>(true);
+  const [applyMotorInput, setApplyMotorInput] = useState<boolean>(true);
+
+  useEffect(() => {
+    console.log('input change');
+    socket.emit('update-config', {
+      applySensoryInput,
+      applyMotorInput,
+    });
+  }, [applySensoryInput, applyMotorInput]);
+
   // simulation functions
   useEffect(() => {
     if (running) {
-      socket.emit('start-simulation');
+      socket.emit('start-simulation', {
+        applySensoryInput,
+        applyMotorInput,
+      });
     }
 
     if (connected && !running) {
@@ -106,6 +125,29 @@ export default function App() {
   return (
     <div className="App">
       <Col style={{ marginTop: '30px' }}>
+        <Row style={{ marginBottom: '15px', marginLeft: '100px' }}>
+          <Col sm={3}>
+            <ToggleButton
+              style={{ marginRight: '10px' }}
+              variant={applySensoryInput ? 'primary' : 'outline-primary'}
+              id="tbg-btn-1"
+              value={1}
+              checked={applySensoryInput}
+              onClick={() => setApplySensoryInput(!applySensoryInput)}
+            >
+              Sensory input active
+            </ToggleButton>
+            <ToggleButton
+              variant={applyMotorInput ? 'primary' : 'outline-primary'}
+              id="tbg-btn-2"
+              value={2}
+              checked={applyMotorInput}
+              onClick={() => setApplyMotorInput(!applyMotorInput)}
+            >
+              Motor input active
+            </ToggleButton>
+          </Col>
+        </Row>
         <Row
           style={{
             marginTop: '50px',
@@ -387,6 +429,7 @@ const ControlPanel = ({
   visible: boolean;
   onHide: () => void;
 }) => {
+  // sliders
   const [io, setIo] = useState<number>(0);
   const [noise, setNoise] = useState<number>(0);
   const [steps, setSteps] = useState<number>(0);
@@ -612,5 +655,34 @@ const Slider = ({
         </Col>
       </Form.Group>
     </Form>
+  );
+};
+
+/**
+ * @todo move to separate file
+ */
+const Switch = ({
+  title,
+  value,
+  checked,
+  setChecked,
+}: {
+  title: string;
+  value: string;
+  checked: boolean;
+  setChecked: (checked: boolean) => void;
+}) => {
+  return (
+    <ToggleButton
+      className="mb-2"
+      id="toggle-check"
+      type="checkbox"
+      variant="outline-primary"
+      checked={checked}
+      value={value}
+      onChange={(e) => setChecked(e.currentTarget.checked)}
+    >
+      {title}
+    </ToggleButton>
   );
 };
