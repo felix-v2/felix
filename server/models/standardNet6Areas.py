@@ -141,7 +141,7 @@ class StandardNet6Areas:
     stimRepet: int = 0,       # 4 TESTING: number of repeated stimulations
     stimCA: int = 0	          # 4 TESTING: CA currently being stimulated
 
-    freq_distrib = 0  # array containing freq. of pattern presentations
+    freq_distrib: list = []  # array containing freq. of pattern presentations
 
     noise_fac: float = 0,    # amplitude of spontaneous firing rate
     total_output: float = 0  # Sum of ALL cell's OUTPUT (firing rate)
