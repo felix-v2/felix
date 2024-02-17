@@ -1,4 +1,6 @@
 import io
+import numpy as np
+import random
 
 
 class StandardNet6Areas:
@@ -204,6 +206,127 @@ class StandardNet6Areas:
 
     Jinh: list = []  # Contains the ONE and only inhibitory (Gauss.) kernel
 
+    def main_init(self):
+        """
+        main_init() is called when simulation PROGRAM is started. It does
+        all initialisations the need to be done only ONCE at startup, eg.
+        getting memory for data structures, init. random numbers, etc.
+        """
+        # Random numbers generation                                      */
+        # srandom( time(NULL) );
+        # randomize( time(NULL) );
+        # noise_fac = sqrt(24.0/STEPSIZE);  // if STEPSIZE=0.5, noise_fac ~= 6.93
+
+        # Membr. pot. of ALL excit. cells
+        self.pot = np.zeros(self.NAREAS * self.N1)
+        # Firing rates of ALL excit. cells
+        self.rates = np.zeros(self.NAREAS * self.N1)
+        # M. potential of ALL inhib. cells
+        self.inh = np.zeros(self.NAREAS * self.N1)
+        # patt.-specific f.rates avg.
+        self.avg_patts = np.zeros(self.NAREAS * self.N1 * self.P)
+        # emerging Cell Assemblies
+        # @todo vVector
+        self.ca_patts = np.zeros(self.NAREAS * self.N1 * self.P)
+        # Per-area overlaps betw. CAs
+        self.ca_ovlps = np.zeros(self.NAREAS * self.P * self.P)
+        # Ovlps. betw. CAs & current activity
+        self.ovlps = np.zeros(self.NAREAS * self.P)
+
+        # M. potential of G. Inhib. cells
+        self.slowinh = np.zeros(self.NAREAS)
+        # Adaptation of ALL excit. cells
+        self.adapt = np.zeros(self.NAREAS * self.N1)
+        # Lesion mask (1 <=> lesioned)
+
+        # @todo vVector
+        self.diluted = np.zeros(self.NAREAS * self.N1)
+
+        # @todo vVector
+        # cells CURRENTLY > thresh
+        self.above_thresh = np.zeros(self.NAREAS * self.N1)
+        # @todo vVector
+        self.above_hstory = np.zeros(
+            self.NAREAS * self.N1 * self.P)  # above_thresh's history
+        # (pattern specific)
+        self.tot_LTP = np.zeros(self.NAREAS)
+        self.tot_LTD = np.zeros(self.NAREAS)
+
+        # @todo bVector
+        self.sensInput = np.zeros(self.NYAREAS * self.N1)
+        # @todo bVector
+        self.motorInput = np.zeros(self.NYAREAS * self.N1)
+
+        # @todo bVector
+        self.sensPatt = np.zeros(self.NYAREAS*self.P*self.N1)
+        # @todo bVector
+        self.motorPatt = np.zeros(self.NYAREAS*self.P*self.N1)
+
+        # freq_distrib = (int*)calloc( P, sizeof(int) ); # array of freq. pres.
+
+        # Kernels: we allocate bigger arrays than we actually need (each
+        # el. can contain up to NSQR1 synapses = all-to-all connectivity) #
+
+        self.J = np.zeros(self.NAREAS * self.NAREAS *
+                          self.NSQR1)  # NAREAS*NAREAS couplings
+        # 1 inhib. kernel with at most self.N1 links
+        self.Jinh = np.zeros(self.N1)
+
+        # Vectors of post-synapt. pot. incoming to each cell of one area #
+        self.linkffb = np.zeros(self.N1)  # EPSPs from OTHER (between-) areas
+        self.linkrec = np.zeros(self.N1)  # EPSPs from THIS area (recurrent)
+        # Inh.Post-Syn. Pot from inhib. layer
+        self.linkinh = np.zeros(self.N1)
+        self.tempffb = np.zeros(self.N1)  # auxiliary (used for temp. EPSPs)
+        # "Clamp" input from sensorimotor patt.
+        self.clampSMIn = np.zeros(self.N1)
+
+    def randomise_net_activity(self):
+        """
+        For unit testing: generate activity vectors to pre-empt resetNet
+        """
+        self.pot = np.random.rand(self.NAREAS * self.N1)
+        self.inh = np.random.rand(self.NAREAS * self.N1)
+        self.adapt = np.random.rand(self.NAREAS * self.N1)
+        self.rates = np.random.rand(self.NAREAS * self.N1)
+        self.slowinh = np.random.rand(self.NAREAS)
+        self.tot_LTP = np.random.rand(self.NAREAS)
+        self.tot_LTD = np.random.rand(self.NAREAS)
+        self.above_hstory = np.random.rand(self.NAREAS * self.N1 * self.P)
+
+        self.total_output = random.uniform(1, 1000)
+
+    def resetNet(self):
+        """
+        Reset completely the network activity (the synaptic weights are 
+        left untouched). Recent "history" of TESTING activity is erased.
+        """
+        self.pot = np.zeros(self.NAREAS * self.N1)
+        self.inh = np.zeros(self.NAREAS * self.N1)
+        self.adapt = np.zeros(self.NAREAS * self.N1)
+        self.rates = np.zeros(self.NAREAS * self.N1)
+        self.slowinh = np.zeros(self.NAREAS)
+        self.tot_LTP = np.zeros(self.NAREAS)
+        self.tot_LTD = np.zeros(self.NAREAS)
+        self.above_hstory = np.zeros(self.NAREAS * self.N1 * self.P)
+
+        self.total_output = 0.0
+
+    @staticmethod
+    def init():
+        """
+        init() is called whenever "INIT" or "RUN" buttons in the GUI are 
+        pressed; it initialises individual simulation runs               
+        """
+        return
+
+    @staticmethod
+    def step():
+        """
+        MAIN  "STEP" FUNCTION, executed at each sim. step
+        """
+        return
+
     @staticmethod
     def gener_random_bin_patterns(n: int, nones: int, p: int, pats: list):
         """Creates p binary random vectors of length n, where "nones" units are="1" 
@@ -269,22 +392,6 @@ class StandardNet6Areas:
         """
         return
 
-    def display_K(self):
-        """
-        Visualise (as text output) the links of connectivity matrix K[].
-        """
-        areaConnections = dict()
-        for i in range(self.NAREAS):
-            areaConnectsTo = []
-            print("Area %d receives from ", i+1)
-            for j in range(self.NAREAS):
-                if self.K[self.NAREAS*j+i]:
-                    areaConnectsTo.append(j+1)
-                    print(" %d", j+1)
-            areaConnections[i+1] = areaConnectsTo
-            print(" \n")
-        return areaConnections
-
     @staticmethod
     def compute_CApatts(threshold: float):
         """
@@ -310,34 +417,18 @@ class StandardNet6Areas:
         """
         return
 
-    @staticmethod
-    def resetNet():
+    def display_K(self):
         """
-        Reset completely the network activity (the synaptic weights are 
-        left untouched). Recent "history" of TESTING activity is erased.
+        Visualise (as text output) the links of connectivity matrix K[].
         """
-        return
-
-    @staticmethod
-    def mainInit():
-        """
-        main_init() is called when simulation PROGRAM is started. It does
-        all initialisations the need to be done only ONCE at startup, eg.
-        getting memory for data structures, init. random numbers, etc.
-        """
-        return
-
-    @staticmethod
-    def init():
-        """
-        init() is called whenever "INIT" or "RUN" buttons in the GUI are 
-        pressed; it initialises individual simulation runs               
-        """
-        return
-
-    @staticmethod
-    def step():
-        """
-        MAIN  "STEP" FUNCTION, executed at each sim. step
-        """
-        return
+        areaConnections = dict()
+        for i in range(self.NAREAS):
+            areaConnectsTo = []
+            print("Area %d receives from ", i+1)
+            for j in range(self.NAREAS):
+                if self.K[self.NAREAS*j+i]:
+                    areaConnectsTo.append(j+1)
+                    print(" %d", j+1)
+            areaConnections[i+1] = areaConnectsTo
+            print(" \n")
+        return areaConnections
