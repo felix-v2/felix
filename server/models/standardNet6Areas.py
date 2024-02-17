@@ -1,6 +1,7 @@
 import io
 import numpy as np
 import random
+import math
 
 
 class StandardNet6Areas:
@@ -104,6 +105,12 @@ class StandardNet6Areas:
 
     NO_SYNAPSE = 0.0
 
+    # File names for Saving / Loading net data #
+
+    NET_WR = "net%d.dat"
+    NET_RD = "net.dat"
+    CA_WR = "CA-structure.txt"
+
     ## For AUTOMATED TRAINING of the net ##
 
     PAUSE_TIME = 30      # Duration of pause betw. inputs (time-steps)
@@ -161,7 +168,7 @@ class StandardNet6Areas:
     motorInput: np.array  # current inputs (NYAREAS areas) to "right" (motor)
 
     # @todo defined as type bVector in the C code - what is that?
-    sensPatt: np.array   # Fixed input patterns (NYAREAS x P) to the left
+     / self.motorPatt = pats: np.array   # Fixed input patterns (NYAREAS x P) to the left
     motorPatt: np.array  # Fixed input patterns (NYAREAS x P) to the right
 
     # Post-syn. potentials in input to area
@@ -311,17 +318,21 @@ class StandardNet6Areas:
         self.above_hstory = np.zeros(self.NAREAS * self.N1 * self.P)
 
         self.total_output = 0.0
+    
+    @staticmethod
+    def init():
+            """
+            init() is called whenever "INIT" or "RUN" buttons in the GUI are 
+            pressed; it initialises individual simulation runs               
+            """
+            return
 
-    # @todo set self.ca_ovlps[index] = bbSkalar(the_computed_value)
-    def compute_CAoverlaps(self):
+    @staticmethod
+    def step():
         """
-        Compute the PxP overlaps between the emergin Cell Assemblies
+        MAIN  "STEP" FUNCTION, executed at each sim. step
         """
-        for area in range(self.NAREAS):
-            for i in range(self.P):
-                for j in range(self.P):
-                    self.ca_ovlps[self.P*(self.P*area+i) + j] = (self.N1, self.ca_patts[self.N1*(
-                        self.NAREAS*i+area)], self.ca_patts[self.N1*(self.NAREAS*j+area)]) / self.NONES
+        return
 
     def display_K(self):
         """
@@ -339,20 +350,33 @@ class StandardNet6Areas:
             print(" \n")
         return areaConnections
 
-    @staticmethod
-    def init():
+    # @todo *bbSkalar*: set self.ca_ovlps[index] = bbSkalar(self.N1, self.ca_patts[self.N1*(self.NAREAS*i+area)], self.ca_patts[self.N1*(self.NAREAS*j+area)]) / self.NONES
+    def compute_CAoverlaps(self):
         """
-        init() is called whenever "INIT" or "RUN" buttons in the GUI are 
-        pressed; it initialises individual simulation runs               
+        Compute the PxP overlaps between the emergin Cell Assemblies
         """
-        return
+        for area in range(self.NAREAS):
+            for i in range(self.P):
+                for j in range(self.P):
+                    self.ca_ovlps[self.P*(self.P*area+i) + j] = (self.N1, self.ca_patts[self.N1*(
+                        self.NAREAS*i+area)], self.ca_patts[self.N1*(self.NAREAS*j+area)]) / self.NONES
 
-    @staticmethod
-    def step():
+    def write_CApatts(self):
         """
-        MAIN  "STEP" FUNCTION, executed at each sim. step
+        Write no. of CA-cells of all CA.s to file (for all CA.s & areas). 
+        CAs are computed by the above routine "compute_CApatts(thresh)".
         """
-        return
+        with open(self.CA_WR, "a") as fiCA:
+            if fiCA is None:
+                print(
+                    "\n ERROR: Could not open file '{}' for writing.\n".format(self.CA_WR))
+            else:
+                for i in range(self.P):
+                    fiCA.write("\n CA #{}: ".format(i + 1))
+                    for area in range(self.NAREAS):
+                        fiCA.write("{} ".format(
+                            sum(self.N1, self.ca_patts[self.N1*(self.NAREAS*i+area)])))
+                print("\n\n")
 
     @staticmethod
     def gener_random_bin_patterns(n: int, nones: int, p: int, pats: list):
@@ -365,7 +389,40 @@ class StandardNet6Areas:
         p     -- IN: tot. no. patterns
         pats  -- OUT: the array of patterns
         """
-        return
+        pats = np.zeros(n*p)  # Clear content of ALL patterns
+
+        for j in range(p):  # For each pattern
+            temp_pat = pats[n * j:n * (j + 1)]  # Get slice for current pattern
+            for i in range(nones):  # For all cells of this pattern
+                temp_pat[random.randint(0, n - 1)] = 1
+
+            # It may be that two or more "1"s happen to coincide...
+            while sum(temp_pat) < nones:  # Inefficient, but fast enough
+                temp_pat[random.randint(0, n - 1)] = 1
+
+        # @todo I think since we are not modifying the input pats, like we are in the C version,
+        # the caller will need to set self.sensPatt / self.motorPatt = pats
+        return pats
+
+     # @todo Implement Fire function
+    def compute_CApatts(self, threshold):
+        """
+        Compute the emerging Cell Assemblies using specified threshold
+
+        Keyword arguments:
+        threshold -- IN: threshold used to define a CA
+        """
+        # for area in range(self.NAREAS):  # For all areas
+        #     for i in range(self.P):  # for all input pattern pairs
+        #         # Get firing rate of maximally responsive cell in current area
+        #         max_act = max(self.avg_patts[self.N1*(self.NAREAS*i+area)])
+
+        #         # Check if there is at least 1 cell strongly responsive
+        #         if max_act >= self.MIN_CELLRATE:
+        #             # If cell rate > threshold, set cell to 1 in 'ca_patts'
+        #             Fire(self.N1, self.avg_patts[self.N1*(self.NAREAS*i+area)], threshold*max_act,
+        #                 self.ca_patts[self.N1*(self.NAREAS*i+area)])
+        #         # Else: NO cells are set to 1 in the 'ca_patts' vector
 
     @staticmethod
     def init_gaussian_kernel(nx: int, ny: int, mx: int, my: int, J: list, sigmax: float, sigmay: float, ampl: float):
@@ -381,10 +438,24 @@ class StandardNet6Areas:
         sigmax, sigmay  -- IN: std. deviations
         ampl            -- IN: value at Gaussian center
         """
-        return
+        cx = mx // 2
+        cy = my // 2
 
-    @staticmethod
-    def init_patchy_gauss_kern(nx: int, ny: int, mx: int, my: int, J: list, sigmax: float, sigmay: float, prob: float, upper: float):
+        h1 = 1.0 / (sigmax * sigmax)
+        h2 = 1.0 / (sigmay * sigmay)
+
+        # Set up kernel (0,0)
+        for x in range(mx):
+            for y in range(my):
+                h = (x - cx) * (x - cx) * h1 + (y - cy) * (y - cy) * h2
+                J[y * mx + x] = ampl * math.exp(-h)
+
+        # Copy kernel (0,0) to other locations
+        mm = mx * my
+        for i in range(1, nx * ny):
+            J[i * mm: (i + 1) * mm] = J[:mm]
+
+    def init_patchy_gauss_kern(self, nx: int, ny: int, mx: int, my: int, J: list, sigmax: float, sigmay: float, prob: float, upper: float):
         """This routine initializes nx*ny kernels of size mx*my in the Array
         J such that the probability of creating a synapse follows a Gaus-
         sian distribution falling with distance from center with standard
@@ -401,10 +472,22 @@ class StandardNet6Areas:
         prob            -- IN: IN: Gaussian amplitude
         upper           -- IN: upper synaptic value
         """
-        return
+        # Checks that max. probability is within bounds
+        if prob < 0.0 or prob > 1.0:
+            print("ERROR: init_<..>_kernel() probab. not in [0,1]")
+            exit(-1)
 
-    @staticmethod
-    def train_projection_cyclic(pre: list, post_pot: list, J: list, nx: int, ny: int, mx: int, my: int, hrate: float, totLTP: float, totLTD: float):
+        # First, we compute the probabilities...
+        self.init_gaussian_kernel(nx, ny, mx, my, J, sigmax, sigmay, prob)
+
+        # ...then transform them into the requested synaptic values.
+        for i in range(nx * ny * mx * my):
+            if random.random() < J[i]:
+                J[i] = upper * random.random()  # random.uniform(0, upper) could be used instead of upper*random.random()
+            else:
+                J[i] = 0  # NO_SYNAPSE
+
+    def train_projection_cyclic(self, pre: list, post_pot: list, J: list, nx: int, ny: int, mx: int, my: int, hrate: float, totLTP: float, totLTD: float):
         """Train" all the synapses connecting area X to area Y (incl. X==Y)
 
         Keyword arguments:
@@ -417,22 +500,44 @@ class StandardNet6Areas:
         totLTP    -- OUT: tot. amount of LTP
         totLTD    -- OUT: tot. amount of LTD
         """
-        return
+        kx2 = mx // 2
+        ky2 = my // 2
+        mxy = mx * my
+        kern = J
 
-    @staticmethod
-    def compute_CApatts(threshold: float):
-        """
-        Compute the emerging Cell Assemblies using specified threshold
+        for i in range(ny):  # For all cells in area Y
+            for j in range(nx):  # For all cells in area X
+                ij = i * nx + j  # "ij" counts total number of cells
+                for k in range(-ky2, ky2 + 1):  # For all links of 1 kernel
+                    for l in range(-kx2, kx2 + 1):  # "kern" counts total number of links
+                        m = ((i + k + ny) % ny) * nx + (j + l + nx) % nx  # Get index of cell in X
 
-        Keyword arguments:
-        threshold -- IN: threshold used to define a CA
-        """
-        return
+                        # Check if synapse considered "exists" (i.e., is not equal to NO_SYNAPSE)
+                        if kern[0] != self.NO_SYNAPSE:
+                            # Synapse exists; update its weight using learning rule
 
-    @staticmethod
-    def write_CApatts():
-        """
-        Write no. of CA-cells of all CA.s to file (for all CA.s & areas). 
-        CAs are computed by the above routine "compute_CApatts(thresh)".
-        """
-        return
+                            pre_D = pre[m]  # Get pre-synaptic activity (firing rate)
+
+                            # Check if post-synaptic potential is above LTP threshold
+                            if post_pot[ij] > self.LTP_THRESH:
+                                if pre_D > self.F_THRESH:  # Is there sufficient pre-synaptic activity?
+                                    if kern[0] < self.JMAX:  # Not yet reached MAX synapse weight
+                                        kern[0] += hrate  # Homosynaptic LTP
+                                        totLTP[0] += hrate  # Update total amount of LTP
+                                else:  # pre_D <= F_THRESH
+                                    if kern[0] > self.JMIN:  # Reached MIN synapse weight
+                                        kern[0] -= hrate  # "low"-homosynaptic or heterosynaptic LTD
+                                        totLTD[0] += hrate  # Update total amount of LTD
+                                        if kern[0] < self.JMIN:  # Make sure not to go below JMIN
+                                            kern[0] = self.JMIN
+                            else:  # post_pot <= LTP_THRESH
+                                # Are post_pot and pre_D right for LTD?
+                                if pre_D > self.F_THRESH and post_pot[ij] > self.LTD_THRESH and kern[0] > self.JMIN:
+                                    kern[0] -= hrate  # Homosynaptic LTD
+                                    totLTD[0] += hrate  # Update total amount of LTD
+                                    if kern[0] < self.JMIN:  # Make sure not to go below JMIN
+                                        kern[0] = self.JMIN
+
+                        kern = kern[1:]  # Move to the next synaptic link
+
+
