@@ -184,6 +184,26 @@ class StandardNet6Areas:
 
     fi: io.TextIOWrapper  # file handle for writing data during TESTING
 
+    # Matrix specifying the network's Connectivity structure #
+    # A "1" at coord. (x,y) means Area #x ==> Area #y
+    K: list = [
+        # (to area)
+        # 1, 2, 3, 4, 5, 6
+        1, 1, 0, 0, 0, 0,  # 1
+        1, 1, 1, 0, 0, 0,  # 2
+        0, 1, 1, 1, 0, 0,  # 3
+        0, 0, 1, 1, 1, 0,  # 4
+        0, 0, 0, 1, 1, 1,  # 5
+        0, 0, 0, 0, 1, 1   # 6 (from area)
+    ]
+
+    # ALL KERNELS of the network are (linearly) stored in J[].
+    # Each "element" is a vector of NSQR1 values (syn. weights)
+    # J[Row,Col] = kernel/links FROM area (Row) TO area (Col)
+    J: list = []
+
+    Jinh: list = []  # Contains the ONE and only inhibitory (Gauss.) kernel
+
     @staticmethod
     def gener_random_bin_patterns(n: int, nones: int, p: int, pats: list):
         """Creates p binary random vectors of length n, where "nones" units are="1" 
@@ -249,12 +269,21 @@ class StandardNet6Areas:
         """
         return
 
-    @staticmethod
-    def display_K():
+    def display_K(self):
         """
         Visualise (as text output) the links of connectivity matrix K[].
         """
-        return
+        areaConnections = dict()
+        for i in range(self.NAREAS):
+            areaConnectsTo = []
+            print("Area %d receives from ", i+1)
+            for j in range(self.NAREAS):
+                if self.K[self.NAREAS*j+i]:
+                    areaConnectsTo.append(j+1)
+                    print(" %d", j+1)
+            areaConnections[i+1] = areaConnectsTo
+            print(" \n")
+        return areaConnections
 
     @staticmethod
     def compute_CApatts(threshold: float):
