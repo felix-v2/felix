@@ -93,6 +93,5 @@ class TestStandardNet6Areas(unittest.TestCase):
             net.above_hstory, net.NAREAS * net.N1 * net.P)
         self.assertEqual(net.total_output, 0.0)
 
-
 if __name__ == "__main__":
     unittest.main()

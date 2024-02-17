@@ -143,52 +143,52 @@ class StandardNet6Areas:
     stimRepet: int = 0,       # 4 TESTING: number of repeated stimulations
     stimCA: int = 0	          # 4 TESTING: CA currently being stimulated
 
-    freq_distrib: list = []  # array containing freq. of pattern presentations
+    freq_distrib: np.array  # array containing freq. of pattern presentations
 
     noise_fac: float = 0,    # amplitude of spontaneous firing rate
     total_output: float = 0  # Sum of ALL cell's OUTPUT (firing rate)
 
-    pot: list = []        # (Entire network's) excitat. cells' potentials
-    inh: list = []        # inhib. cells' potentials
-    adapt: list = []      # adaptation of all excit cells
-    rates: list = []      # firing rates (output) of excitatory cells
-    avg_patts: list = []  # time-average of cells' f.rates (pattern specific)
-    ca_ovlps: list = []   # overlaps between emerging CA patts. (in each area)
-    ovlps: list = []      # "   " betw. current activity & CA patts. ("   " )
+    pot: np.array        # (Entire network's) excitat. cells' potentials
+    inh: np.array        # inhib. cells' potentials
+    adapt: np.array      # adaptation of all excit cells
+    rates: np.array      # firing rates (output) of excitatory cells
+    avg_patts: np.array  # time-average of cells' f.rates (pattern specific)
+    ca_ovlps: np.array   # overlaps between emerging CA patts. (in each area)
+    ovlps: np.array      # "   " betw. current activity & CA patts. ("   " )
 
     # @todo defined as type bVector in the C code - what is that?
-    sensInput: list = [],  # current inputs (NYAREAS areas) to "left" (sensory)
-    motorInput: list = []  # current inputs (NYAREAS areas) to "right" (motor)
+    sensInput: np.array   # current inputs (NYAREAS areas) to "left" (sensory)
+    motorInput: np.array  # current inputs (NYAREAS areas) to "right" (motor)
 
     # @todo defined as type bVector in the C code - what is that?
-    sensPatt: list = [],  # Fixed input patterns (NYAREAS x P) to the left
-    motorPatt: list = []  # Fixed input patterns (NYAREAS x P) to the right
+    sensPatt: np.array   # Fixed input patterns (NYAREAS x P) to the left
+    motorPatt: np.array  # Fixed input patterns (NYAREAS x P) to the right
 
     # Post-syn. potentials in input to area
-    linkffb: list = [],
-    linkrec: list = [],
-    linkinh: list = [],
-    tempffb: list = [],   # auxiliary (EPSPs from diff. areas)
-    clampSMIn: list = []  # Incoming sesnory OR motor input to one area
+    linkffb: np.array
+    linkrec: np.array
+    linkinh: np.array
+    tempffb: np.array    # auxiliary (EPSPs from diff. areas)
+    clampSMIn: np.array  # Incoming sesnory OR motor input to one area
 
-    slowinh: list = []  # slow inhib (1 cell per area)
-
-    # @todo defined as type bVector in the C code - what is that?
-    diluted: list = [],       # All "dead" cells
-    above_thresh: list = [],  # Cells CURRENTLY firing above CA_THRESHold
-    above_hstory: list = []   # "history" of above_thresh vector activation
+    slowinh: np.array  # slow inhib (1 cell per area)
 
     # @todo defined as type bVector in the C code - what is that?
-    ca_patts: list = []  # CA patterns emerging as a result of the training
+    diluted: np.array        # All "dead" cells
+    above_thresh: np.array   # Cells CURRENTLY firing above CA_THRESHold
+    above_hstory: np.array   # "history" of above_thresh vector activation
 
-    tot_LTP: list = [],  # Sum of synaptic weight *increase* (in each area)
-    tot_LTD: list = []   # Sum of synaptic weight *decrease* (in each area)
+    # @todo defined as type bVector in the C code - what is that?
+    ca_patts: np.array  # CA patterns emerging as a result of the training
+
+    tot_LTP: np.array   # Sum of synaptic weight *increase* (in each area)
+    tot_LTD: np.array   # Sum of synaptic weight *decrease* (in each area)
 
     fi: io.TextIOWrapper  # file handle for writing data during TESTING
 
     # Matrix specifying the network's Connectivity structure #
     # A "1" at coord. (x,y) means Area #x ==> Area #y
-    K: list = [
+    K: np.array = [
         # (to area)
         # 1, 2, 3, 4, 5, 6
         1, 1, 0, 0, 0, 0,  # 1
@@ -202,9 +202,9 @@ class StandardNet6Areas:
     # ALL KERNELS of the network are (linearly) stored in J[].
     # Each "element" is a vector of NSQR1 values (syn. weights)
     # J[Row,Col] = kernel/links FROM area (Row) TO area (Col)
-    J: list = []
+    J: np.array
 
-    Jinh: list = []  # Contains the ONE and only inhibitory (Gauss.) kernel
+    Jinh: np.array  # Contains the ONE and only inhibitory (Gauss.) kernel
 
     def main_init(self):
         """
@@ -312,6 +312,33 @@ class StandardNet6Areas:
 
         self.total_output = 0.0
 
+    # @todo set self.ca_ovlps[index] = bbSkalar(the_computed_value)
+    def compute_CAoverlaps(self):
+        """
+        Compute the PxP overlaps between the emergin Cell Assemblies
+        """
+        for area in range(self.NAREAS):
+            for i in range(self.P):
+                for j in range(self.P):
+                    self.ca_ovlps[self.P*(self.P*area+i) + j] = (self.N1, self.ca_patts[self.N1*(
+                        self.NAREAS*i+area)], self.ca_patts[self.N1*(self.NAREAS*j+area)]) / self.NONES
+
+    def display_K(self):
+        """
+        Visualise (as text output) the links of connectivity matrix K[].
+        """
+        areaConnections = dict()
+        for i in range(self.NAREAS):
+            areaConnectsTo = []
+            print("Area %d receives from ", i+1)
+            for j in range(self.NAREAS):
+                if self.K[self.NAREAS*j+i]:
+                    areaConnectsTo.append(j+1)
+                    print(" %d", j+1)
+            areaConnections[i+1] = areaConnectsTo
+            print(" \n")
+        return areaConnections
+
     @staticmethod
     def init():
         """
@@ -409,26 +436,3 @@ class StandardNet6Areas:
         CAs are computed by the above routine "compute_CApatts(thresh)".
         """
         return
-
-    @staticmethod
-    def compute_CAoverlaps():
-        """
-        Compute the PxP overlaps between the emergin Cell Assemblies
-        """
-        return
-
-    def display_K(self):
-        """
-        Visualise (as text output) the links of connectivity matrix K[].
-        """
-        areaConnections = dict()
-        for i in range(self.NAREAS):
-            areaConnectsTo = []
-            print("Area %d receives from ", i+1)
-            for j in range(self.NAREAS):
-                if self.K[self.NAREAS*j+i]:
-                    areaConnectsTo.append(j+1)
-                    print(" %d", j+1)
-            areaConnections[i+1] = areaConnectsTo
-            print(" \n")
-        return areaConnections
