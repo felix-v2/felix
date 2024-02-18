@@ -3,7 +3,6 @@ from standardNet6Areas import StandardNet6Areas
 import numpy as np
 
 
-# Note: very brut-ish and ugly unit tests but they will do for now to ensure the code works as expected
 class TestStandardNet6Areas(unittest.TestCase):
 
     @staticmethod
@@ -92,6 +91,7 @@ class TestStandardNet6Areas(unittest.TestCase):
         self.assertZeroActivity(
             net.above_hstory, net.NAREAS * net.N1 * net.P)
         self.assertEqual(net.total_output, 0.0)
+
 
 if __name__ == "__main__":
     unittest.main()
