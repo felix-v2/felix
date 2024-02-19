@@ -2,10 +2,11 @@
 # There are surely far more Pythonic implementations (e.g. numpy) than those below, but we ignore them
 # in order to keep the translated Python version as close as possible to the original C implementation.
 
-from multiprocessing import Pool
 import numpy as np
 from numpy.typing import NDArray
 import random
+import math
+# from multiprocessing import Pool
 
 BaseType = np.float64
 VectorType = NDArray[BaseType]
@@ -272,3 +273,29 @@ def bool_noise(p: BaseType) -> bool:
     false with probability 1-p
     """
     return random.random() <= p
+
+
+def SIGMOID(x: BaseType):
+    """
+    Computes the sigmoid activation value for the input _x, which squashes the input values into the range [0, 1], 
+    (suitable for modeling probabilities -- firing rates in neural nets)
+
+    Replace with: tensorflow.sig ?
+    """
+    return 1.0 / (1.0 + math.exp(-2.0 * x))
+
+
+def RAMP(x: BaseType):
+    """
+    Activation function (for excitatory cells)
+    Essentially clips the input x to the range [0.0, 1.0]. If the input is outside this range, it is clamped to the nearest boundary value (0.0 or 1.0)
+    """
+    return max(0.0, min(1.0, x))
+
+
+def TLIN(x: BaseType):
+    """
+    Activation functions (for inhibitory neurons)
+    Introduces a threshold, and if the input exceeds the threshold, it allows the input to pass through unchanged; otherwise, it returns zero
+    """
+    return x if x > 0 else 0

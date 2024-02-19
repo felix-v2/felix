@@ -2,7 +2,8 @@ import io
 import numpy as np
 import random
 import math
-from util import bbSkalar, Fire, Get_Vector, Get_bVector, Clear_Vector, Clear_bVector, Get_Random_Vector, VectorType, bVectorType
+from util import bbSkalar, Fire, Get_Vector, Get_bVector, Clear_Vector, Clear_bVector, Get_Random_Vector, RAMP, TLIN, bool_noise, VectorType, bVectorType
+import time
 
 
 class StandardNet6Areas:
@@ -56,15 +57,21 @@ class StandardNet6Areas:
 
     r0 = 0.003
     r1 = 0.5
-    # @todo
-    # define SFUNC(_x) bool_noise( r0+r1*TLIN(_x) )
+
+    def SFUNC(self, x: float):
+        return bool_noise(self.r0+self.r1*TLIN(x))
 
     ## Rate functions of different cells ##
 
-    # @todo
-    # define FUNCI(x) TLIN(x)   // For inhibitory cells
-    # define FUNC(x)  RAMP(x)   // For excitatory cells
-    # define SIGMOID(_x) ( 1.0 / ( 1.0+exp(-2.0*(_x)) ) )   // ? is this used?..
+    @staticmethod
+    def FUNCI(x: float):
+        "For inhibitory cells"
+        return TLIN(x)
+
+    @staticmethod
+    def FUNC(x: float):
+        "For excitatory cells"
+        return RAMP(x)
 
     ## Kernels & synaptic values ##
 
@@ -216,12 +223,14 @@ class StandardNet6Areas:
         main_init() is called when simulation PROGRAM is started. It does
         all initialisations the need to be done only ONCE at startup, eg.
         getting memory for data structures, init. random numbers, etc.
+
+        Note: we could easily move this initialise these values in-line above, but I'm
+        leaving as is, in the spirit of "like for like" translation
         """
-        # @todo
         # Random numbers generation
-        # srandom( time(NULL) );
-        # randomize( time(NULL) );
-        # noise_fac = sqrt(24.0/STEPSIZE);  // if STEPSIZE=0.5, noise_fac ~= 6.93
+        random.seed(time.time())
+        # if STEPSIZE=0.5, noise_fac ~= 6.93
+        self.noise_fac = math.sqrt(24.0 / self.STEPSIZE)
 
         # Membr. pot. of ALL excit. cells
         self.pot = Get_Vector(self.NAREAS * self.N1)
@@ -260,8 +269,8 @@ class StandardNet6Areas:
         self.sensPatt = Get_bVector(self.NYAREAS*self.P*self.N1)
         self.motorPatt = Get_bVector(self.NYAREAS*self.P*self.N1)
 
-        # @todo
-        # freq_distrib = (int*)calloc( P, sizeof(int) ); # array of freq. pres.
+        # note: in the C version there is `freq_distrib = (int*)calloc( P, sizeof(int) )` - Get_bVector is not used
+        self.freq_distrib = Get_bVector(self.P)  # array of freq. pres.
 
         # Kernels: we allocate bigger arrays than we actually need (each
         # el. can contain up to NSQR1 synapses = all-to-all connectivity) #
@@ -376,8 +385,6 @@ class StandardNet6Areas:
                 print("\n\n")
 
     # @todo unit test
-    # @todo I think since we are not modifying the class member (pats), like we are in the C version,
-    # the caller will need to set it
     @staticmethod
     def gener_random_bin_patterns(n: int, nones: int, p: int, pats: np.ndarray):
         """Creates p binary random vectors of length n, where "nones" units are="1" 

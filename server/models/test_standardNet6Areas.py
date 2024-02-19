@@ -1,6 +1,7 @@
 import unittest
 from standardNet6Areas import StandardNet6Areas
 import numpy as np
+from unittest.mock import patch
 
 
 class TestStandardNet6Areas(unittest.TestCase):
@@ -91,6 +92,16 @@ class TestStandardNet6Areas(unittest.TestCase):
         self.assertZeroActivity(
             net.above_hstory, net.NAREAS * net.N1 * net.P)
         self.assertEqual(net.total_output, 0.0)
+
+    @patch('random.random')
+    def test_SFUNC(self, mock_random):
+        net = StandardNet6Areas()
+
+        mock_random.return_value = 0.5
+        self.assertTrue(net.SFUNC(1.0))
+
+        mock_random.return_value = 0.8
+        self.assertFalse(net.SFUNC(0))
 
 
 if __name__ == "__main__":

@@ -1,6 +1,8 @@
 import unittest
+from unittest.mock import patch
 import numpy as np
 import util
+import math
 
 
 class TestUtil(unittest.TestCase):
@@ -31,10 +33,13 @@ class TestUtil(unittest.TestCase):
     def test_equal_noise(self):
         self.assertTrue(0 <= util.equal_noise() <= 1)
 
-    def test_bool_noise(self):
-        self.assertFalse(util.bool_noise(0))
-        self.assertTrue(util.bool_noise(1))
-        self.assertIn(util.bool_noise(0.5), [True, False])
+    @patch('random.random')
+    def test_bool_noise(self, mock_random):
+        mock_random.return_value = 0.5
+        self.assertTrue(util.bool_noise(0.6))
+
+        mock_random.return_value = 0.99
+        self.assertFalse(util.bool_noise(0.8))
 
     def test_bSum(self):
         v = [1, 0, 1, 1, 0, 0, 0, 1]
@@ -109,6 +114,25 @@ class TestUtil(unittest.TestCase):
         expected = np.array([[54, 54, 54], [54, 54, 53], [54, 54, 54]])
 
         np.testing.assert_array_equal(got, expected)
+
+    def test_SIGMOID(self):
+        self.assertEqual(util.SIGMOID(0), 0.5)
+        self.assertEqual(util.SIGMOID(math.inf), 1)
+        self.assertEqual(util.SIGMOID(0.1), 0.549833997312478)
+
+    def test_RAMP(self):
+        self.assertEqual(util.RAMP(1), 1)
+        self.assertEqual(util.RAMP(0), 0)
+        self.assertEqual(util.RAMP(1.6), 1)
+        self.assertEqual(util.RAMP(-0.2), 0)
+        self.assertEqual(util.RAMP(0.6), 0.6)
+
+    def test_TLIN(self):
+        self.assertEqual(util.TLIN(0), 0)
+        self.assertEqual(util.TLIN(-.1), 0)
+        self.assertEqual(util.TLIN(0.1), 0.1)
+        self.assertEqual(util.TLIN(1), 1)
+        self.assertEqual(util.TLIN(1.5), 1.5)
 
 
 if __name__ == "__main__":
