@@ -200,6 +200,7 @@ class StandardNet6Areas:
 
     # Matrix specifying the network's Connectivity structure #
     # A "1" at coord. (x,y) means Area #x ==> Area #y
+    # Note: keeping this 1d in the spirit of "like for like" translation
     K: bVectorType = np.array([
         # (to area)
         # 1, 2, 3, 4, 5, 6
@@ -330,6 +331,7 @@ class StandardNet6Areas:
         init() is called whenever "INIT" or "RUN" buttons in the GUI are 
         pressed; it initialises individual simulation runs               
         """
+
         return
 
     @staticmethod

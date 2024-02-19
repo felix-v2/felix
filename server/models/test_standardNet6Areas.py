@@ -61,6 +61,8 @@ class TestStandardNet6Areas(unittest.TestCase):
         self.assertZeroActivity(net.linkinh, net.N1)
         self.assertZeroActivity(net.tempffb, net.N1)
         self.assertZeroActivity(net.clampSMIn, net.N1)
+        self.assertZeroActivity(net.freq_distrib, net.P)
+        self.assertEqual(net.noise_fac, 6.928203230275509)
 
     def test_resetNet(self):
         net = StandardNet6Areas()
