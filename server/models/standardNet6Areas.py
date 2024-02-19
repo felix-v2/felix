@@ -2,7 +2,7 @@ import io
 import numpy as np
 import random
 import math
-from util import bbSkalar, Fire, Get_Vector, Get_bVector, Clear_Vector, Clear_bVector, Get_Random_Vector, RAMP, TLIN, bool_noise, VectorType, bVectorType
+import util
 import time
 
 
@@ -59,19 +59,19 @@ class StandardNet6Areas:
     r1 = 0.5
 
     def SFUNC(self, x: float):
-        return bool_noise(self.r0+self.r1*TLIN(x))
+        return util.bool_noise(self.r0+self.r1*util.TLIN(x))
 
     ## Rate functions of different cells ##
 
     @staticmethod
     def FUNCI(x: float):
         "For inhibitory cells"
-        return TLIN(x)
+        return util.TLIN(x)
 
     @staticmethod
     def FUNC(x: float):
         "For excitatory cells"
-        return RAMP(x)
+        return util.RAMP(x)
 
     ## Kernels & synaptic values ##
 
@@ -158,50 +158,58 @@ class StandardNet6Areas:
     stimRepet: int = 0,       # 4 TESTING: number of repeated stimulations
     stimCA: int = 0	          # 4 TESTING: CA currently being stimulated
 
-    freq_distrib: VectorType  # array containing freq. of pattern presentations
+    freq_distrib: util.VectorType  # array containing freq. of pattern presentations
 
     noise_fac: float = 0.0,     # amplitude of spontaneous firing rate
     total_output: float = 0.0,  # Sum of ALL cell's OUTPUT (firing rate)
 
-    pot: VectorType        # (Entire network's) excitat. cells' potentials
-    inh: VectorType        # inhib. cells' potentials
-    adapt: VectorType      # adaptation of all excit cells
-    rates: VectorType      # firing rates (output) of excitatory cells
-    avg_patts: VectorType  # time-average of cells' f.rates (pattern specific)
-    ca_ovlps: VectorType   # overlaps between emerging CA patts. (in each area)
-    ovlps: VectorType      # "   " betw. current activity & CA patts. ("   " )
+    pot: util.VectorType        # (Entire network's) excitat. cells' potentials
+    inh: util.VectorType        # inhib. cells' potentials
+    adapt: util.VectorType      # adaptation of all excit cells
+    rates: util.VectorType      # firing rates (output) of excitatory cells
+    # time-average of cells' f.rates (pattern specific)
+    avg_patts: util.VectorType
+    # overlaps between emerging CA patts. (in each area)
+    ca_ovlps: util.VectorType
+    # "   " betw. current activity & CA patts. ("   " )
+    ovlps: util.VectorType
 
     # current inputs (NYAREAS areas) to "left" (sensory)
-    sensInput: VectorType
-    motorInput: VectorType  # current inputs (NYAREAS areas) to "right" (motor)
+    sensInput: util.VectorType
+    # current inputs (NYAREAS areas) to "right" (motor)
+    motorInput: util.VectorType
 
-    sensPatt: VectorType   # Fixed input patterns (NYAREAS x P) to the left
-    motorPatt: VectorType  # Fixed input patterns (NYAREAS x P) to the right
+    # Fixed input patterns (NYAREAS x P) to the left
+    sensPatt: util.VectorType
+    # Fixed input patterns (NYAREAS x P) to the right
+    motorPatt: util.VectorType
 
     # Post-syn. potentials in input to area
-    linkffb: VectorType
-    linkrec: VectorType
-    linkinh: VectorType
-    tempffb: VectorType    # auxiliary (EPSPs from diff. areas)
-    clampSMIn: VectorType  # Incoming sesnory OR motor input to one area
+    linkffb: util.VectorType
+    linkrec: util.VectorType
+    linkinh: util.VectorType
+    tempffb: util.VectorType    # auxiliary (EPSPs from diff. areas)
+    clampSMIn: util.VectorType  # Incoming sesnory OR motor input to one area
 
-    slowinh: VectorType  # slow inhib (1 cell per area)
+    slowinh: util.VectorType  # slow inhib (1 cell per area)
 
-    diluted: VectorType        # All "dead" cells
-    above_thresh: VectorType   # Cells CURRENTLY firing above CA_THRESHold
-    above_hstory: VectorType   # "history" of above_thresh vector activation
+    diluted: util.VectorType        # All "dead" cells
+    above_thresh: util.VectorType   # Cells CURRENTLY firing above CA_THRESHold
+    above_hstory: util.VectorType   # "history" of above_thresh vector activation
 
-    ca_patts: bVectorType   # CA patterns emerging as a result of the training
+    ca_patts: util.bVectorType   # CA patterns emerging as a result of the training
 
-    tot_LTP: VectorType   # Sum of synaptic weight *increase* (in each area)
-    tot_LTD: VectorType   # Sum of synaptic weight *decrease* (in each area)
+    # Sum of synaptic weight *increase* (in each area)
+    tot_LTP: util.VectorType
+    # Sum of synaptic weight *decrease* (in each area)
+    tot_LTD: util.VectorType
 
     fi: io.TextIOWrapper  # file handle for writing data during TESTING
 
     # Matrix specifying the network's Connectivity structure #
     # A "1" at coord. (x,y) means Area #x ==> Area #y
     # Note: keeping this 1d in the spirit of "like for like" translation
-    K: bVectorType = np.array([
+    K: util.bVectorType = np.array([
         # (to area)
         # 1, 2, 3, 4, 5, 6
         1, 1, 0, 0, 0, 0,  # 1
@@ -215,9 +223,10 @@ class StandardNet6Areas:
     # ALL KERNELS of the network are (linearly) stored in J[].
     # Each "element" is a vector of NSQR1 values (syn. weights)
     # J[Row,Col] = kernel/links FROM area (Row) TO area (Col)
-    J: VectorType
+    J: util.VectorType
 
-    Jinh: VectorType  # Contains the ONE and only inhibitory (Gauss.) kernel
+    # Contains the ONE and only inhibitory (Gauss.) kernel
+    Jinh: util.VectorType
 
     def main_init(self):
         """
@@ -234,74 +243,78 @@ class StandardNet6Areas:
         self.noise_fac = math.sqrt(24.0 / self.STEPSIZE)
 
         # Membr. pot. of ALL excit. cells
-        self.pot = Get_Vector(self.NAREAS * self.N1)
+        self.pot = util.Get_Vector(self.NAREAS * self.N1)
         # Firing rates of ALL excit. cells
-        self.rates = Get_Vector(self.NAREAS * self.N1)
+        self.rates = util.Get_Vector(self.NAREAS * self.N1)
         # M. potential of ALL inhib. cells
-        self.inh = Get_Vector(self.NAREAS * self.N1)
+        self.inh = util.Get_Vector(self.NAREAS * self.N1)
         # patt.-specific f.rates avg.
-        self.avg_patts = Get_Vector(self.NAREAS * self.N1 * self.P)
+        self.avg_patts = util.Get_Vector(self.NAREAS * self.N1 * self.P)
         # emerging Cell Assemblies
-        self.ca_patts = Get_bVector(self.NAREAS * self.N1 * self.P)
+        self.ca_patts = util.Get_bVector(self.NAREAS * self.N1 * self.P)
         # Per-area overlaps betw. CAs
-        self.ca_ovlps = Get_Vector(self.NAREAS * self.P * self.P)
+        self.ca_ovlps = util.Get_Vector(self.NAREAS * self.P * self.P)
         # Ovlps. betw. CAs & current activity
-        self.ovlps = Get_Vector(self.NAREAS * self.P)
+        self.ovlps = util.Get_Vector(self.NAREAS * self.P)
 
         # M. potential of G. Inhib. cells
-        self.slowinh = Get_Vector(self.NAREAS)
+        self.slowinh = util.Get_Vector(self.NAREAS)
         # Adaptation of ALL excit. cells
-        self.adapt = Get_Vector(self.NAREAS * self.N1)
+        self.adapt = util.Get_Vector(self.NAREAS * self.N1)
         # Lesion mask (1 <=> lesioned)
 
-        self.diluted = Get_bVector(self.NAREAS * self.N1)
+        self.diluted = util.Get_bVector(self.NAREAS * self.N1)
 
         # cells CURRENTLY > thresh
-        self.above_thresh = Get_bVector(self.NAREAS * self.N1)
-        self.above_hstory = Get_bVector(
+        self.above_thresh = util.Get_bVector(self.NAREAS * self.N1)
+        self.above_hstory = util.Get_bVector(
             self.NAREAS * self.N1 * self.P)  # above_thresh's history
         # (pattern specific)
-        self.tot_LTP = Get_Vector(self.NAREAS)
-        self.tot_LTD = Get_Vector(self.NAREAS)
+        self.tot_LTP = util.Get_Vector(self.NAREAS)
+        self.tot_LTD = util.Get_Vector(self.NAREAS)
 
-        self.sensInput = Get_bVector(self.NYAREAS * self.N1)
-        self.motorInput = Get_bVector(self.NYAREAS * self.N1)
+        self.sensInput = util.Get_bVector(self.NYAREAS * self.N1)
+        self.motorInput = util.Get_bVector(self.NYAREAS * self.N1)
 
-        self.sensPatt = Get_bVector(self.NYAREAS*self.P*self.N1)
-        self.motorPatt = Get_bVector(self.NYAREAS*self.P*self.N1)
+        self.sensPatt = util.Get_bVector(self.NYAREAS*self.P*self.N1)
+        self.motorPatt = util.Get_bVector(self.NYAREAS*self.P*self.N1)
 
         # note: in the C version there is `freq_distrib = (int*)calloc( P, sizeof(int) )` - Get_bVector is not used
-        self.freq_distrib = Get_bVector(self.P)  # array of freq. pres.
+        self.freq_distrib = util.Get_bVector(self.P)  # array of freq. pres.
 
         # Kernels: we allocate bigger arrays than we actually need (each
         # el. can contain up to NSQR1 synapses = all-to-all connectivity) #
 
-        self.J = Get_Vector(self.NAREAS * self.NAREAS *
-                            self.NSQR1)  # NAREAS*NAREAS couplings
+        self.J = util.Get_Vector(self.NAREAS * self.NAREAS *
+                                 self.NSQR1)  # NAREAS*NAREAS couplings
         # 1 inhib. kernel with at most self.N1 links
-        self.Jinh = Get_Vector(self.N1)
+        self.Jinh = util.Get_Vector(self.N1)
 
         # Vectors of post-synapt. pot. incoming to each cell of one area #
-        self.linkffb = Get_Vector(self.N1)  # EPSPs from OTHER (between-) areas
-        self.linkrec = Get_Vector(self.N1)  # EPSPs from THIS area (recurrent)
+        # EPSPs from OTHER (between-) areas
+        self.linkffb = util.Get_Vector(self.N1)
+        # EPSPs from THIS area (recurrent)
+        self.linkrec = util.Get_Vector(self.N1)
         # Inh.Post-Syn. Pot from inhib. layer
-        self.linkinh = Get_Vector(self.N1)
-        self.tempffb = Get_Vector(self.N1)  # auxiliary (used for temp. EPSPs)
+        self.linkinh = util.Get_Vector(self.N1)
+        # auxiliary (used for temp. EPSPs)
+        self.tempffb = util.Get_Vector(self.N1)
         # "Clamp" input from sensorimotor patt.
-        self.clampSMIn = Get_Vector(self.N1)
+        self.clampSMIn = util.Get_Vector(self.N1)
 
     def randomise_net_activity(self):
         """
         For unit testing: generate activity vectors to pre-empt resetNet
         """
-        self.pot = Get_Random_Vector(self.NAREAS * self.N1)
-        self.inh = Get_Random_Vector(self.NAREAS * self.N1)
-        self.adapt = Get_Random_Vector(self.NAREAS * self.N1)
-        self.rates = Get_Random_Vector(self.NAREAS * self.N1)
-        self.slowinh = Get_Random_Vector(self.NAREAS)
-        self.tot_LTP = Get_Random_Vector(self.NAREAS)
-        self.tot_LTD = Get_Random_Vector(self.NAREAS)
-        self.above_hstory = Get_Random_Vector(self.NAREAS * self.N1 * self.P)
+        self.pot = util.Get_Random_Vector(self.NAREAS * self.N1)
+        self.inh = util.Get_Random_Vector(self.NAREAS * self.N1)
+        self.adapt = util.Get_Random_Vector(self.NAREAS * self.N1)
+        self.rates = util.Get_Random_Vector(self.NAREAS * self.N1)
+        self.slowinh = util.Get_Random_Vector(self.NAREAS)
+        self.tot_LTP = util.Get_Random_Vector(self.NAREAS)
+        self.tot_LTD = util.Get_Random_Vector(self.NAREAS)
+        self.above_hstory = util.Get_Random_Vector(
+            self.NAREAS * self.N1 * self.P)
 
         self.total_output = random.uniform(1, 1000)
 
@@ -314,14 +327,14 @@ class StandardNet6Areas:
         Note: I don't think we need to pass the len in here, but I'll leave it for now, 
         in the spirit of "like for like" translation
         """
-        Clear_Vector(self.NAREAS * self.N1, self.pot)
-        Clear_Vector(self.NAREAS * self.N1, self.inh)
-        Clear_Vector(self.NAREAS * self.N1, self.adapt)
-        Clear_Vector(self.NAREAS * self.N1, self.rates)
-        Clear_Vector(self.NAREAS, self.slowinh)
-        Clear_Vector(self.NAREAS, self.tot_LTP)
-        Clear_Vector(self.NAREAS, self.tot_LTD)
-        Clear_bVector(self.NAREAS * self.N1 * self.P, self.above_hstory)
+        util.Clear_Vector(self.NAREAS * self.N1, self.pot)
+        util.Clear_Vector(self.NAREAS * self.N1, self.inh)
+        util.Clear_Vector(self.NAREAS * self.N1, self.adapt)
+        util.Clear_Vector(self.NAREAS * self.N1, self.rates)
+        util.Clear_Vector(self.NAREAS, self.slowinh)
+        util.Clear_Vector(self.NAREAS, self.tot_LTP)
+        util.Clear_Vector(self.NAREAS, self.tot_LTD)
+        util.Clear_bVector(self.NAREAS * self.N1 * self.P, self.above_hstory)
 
         self.total_output = 0.0
 
@@ -398,7 +411,7 @@ class StandardNet6Areas:
         p     -- IN: tot. no. patterns
         pats  -- OUT: the array of patterns
         """
-        Clear_Vector(n*p, pats)  # Clear content of ALL patterns
+        util.Clear_Vector(n*p, pats)  # Clear content of ALL patterns
 
         for j in range(p):  # For each pattern
             temp_pat = pats[n * j:n * (j + 1)]  # Get slice for current pattern
@@ -425,8 +438,8 @@ class StandardNet6Areas:
                 # Check if there is at least 1 cell strongly responsive
                 if max_act >= self.MIN_CELLRATE:
                     # If cell rate > threshold, set cell to 1 in 'ca_patts'
-                    Fire(self.N1, self.avg_patts[self.N1*(self.NAREAS*i+area)], threshold*max_act,
-                         self.ca_patts[self.N1*(self.NAREAS*i+area)])
+                    util.Fire(self.N1, self.avg_patts[self.N1*(self.NAREAS*i+area)], threshold*max_act,
+                              self.ca_patts[self.N1*(self.NAREAS*i+area)])
                 # Else: NO cells are set to 1 in the 'ca_patts' vector
 
     # @todo unit test
