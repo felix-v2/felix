@@ -34,14 +34,14 @@ def Get_bVector(z: int) -> bVectorType:
     return np.zeros(z, dtype=np.int32)
 
 
-def Clear_Vector(z: int, v: VectorType) -> None:
+def Clear_Vector(v: VectorType) -> None:
     """
     Zeros all values of the vector
     """
     v.fill(0.0)
 
 
-def Clear_bVector(z: int, v: bVectorType) -> None:
+def Clear_bVector(v: bVectorType) -> None:
     """
     Zeros all values of the binary vector
     """

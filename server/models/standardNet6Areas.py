@@ -312,14 +312,14 @@ class StandardNet6Areas:
         Note: I don't think we need to pass the len in here, but I'll leave it for now, 
         in the spirit of "like for like" translation
         """
-        util.Clear_Vector(self.NAREAS * self.N1, self.pot)
-        util.Clear_Vector(self.NAREAS * self.N1, self.inh)
-        util.Clear_Vector(self.NAREAS * self.N1, self.adapt)
-        util.Clear_Vector(self.NAREAS * self.N1, self.rates)
-        util.Clear_Vector(self.NAREAS, self.slowinh)
-        util.Clear_Vector(self.NAREAS, self.tot_LTP)
-        util.Clear_Vector(self.NAREAS, self.tot_LTD)
-        util.Clear_bVector(self.NAREAS * self.N1 * self.P, self.above_hstory)
+        util.Clear_Vector(self.pot)
+        util.Clear_Vector(self.inh)
+        util.Clear_Vector(self.adapt)
+        util.Clear_Vector(self.rates)
+        util.Clear_Vector(self.slowinh)
+        util.Clear_Vector(self.tot_LTP)
+        util.Clear_Vector(self.tot_LTD)
+        util.Clear_bVector(self.above_hstory)
 
         self.total_output = 0.0
 
@@ -328,28 +328,28 @@ class StandardNet6Areas:
         init() is called whenever "INIT" or "RUN" buttons in the GUI are 
         pressed; it initialises individual simulation runs               
         """
-        util.Clear_Vector(self.NAREAS * self.N1, self.pot)
-        util.Clear_Vector(self.NAREAS * self.N1, self.rates)
-        util.Clear_Vector(self.NAREAS * self.N1, self.adapt)
-        util.Clear_Vector(self.NAREAS * self.N1 * self.P, self.avg_patts)
-        util.Clear_bVector(self.NAREAS * self.N1 * self.P, self.ca_patts)
-        util.Clear_Vector(self.NAREAS * self.P * self.P, self.ca_ovlps)
-        util.Clear_Vector(self.NAREAS * self.P, self.ovlps)
-        util.Clear_bVector(self.NAREAS * self.N1, self.diluted)
-        util.Clear_Vector(self.NAREAS * self.N1, self.inh)
-        util.Clear_Vector(self.NAREAS, self.slowinh)
-        util.Clear_bVector(self.NYAREAS * self.N1, self.sensInput)
-        util.Clear_bVector(self.NYAREAS * self.N1, self.motorInput)
-        util.Clear_bVector(self.NYAREAS * self.P * self.N1, self.sensPatt)
+        util.Clear_Vector(self.pot)
+        util.Clear_Vector(self.rates)
+        util.Clear_Vector(self.adapt)
+        util.Clear_Vector(self.avg_patts)
+        util.Clear_bVector(self.ca_patts)
+        util.Clear_Vector(self.ca_ovlps)
+        util.Clear_Vector(self.ovlps)
+        util.Clear_bVector(self.diluted)
+        util.Clear_Vector(self.inh)
+        util.Clear_Vector(self.slowinh)
+        util.Clear_bVector(self.sensInput)
+        util.Clear_bVector(self.motorInput)
+        util.Clear_bVector(self.sensPatt)
         # NYAREAS rows x P col.
-        util.Clear_bVector(self.NYAREAS * self.P * self.N1, self.motorPatt)
+        util.Clear_bVector(self.motorPatt)
         # util.Clear_bVector(self.NAREAS * self.NAREAS, self.K);
-        util.Clear_bVector(self.NAREAS * self.N1, self.above_thresh)
-        util.Clear_bVector(self.NAREAS * self.N1 * self.P, self.above_hstory)
+        util.Clear_bVector(self.above_thresh)
+        util.Clear_bVector(self.above_hstory)
 
         self.total_output = 0.0
 
-        util.Clear_bVector(self.P, self.freq_distrib)
+        util.Clear_bVector(self.freq_distrib)
 
         ## Randomly initialise all sensorimotor input patterns ##
         self.gener_random_bin_patterns(
@@ -358,7 +358,7 @@ class StandardNet6Areas:
             self.N1, self.NONES, self.NYAREAS*self.P, self.motorPatt)
 
         ##  INITIALISE ALL THE KERNELS ##
-        # util.Clear_Vector(self.NAREAS * self.NAREAS * self.NSQR1, self.J)
+        util.Clear_Vector(self.J)
 
     @staticmethod
     def step():
@@ -413,6 +413,8 @@ class StandardNet6Areas:
                 print("\n\n")
 
     # @todo unit test
+    # Note: I slightly pythonic-ised the implementation because the C version was using pointers
+    # Note: static because in the C version relies only on args that are passed in - not globals like everywhere else
     @staticmethod
     def gener_random_bin_patterns(n: int, nones: int, p: int, pats: util.bVectorType):
         """Creates p binary random vectors of length n, where "nones" units are="1" 
@@ -424,7 +426,7 @@ class StandardNet6Areas:
         p     -- IN: tot. no. patterns
         pats  -- OUT: the array of patterns
         """
-        util.Clear_bVector(n*p, pats)  # Clear content of ALL patterns
+        util.Clear_bVector(pats)  # Clear content of ALL patterns
 
         for j in range(p):  # For each pattern
             # Generate nones random indices and set them to 1

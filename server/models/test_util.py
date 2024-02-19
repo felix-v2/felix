@@ -14,7 +14,7 @@ class TestUtil(unittest.TestCase):
 
     def test_Clear_Vector(self):
         v = util.Get_Vector(10)
-        util.Clear_Vector(10, v)
+        util.Clear_Vector(v)
 
         np.testing.assert_array_equal(v, np.zeros(10))
 
@@ -26,7 +26,7 @@ class TestUtil(unittest.TestCase):
 
     def test_Clear_bVector(self):
         v = util.Get_bVector(10)
-        util.Clear_bVector(10, v)
+        util.Clear_bVector(v)
 
         np.testing.assert_array_equal(v, np.zeros(10))
 
