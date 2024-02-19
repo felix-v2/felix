@@ -7,14 +7,14 @@ from unittest.mock import patch
 class TestStandardNet6Areas(unittest.TestCase):
 
     @staticmethod
-    def assertZeroActivity(arr: np.array, els: int):
+    def assertSilentVector(arr: np.array, n: int):
         """
         Testing util func: asserts the 1d array with {els} elements, all with zero values.
         Aka an initialised empty vector (after main_init, but before simulation has started)
         """
-        np.testing.assert_array_equal(arr, np.zeros(els))
+        np.testing.assert_array_equal(arr, np.zeros(n))
 
-    def assertNonZeroActivity(self, arr: np.array):
+    def assertVectorWithActivity(self, arr: np.array):
         """
         Testing util func: asserts the array has some non-zero values.
         Aka an initialised non-empty vector (during simulation)
@@ -36,32 +36,32 @@ class TestStandardNet6Areas(unittest.TestCase):
         net = StandardNet6Areas()
         net.main_init()
 
-        self.assertZeroActivity(net.pot, net.NAREAS * net.N1)
-        self.assertZeroActivity(net.rates, net.NAREAS * net.N1)
-        self.assertZeroActivity(net.inh, net.NAREAS * net.N1)
-        self.assertZeroActivity(net.avg_patts, net.NAREAS * net.N1 * net.P)
-        self.assertZeroActivity(net.ca_patts, net.NAREAS * net.N1 * net.P)
-        self.assertZeroActivity(net.ca_ovlps, net.NAREAS * net.P * net.P)
-        self.assertZeroActivity(net.ovlps, net.NAREAS * net.P)
-        self.assertZeroActivity(net.slowinh, net.NAREAS)
-        self.assertZeroActivity(net.adapt, net.NAREAS * net.N1)
-        self.assertZeroActivity(net.diluted, net.NAREAS * net.N1)
-        self.assertZeroActivity(net.above_thresh, net.NAREAS * net.N1)
-        self.assertZeroActivity(net.above_hstory, net.NAREAS * net.N1 * net.P)
-        self.assertZeroActivity(net.tot_LTP, net.NAREAS)
-        self.assertZeroActivity(net.tot_LTD, net.NAREAS)
-        self.assertZeroActivity(net.sensInput, net.NYAREAS * net.N1)
-        self.assertZeroActivity(net.motorInput, net.NYAREAS * net.N1)
-        self.assertZeroActivity(net.sensPatt, net.NYAREAS*net.P*net.N1)
-        self.assertZeroActivity(net.motorPatt, net.NYAREAS*net.P*net.N1)
-        self.assertZeroActivity(net.J, net.NAREAS * net.NAREAS * net.NSQR1)
-        self.assertZeroActivity(net.Jinh, net.N1)
-        self.assertZeroActivity(net.linkffb, net.N1)
-        self.assertZeroActivity(net.linkrec, net.N1)
-        self.assertZeroActivity(net.linkinh, net.N1)
-        self.assertZeroActivity(net.tempffb, net.N1)
-        self.assertZeroActivity(net.clampSMIn, net.N1)
-        self.assertZeroActivity(net.freq_distrib, net.P)
+        self.assertSilentVector(net.pot, net.NAREAS * net.N1)
+        self.assertSilentVector(net.rates, net.NAREAS * net.N1)
+        self.assertSilentVector(net.inh, net.NAREAS * net.N1)
+        self.assertSilentVector(net.avg_patts, net.NAREAS * net.N1 * net.P)
+        self.assertSilentVector(net.ca_patts, net.NAREAS * net.N1 * net.P)
+        self.assertSilentVector(net.ca_ovlps, net.NAREAS * net.P * net.P)
+        self.assertSilentVector(net.ovlps, net.NAREAS * net.P)
+        self.assertSilentVector(net.slowinh, net.NAREAS)
+        self.assertSilentVector(net.adapt, net.NAREAS * net.N1)
+        self.assertSilentVector(net.diluted, net.NAREAS * net.N1)
+        self.assertSilentVector(net.above_thresh, net.NAREAS * net.N1)
+        self.assertSilentVector(net.above_hstory, net.NAREAS * net.N1 * net.P)
+        self.assertSilentVector(net.tot_LTP, net.NAREAS)
+        self.assertSilentVector(net.tot_LTD, net.NAREAS)
+        self.assertSilentVector(net.sensInput, net.NYAREAS * net.N1)
+        self.assertSilentVector(net.motorInput, net.NYAREAS * net.N1)
+        self.assertSilentVector(net.sensPatt, net.NYAREAS*net.P*net.N1)
+        self.assertSilentVector(net.motorPatt, net.NYAREAS*net.P*net.N1)
+        self.assertSilentVector(net.J, net.NAREAS * net.NAREAS * net.NSQR1)
+        self.assertSilentVector(net.Jinh, net.N1)
+        self.assertSilentVector(net.linkffb, net.N1)
+        self.assertSilentVector(net.linkrec, net.N1)
+        self.assertSilentVector(net.linkinh, net.N1)
+        self.assertSilentVector(net.tempffb, net.N1)
+        self.assertSilentVector(net.clampSMIn, net.N1)
+        self.assertSilentVector(net.freq_distrib, net.P)
         self.assertEqual(net.noise_fac, 6.928203230275509)
 
     def test_resetNet(self):
@@ -69,31 +69,66 @@ class TestStandardNet6Areas(unittest.TestCase):
         net.main_init()
 
         # make sure there is non-zero activity in the network
-        net.randomise_net_activity()
+        net.MAIN_INIT_RANDOM_ACTIVITY()
 
-        self.assertNonZeroActivity(net.pot)
-        self.assertNonZeroActivity(net.inh)
-        self.assertNonZeroActivity(net.adapt)
-        self.assertNonZeroActivity(net.rates)
-        self.assertNonZeroActivity(net.slowinh)
-        self.assertNonZeroActivity(net.tot_LTP)
-        self.assertNonZeroActivity(net.tot_LTD)
-        self.assertNonZeroActivity(net.above_hstory)
+        self.assertVectorWithActivity(net.pot)
+        self.assertVectorWithActivity(net.inh)
+        self.assertVectorWithActivity(net.adapt)
+        self.assertVectorWithActivity(net.rates)
+        self.assertVectorWithActivity(net.slowinh)
+        self.assertVectorWithActivity(net.tot_LTP)
+        self.assertVectorWithActivity(net.tot_LTD)
+        self.assertVectorWithActivity(net.above_hstory)
         self.assertTrue(net.total_output > 0)
 
         # then check that the reset zeroes all activity
         net.resetNet()
 
-        self.assertZeroActivity(net.pot, net.NAREAS * net.N1)
-        self.assertZeroActivity(net.inh, net.NAREAS * net.N1)
-        self.assertZeroActivity(net.adapt, net.NAREAS * net.N1)
-        self.assertZeroActivity(net.rates, net.NAREAS * net.N1)
-        self.assertZeroActivity(net.slowinh, net.NAREAS)
-        self.assertZeroActivity(net.tot_LTP, net.NAREAS)
-        self.assertZeroActivity(net.tot_LTD, net.NAREAS)
-        self.assertZeroActivity(
+        self.assertSilentVector(net.pot, net.NAREAS * net.N1)
+        self.assertSilentVector(net.inh, net.NAREAS * net.N1)
+        self.assertSilentVector(net.adapt, net.NAREAS * net.N1)
+        self.assertSilentVector(net.rates, net.NAREAS * net.N1)
+        self.assertSilentVector(net.slowinh, net.NAREAS)
+        self.assertSilentVector(net.tot_LTP, net.NAREAS)
+        self.assertSilentVector(net.tot_LTD, net.NAREAS)
+        self.assertSilentVector(
             net.above_hstory, net.NAREAS * net.N1 * net.P)
         self.assertEqual(net.total_output, 0.0)
+
+    def test_init(self):
+        net = StandardNet6Areas()
+        net.main_init()
+
+        # generate vectors with random activity
+        net.INIT_RANDOM_ACTIVITY()
+
+        # check that init recreates the vectors with the same shape but zero activity
+        net.init()
+
+        self.assertSilentVector(net.pot, net.NAREAS * net.N1)
+        self.assertSilentVector(net.rates, net.NAREAS * net.N1)
+        self.assertSilentVector(net.adapt, net.NAREAS * net.N1)
+        self.assertSilentVector(net.avg_patts, net.NAREAS * net.N1 * net.P)
+        self.assertSilentVector(net.ca_patts, net.NAREAS * net.N1 * net.P)
+        self.assertSilentVector(net.ca_ovlps, net.NAREAS * net.P * net.P)
+        self.assertSilentVector(net.ovlps, net.NAREAS * net.P)
+        self.assertSilentVector(net.diluted, net.NAREAS * net.N1)
+        self.assertSilentVector(net.inh, net.NAREAS * net.N1)
+        self.assertSilentVector(net.slowinh, net.NAREAS)
+        self.assertSilentVector(net.sensInput, net.NYAREAS * net.N1)
+        self.assertSilentVector(net.motorInput, net.NYAREAS * net.N1)
+        self.assertSilentVector(net.above_thresh, net.NAREAS * net.N1)
+        self.assertSilentVector(net.above_hstory, net.NAREAS * net.N1 * net.P)
+        self.assertEqual(net.total_output, 0.0)
+
+        self.assertSilentVector(net.freq_distrib, net.P)
+
+        self.assertVectorWithActivity(net.sensPatt)
+        self.assertVectorWithActivity(net.motorPatt)
+
+        ## Randomly initialise all sensorimotor input patterns ##
+        # gener_random_bin_patterns( N1, NONES, NYAREAS*P, sensPatt);
+        # gener_random_bin_patterns( N1, NONES, NYAREAS*P, motorPatt);
 
     @patch('random.random')
     def test_SFUNC(self, mock_random):

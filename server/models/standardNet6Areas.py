@@ -6,6 +6,7 @@ import util
 import time
 
 
+# @todo For clearing vectors, just do a fill(0) or fill(0.0) - ignore the len and types
 class StandardNet6Areas:
     NXAREAS = 6
     NYAREAS = 1
@@ -175,14 +176,14 @@ class StandardNet6Areas:
     ovlps: util.VectorType
 
     # current inputs (NYAREAS areas) to "left" (sensory)
-    sensInput: util.VectorType
+    sensInput: util.bVectorType
     # current inputs (NYAREAS areas) to "right" (motor)
-    motorInput: util.VectorType
+    motorInput: util.bVectorType
 
     # Fixed input patterns (NYAREAS x P) to the left
-    sensPatt: util.VectorType
+    sensPatt: util.bVectorType
     # Fixed input patterns (NYAREAS x P) to the right
-    motorPatt: util.VectorType
+    motorPatt: util.bVectorType
 
     # Post-syn. potentials in input to area
     linkffb: util.VectorType
@@ -193,9 +194,9 @@ class StandardNet6Areas:
 
     slowinh: util.VectorType  # slow inhib (1 cell per area)
 
-    diluted: util.VectorType        # All "dead" cells
-    above_thresh: util.VectorType   # Cells CURRENTLY firing above CA_THRESHold
-    above_hstory: util.VectorType   # "history" of above_thresh vector activation
+    diluted: util.bVectorType        # All "dead" cells
+    above_thresh: util.bVectorType   # Cells CURRENTLY firing above CA_THRESHold
+    above_hstory: util.bVectorType   # "history" of above_thresh vector activation
 
     ca_patts: util.bVectorType   # CA patterns emerging as a result of the training
 
@@ -302,22 +303,6 @@ class StandardNet6Areas:
         # "Clamp" input from sensorimotor patt.
         self.clampSMIn = util.Get_Vector(self.N1)
 
-    def randomise_net_activity(self):
-        """
-        For unit testing: generate activity vectors to pre-empt resetNet
-        """
-        self.pot = util.Get_Random_Vector(self.NAREAS * self.N1)
-        self.inh = util.Get_Random_Vector(self.NAREAS * self.N1)
-        self.adapt = util.Get_Random_Vector(self.NAREAS * self.N1)
-        self.rates = util.Get_Random_Vector(self.NAREAS * self.N1)
-        self.slowinh = util.Get_Random_Vector(self.NAREAS)
-        self.tot_LTP = util.Get_Random_Vector(self.NAREAS)
-        self.tot_LTD = util.Get_Random_Vector(self.NAREAS)
-        self.above_hstory = util.Get_Random_Vector(
-            self.NAREAS * self.N1 * self.P)
-
-        self.total_output = random.uniform(1, 1000)
-
     def resetNet(self):
         """
         Reset completely the network activity (the synaptic weights are 
@@ -338,14 +323,42 @@ class StandardNet6Areas:
 
         self.total_output = 0.0
 
-    @staticmethod
-    def init():
+    def init(self):
         """
         init() is called whenever "INIT" or "RUN" buttons in the GUI are 
         pressed; it initialises individual simulation runs               
         """
+        util.Clear_Vector(self.NAREAS * self.N1, self.pot)
+        util.Clear_Vector(self.NAREAS * self.N1, self.rates)
+        util.Clear_Vector(self.NAREAS * self.N1, self.adapt)
+        util.Clear_Vector(self.NAREAS * self.N1 * self.P, self.avg_patts)
+        util.Clear_bVector(self.NAREAS * self.N1 * self.P, self.ca_patts)
+        util.Clear_Vector(self.NAREAS * self.P * self.P, self.ca_ovlps)
+        util.Clear_Vector(self.NAREAS * self.P, self.ovlps)
+        util.Clear_bVector(self.NAREAS * self.N1, self.diluted)
+        util.Clear_Vector(self.NAREAS * self.N1, self.inh)
+        util.Clear_Vector(self.NAREAS, self.slowinh)
+        util.Clear_bVector(self.NYAREAS * self.N1, self.sensInput)
+        util.Clear_bVector(self.NYAREAS * self.N1, self.motorInput)
+        util.Clear_bVector(self.NYAREAS * self.P * self.N1, self.sensPatt)
+        # NYAREAS rows x P col.
+        util.Clear_bVector(self.NYAREAS * self.P * self.N1, self.motorPatt)
+        # util.Clear_bVector(self.NAREAS * self.NAREAS, self.K);
+        util.Clear_bVector(self.NAREAS * self.N1, self.above_thresh)
+        util.Clear_bVector(self.NAREAS * self.N1 * self.P, self.above_hstory)
 
-        return
+        self.total_output = 0.0
+
+        util.Clear_bVector(self.P, self.freq_distrib)
+
+        ## Randomly initialise all sensorimotor input patterns ##
+        self.gener_random_bin_patterns(
+            self.N1, self.NONES, self.NYAREAS*self.P, self.sensPatt)
+        self.gener_random_bin_patterns(
+            self.N1, self.NONES, self.NYAREAS*self.P, self.motorPatt)
+
+        ##  INITIALISE ALL THE KERNELS ##
+        # util.Clear_Vector(self.NAREAS * self.NAREAS * self.NSQR1, self.J)
 
     @staticmethod
     def step():
@@ -378,7 +391,7 @@ class StandardNet6Areas:
         for area in range(self.NAREAS):
             for i in range(self.P):
                 for j in range(self.P):
-                    self.ca_ovlps[self.P*(self.P*area+i) + j] = bbSkalar(self.N1, self.ca_patts[self.N1*(
+                    self.ca_ovlps[self.P*(self.P*area+i) + j] = util.bbSkalar(self.N1, self.ca_patts[self.N1*(
                         self.NAREAS*i+area)], self.ca_patts[self.N1*(self.NAREAS*j+area)]) / self.NONES
 
     # @todo unit test
@@ -401,7 +414,7 @@ class StandardNet6Areas:
 
     # @todo unit test
     @staticmethod
-    def gener_random_bin_patterns(n: int, nones: int, p: int, pats: np.ndarray):
+    def gener_random_bin_patterns(n: int, nones: int, p: int, pats: util.bVectorType):
         """Creates p binary random vectors of length n, where "nones" units are="1" 
         at random positions. "pats" is the array of vectors/patts
 
@@ -411,16 +424,18 @@ class StandardNet6Areas:
         p     -- IN: tot. no. patterns
         pats  -- OUT: the array of patterns
         """
-        util.Clear_Vector(n*p, pats)  # Clear content of ALL patterns
+        util.Clear_bVector(n*p, pats)  # Clear content of ALL patterns
 
         for j in range(p):  # For each pattern
-            temp_pat = pats[n * j:n * (j + 1)]  # Get slice for current pattern
-            for i in range(nones):  # For all cells of this pattern
-                temp_pat[random.randint(0, n - 1)] = 1
+            # Generate nones random indices and set them to 1
+            indices = random.sample(range(n), nones)
+            pats[j * n: (j + 1) * n][indices] = 1
 
-            # It may be that two or more "1"s happen to coincide...
-            while sum(temp_pat) < nones:  # Inefficient, but fast enough
-                temp_pat[random.randint(0, n - 1)] = 1
+            # Ensure the correct number of "1"s by adding more if necessary
+            # Inefficient, but fast enough
+            while pats[j * n: (j + 1) * n].sum() < nones:
+                index = random.randint(j * n, (j + 1) * n - 1)
+                pats[index] = 1
 
     # @todo unit test
     def compute_CApatts(self, threshold):
@@ -567,3 +582,46 @@ class StandardNet6Areas:
                                         kern[0] = self.JMIN
 
                         kern = kern[1:]  # Move to the next synaptic link
+
+    def MAIN_INIT_RANDOM_ACTIVITY(self):
+        """
+        For unit testing: generate activity vectors to pre-empt resetNet
+        """
+        self.pot = util.Get_Random_Vector(self.NAREAS * self.N1)
+        self.inh = util.Get_Random_Vector(self.NAREAS * self.N1)
+        self.adapt = util.Get_Random_Vector(self.NAREAS * self.N1)
+        self.rates = util.Get_Random_Vector(self.NAREAS * self.N1)
+        self.slowinh = util.Get_Random_Vector(self.NAREAS)
+        self.tot_LTP = util.Get_Random_Vector(self.NAREAS)
+        self.tot_LTD = util.Get_Random_Vector(self.NAREAS)
+        self.above_hstory = util.Get_Random_Vector(
+            self.NAREAS * self.N1 * self.P)
+
+        self.total_output = random.uniform(1, 1000)
+
+    def INIT_RANDOM_ACTIVITY(self):
+        """
+        For unit testing: generate activity vectors to pre-empt init
+        """
+        self.rates = util.Get_Random_Vector(self.NAREAS * self.N1)
+        self.pot = util.Get_Random_Vector(self.NAREAS * self.N1)
+        self.adapt = util.Get_Random_Vector(self.NAREAS * self.N1)
+        self.avg_patts = util.Get_Random_Vector(self.NAREAS * self.N1 * self.P)
+        self.ca_patts = util.Get_Random_Vector(self.NAREAS * self.N1 * self.P)
+        self.ca_ovlps = util.Get_Random_Vector(self.NAREAS * self.P * self.P)
+        self.ovlps = util.Get_Random_Vector(self.NAREAS * self.P)
+        self.diluted = util.Get_Random_Vector(self.NAREAS * self.N1)
+        self.inh = util.Get_Random_Vector(self.NAREAS * self.N1)
+        self.slowinh = util.Get_Random_Vector(self.NAREAS)
+        self.sensInput = util.Get_Random_Vector(self.NYAREAS * self.N1)
+        self.motorInput = util.Get_Random_Vector(self.NYAREAS * self.N1)
+        self.sensPatt = util.Get_Random_Vector(self.NYAREAS * self.P * self.N1)
+        self.motorPatt = util.Get_Random_Vector(
+            self.NYAREAS * self.P * self.N1)
+        self.above_thresh = util.Get_Random_Vector(self.NAREAS * self.N1)
+        self.above_hstory = util.Get_Random_Vector(
+            self.NAREAS * self.N1 * self.P)
+
+        self.total_output = random.uniform(1, 1000)
+
+        self.freq_distrib = util.Get_Random_Vector(self.P)
