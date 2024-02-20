@@ -87,8 +87,9 @@ export default function App() {
     }
 
     if (connected && !running) {
-      socket.disconnect();
-      socket.connect();
+      socket.emit('stop-simulation');
+      // socket.disconnect();
+      // socket.connect();
     }
   }, [socket, running]);
 
@@ -99,14 +100,14 @@ export default function App() {
 
     socket.on('disconnect', () => {
       setConnected(false);
-      setSensoryInput1(silence);
-      setArea1(silence);
-      setArea2(silence);
-      setArea3(silence);
-      setArea4(silence);
-      setArea5(silence);
-      setArea6(silence);
-      setMotorInput1(silence);
+      // setSensoryInput1(silence);
+      // setArea1(silence);
+      // setArea2(silence);
+      // setArea3(silence);
+      // setArea4(silence);
+      // setArea5(silence);
+      // setArea6(silence);
+      // setMotorInput1(silence);
     });
 
     socket.on('new-activity', (data) => {
@@ -206,15 +207,16 @@ export default function App() {
                 </Button>
                 <Button
                   onClick={() => {
+                    // @todo we want this to just stop receiving new activity, not necessarily disconnect
                     setRunning(false);
-                    setSensoryInput1(silence);
-                    setArea1(silence);
-                    setArea2(silence);
-                    setArea3(silence);
-                    setArea4(silence);
-                    setArea5(silence);
-                    setArea6(silence);
-                    setMotorInput1(silence);
+                    // setSensoryInput1(silence);
+                    // setArea1(silence);
+                    // setArea2(silence);
+                    // setArea3(silence);
+                    // setArea4(silence);
+                    // setArea5(silence);
+                    // setArea6(silence);
+                    // setMotorInput1(silence);
                   }}
                   disabled={!connected || !running}
                   variant="danger"
