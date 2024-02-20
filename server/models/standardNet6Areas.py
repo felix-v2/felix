@@ -352,9 +352,9 @@ class StandardNet6Areas:
         util.Clear_bVector(self.freq_distrib)
 
         ## Randomly initialise all sensorimotor input patterns ##
-        self.gener_random_bin_patterns(
+        self.sensPatt = self.gener_random_bin_patterns(
             self.N1, self.NONES, self.NYAREAS*self.P, self.sensPatt)
-        self.gener_random_bin_patterns(
+        self.motorPatt = self.gener_random_bin_patterns(
             self.N1, self.NONES, self.NYAREAS*self.P, self.motorPatt)
 
         ##  INITIALISE ALL THE KERNELS ##
@@ -428,7 +428,7 @@ class StandardNet6Areas:
                 print("\n\n")
 
     # @todo unit test
-    # Note: I slightly pythonic-ised the implementation because the C version was using pointers
+    # Note: I slightly pythonic-ised the implementation because the C version was using pointers (we may need to optimise)
     # Note: static because in the C version relies only on args that are passed in - not globals like everywhere else
     @staticmethod
     def gener_random_bin_patterns(n: int, nones: int, p: int, pats: util.bVectorType):
@@ -442,19 +442,20 @@ class StandardNet6Areas:
         pats  -- OUT: the array of patterns
         """
         util.Clear_bVector(pats)  # Clear content of ALL patterns
+        randomBPats = []
 
         for j in range(p):  # For each pattern
             # Generate nones random indices and set them to 1
-            indices = random.sample(range(n), nones)
-            pats[j * n: (j + 1) * n][indices] = 1
+            randomBPat = np.zeros(n, dtype=int)
+            # Select "nones" random indices
+            # Set the selected indices to 1
+            randomBPat[np.random.choice(n, nones, replace=False)] = 1
+            randomBPats.append(randomBPat)
 
-            # Ensure the correct number of "1"s by adding more if necessary
-            # Inefficient, but fast enough
-            while pats[j * n: (j + 1) * n].sum() < nones:
-                index = random.randint(j * n, (j + 1) * n - 1)
-                pats[index] = 1
+        return np.vstack(randomBPats)
 
     # @todo unit test
+
     def compute_CApatts(self, threshold):
         """
         Compute the emerging Cell Assemblies using specified threshold
