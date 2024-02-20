@@ -13,7 +13,7 @@ socketio = SocketIO(app, async_mode='eventlet', cors_allowed_origins='*')
 
 active_client_connection = None
 model = None
-sim_manager = None
+sim_manager: SimulationManager = None
 
 
 @app.route('/')
@@ -96,10 +96,22 @@ def handle_start_simulation(initial_config):
     print(f'Start-sim request received from client {request.sid}')
 
     global model, sim_manager
-    if not model:
+
+    # @todo this is actually the same thing under the hood - just starts the background thread
+    # so we might be able to just remove it
+    # Resume a simulation that's already running, picking up the model state where it left off
+    if model and sim_manager:
+        print(f'\n\Simulation resuming: {sim_manager.simulation_running}')
+        print(f'\n\Model step: {model.current_step}')
+        sim_manager.resume_simulation(initial_config)
+        return True
+
+    # Initialise a new simulation
+    if not model or not sim_manager:
         model = MockNeuralNet()  # StandardNet6Areas()
         sim_manager = SimulationManager(model, socketio)
-        sim_manager.start_simulation()
+        sim_manager.start_simulation(initial_config)
+
         print(f'\n\Simulation running: {sim_manager.simulation_running}')
         print(f'\n\Model step: {model.current_step}')
 

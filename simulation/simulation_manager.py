@@ -32,38 +32,36 @@ class SimulationManager:
         self.simulation_running = False
         self.simulation_thread = None
 
-    # todo: kill self.simulation_thread and restart a new one?
+    # todo: reinstantiate the model?
     def reset_simulation(self):
         pass
 
-    def start_simulation(self):
+    # todo: I think it's ok to stop and start the tread like this and maintain the model state over time
+    # e.g. restarting the thread doesn't reset the model state
+    def start_simulation(self, config):
+
         with self.simulation_lock:
+            self.config_queue.put(config)
+
             if not self.simulation_running:
                 self.simulation_running = True
                 simulation_thread = threading.Thread(
                     target=self.execute_model)
                 simulation_thread.start()
+                print('Simulation started!')
+
             print('Simulation-start request received but simulation already running!')
 
     def stop_simulation(self):
         with self.simulation_lock:
             if self.simulation_running:
                 self.simulation_running = False
+                print('Simulation stopped!')
+
             print('Simulation-stop request received but simulation is not running!')
 
-    def resume_simulation(self):
-        with self.simulation_lock:
-            if self.simulation_running:
-                print(
-                    'Simulation-resume request received but simulation is already running!')
-                return False
-
-            if self.simulation_thread is None:
-                print(
-                    'Simulation-resume request received but simulation has not yet been started!')
-                return False
-
-            self.simulation_running = True
+    def resume_simulation(self, config):
+        self.start_simulation(config)
 
     def update_config(self, new_config):
         with self.simulation_lock:
