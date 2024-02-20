@@ -35,8 +35,10 @@ disconnect and reconnect to a simulation as it runs server side
 def handle_connection():
     global active_client_connection
     if active_client_connection is not None:
+        print(
+            f'Client {request.sid} wants to connect but client {active_client_connection} is already connected!')
         # Disconnect the new connection if there is already an active connection
-        socketio.emit('disconnect', {'msg': 'Connection already active.'})
+        socketio.send('disconnect', {'msg': 'Connection already active.'})
         return False
 
     # Store the session ID of the active connection
