@@ -47,7 +47,7 @@ def handle_start_simulation(initial_config):
 
     global model, sim_manager
     if not model:
-        model = MockNeuralNet()
+        model = MockNeuralNet()  # StandardNet6Areas()
         sim_manager = SimulationManager(model, socketio)
         sim_manager.start_simulation()
         print(f'\n\Simulation running: {sim_manager.simulation_running}')
