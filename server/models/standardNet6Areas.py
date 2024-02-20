@@ -360,6 +360,21 @@ class StandardNet6Areas:
         ##  INITIALISE ALL THE KERNELS ##
         util.Clear_Vector(self.J)
 
+        # todo: FIX - vector J is wrong
+        # for j in range(self.NAREAS):
+        #     for i in range(self.NAREAS):
+        #         # Does area j have REC. links?
+        #         if j == i and self.K[(self.NAREAS + 1) * j]:
+        #             self.init_patchy_gauss_kern(self.N11, self.N12, self.NREC1, self.NREC2, self.J[self.NSQR1 * (self.NAREAS * i + i)],
+        #                                         self.SIGMAX_REC, self.SIGMAY_REC, self.J_REC_PROB, self.J_UPPER)
+        #         elif self.K[self.NAREAS * j + i]:  # Does AREA (j+1) --> (i+1)?
+        #             self.init_patchy_gauss_kern(self.N11, self.N12, self.NFFB1, self.NFFB2, self.J[self.NSQR1 * (self.NAREAS * j + i)],
+        #                                         self.SIGMAX, self.SIGMAY, self.J_PROB, self.J_UPPER)
+
+        # # There is only 1 inhibitory kernel (FIXED & identical for all)
+        # self.init_gaussian_kernel(1, 1, self.NINH1, self.NINH2, self.Jinh,
+        #                           self.SIGMAX_INH, self.SIGMAY_INH, self.J_INH_INIT)
+
     @staticmethod
     def step():
         """
