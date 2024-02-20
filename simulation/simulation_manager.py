@@ -30,6 +30,11 @@ class SimulationManager:
         self.config_queue = Queue()
         self.simulation_lock = threading.Lock()
         self.simulation_running = False
+        self.simulation_thread = None
+
+    # todo: kill self.simulation_thread and restart a new one?
+    def reset_simulation(self):
+        pass
 
     def start_simulation(self):
         with self.simulation_lock:
@@ -38,13 +43,27 @@ class SimulationManager:
                 simulation_thread = threading.Thread(
                     target=self.execute_model)
                 simulation_thread.start()
-            print('Simulation start request received but simulation already running!')
+            print('Simulation-start request received but simulation already running!')
 
     def stop_simulation(self):
         with self.simulation_lock:
             if self.simulation_running:
                 self.simulation_running = False
             print('Simulation-stop request received but simulation is not running!')
+
+    def resume_simulation(self):
+        with self.simulation_lock:
+            if self.simulation_running:
+                print(
+                    'Simulation-resume request received but simulation is already running!')
+                return False
+
+            if self.simulation_thread is None:
+                print(
+                    'Simulation-resume request received but simulation has not yet been started!')
+                return False
+
+            self.simulation_running = True
 
     def update_config(self, new_config):
         with self.simulation_lock:
