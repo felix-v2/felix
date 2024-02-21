@@ -63,4 +63,4 @@ def handle_start_simulation():
 
 
 if __name__ == '__main__':
-    socketio.run(app, host='localhost', port=9000)
+    socketio.run(app, host='0.0.0.0')
