@@ -26,16 +26,32 @@ npm start
 
 # Docker
 
+## Initialising the whole Felix toolbox
+
 Install Docker desktop.
 
-## Server
+```
+docker-compose up
+```
+
+## Rebuilding the neural net
+
+```
+docker-compose down
+docker build --tag felix-server ./server
+docker-compose up
+```
+
+## Spinning up the apps (server and gui) individually
+
+### Server
 
 ```
 docker build --tag felix-server ./server
 docker run --name felix-server -d -p 5000:5000 felix-server
 ```
 
-## GUI
+### GUI
 
 ```
 docker build --tag felix-gui ./app

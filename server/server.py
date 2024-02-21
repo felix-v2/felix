@@ -46,7 +46,7 @@ def handle_disconnection():
 
 
 @socketio.on('start-simulation')
-def handle_start_simulation():
+def handle_start_simulation(initial_config):
     print(f'Start-sim request received from client {request.sid}')
     while True:
         socketio.sleep(1)

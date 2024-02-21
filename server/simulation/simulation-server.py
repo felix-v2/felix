@@ -141,15 +141,16 @@ Resume execution of the model
 """
 
 
-@socketio.on('resume-simulation')
-def handle_resume_simulation():
-    global sim_manager
-    if sim_manager and not sim_manager.simulation_running:
-        print(f'\n\Model resuming at step: {model.current_step}')
-        sim_manager.resume_simulation()
-        print(f'\n\Simulation running: {sim_manager.simulation_running}')
+# @socketio.on('resume-simulation')
+# def handle_resume_simulation():
+#     global sim_manager
+#     if sim_manager and not sim_manager.simulation_running:
+#         print(f'\n\Model resuming at step: {model.current_step}')
+#         sim_manager.resume_simulation()
+#         print(f'\n\Simulation running: {sim_manager.simulation_running}')
 
 
 if __name__ == '__main__':
     # Start the WebSocket server
-    socketio.run(app, host='localhost', port=9000)
+    # socketio.run(app, host='localhost', port=9000)
+    socketio.run(app, host='0.0.0.0')
