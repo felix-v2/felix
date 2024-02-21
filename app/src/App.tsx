@@ -18,7 +18,7 @@ import ToggleButton from 'react-bootstrap/ToggleButton';
 
 import 'react-bootstrap-range-slider/dist/react-bootstrap-range-slider.css';
 
-const socket = io('ws://localhost:9000', { autoConnect: true });
+const socket = io('ws://localhost:5000', { autoConnect: true });
 
 // generates a 2d matrix of X x Y neurons, each with a random activity value between 0 and 1
 export const randActivity = (

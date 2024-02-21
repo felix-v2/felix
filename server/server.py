@@ -46,7 +46,7 @@ def handle_disconnection():
 
 
 @socketio.on('start-simulation')
-def handle_start_simulation():
+def handle_start_simulation(initial_config):
     print(f'Start-sim request received from client {request.sid}')
     while True:
         socketio.sleep(1)
@@ -63,4 +63,4 @@ def handle_start_simulation():
 
 
 if __name__ == '__main__':
-    socketio.run(app, host='localhost', port=9000)
+    socketio.run(app, host='0.0.0.0')
