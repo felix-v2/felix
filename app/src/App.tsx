@@ -1,22 +1,14 @@
 import { useEffect, useState } from 'react';
-import { Socket, io } from 'socket.io-client';
-import Plot from 'react-plotly.js';
+import { io } from 'socket.io-client';
 import Button from 'react-bootstrap/Button';
-import {
-  Accordion,
-  ButtonGroup,
-  Card,
-  Col,
-  Form,
-  Offcanvas,
-  ProgressBar,
-  Row,
-  ToggleButtonGroup,
-} from 'react-bootstrap';
-import RangeSlider from 'react-bootstrap-range-slider';
+import { Card, Col, ProgressBar, Row } from 'react-bootstrap';
 import ToggleButton from 'react-bootstrap/ToggleButton';
 
 import 'react-bootstrap-range-slider/dist/react-bootstrap-range-slider.css';
+import { Potentials } from './components/potentials';
+import { CellAssemblyOverlaps } from './components/cell-assembly-overlaps';
+import { CellAssembly } from './components/cell-assembly';
+import { ControlPanel } from './components/control-panel';
 
 const socket = io('ws://localhost:5000', { autoConnect: true });
 
@@ -36,12 +28,9 @@ export const randActivity = (
 };
 
 /**
- * @todo Refactor into composable components
- * @todo Add Zod parsing to WebSocket handlers on both client and server
- * @todo Make responsive
- * @todo Remove bloody controls from Plotly heatmap (appears on hover)
- * @todo Add sensory and motor inputs
- * @todo Have the heatmaps respond correctly to server connection/disconnection
+ * @todo Refactor state into objects, use Zod schemas, validate in websocket handlers, and declare state locally
+ * @todo Refactor socket-io interface https://socket.io/how-to/use-with-react
+ * @todo Responsivity?
  */
 export default function App() {
   // server connection
@@ -126,7 +115,6 @@ export default function App() {
   return (
     <div className="App">
       <Col style={{ marginTop: '30px' }}>
-        {/* ACTIVITY COMPONENTS */}
         <Row
           style={{
             marginBottom: '30px',
@@ -135,74 +123,10 @@ export default function App() {
           }}
         >
           <Col xs={6}>
-            <Accordion
-              defaultActiveKey="0"
-              style={{
-                marginLeft: 'auto',
-                marginRight: 'auto',
-              }}
-            >
-              <Accordion.Item eventKey="0">
-                <Accordion.Header>CA #1</Accordion.Header>
-                <Accordion.Body style={{ paddingTop: 10, paddingBottom: 10 }}>
-                  <Row>
-                    <Col style={{ paddingLeft: 0, paddingRight: 0 }}>
-                      {Heatmap({ title: 'Area 1', activity: silence })}
-                    </Col>
-                    <Col style={{ paddingLeft: 0, paddingRight: 0 }}>
-                      {Heatmap({ title: 'Area 2', activity: silence })}
-                    </Col>
-                    <Col style={{ paddingLeft: 0, paddingRight: 0 }}>
-                      {Heatmap({ title: 'Area 3', activity: silence })}
-                    </Col>
-                    <Col style={{ paddingLeft: 0, paddingRight: 0 }}>
-                      {Heatmap({ title: 'Area 4', activity: silence })}
-                    </Col>
-                    <Col style={{ paddingLeft: 0, paddingRight: 0 }}>
-                      {Heatmap({ title: 'Area 5', activity: silence })}
-                    </Col>
-                    <Col style={{ paddingLeft: 0, paddingRight: 0 }}>
-                      {Heatmap({ title: 'Area 6', activity: silence })}
-                    </Col>
-                  </Row>
-                </Accordion.Body>
-              </Accordion.Item>
-            </Accordion>
+            <CellAssembly name={'CA #1'} activity={[]}></CellAssembly>
           </Col>
-          <Col xl={6}>
-            <Accordion
-              defaultActiveKey="0"
-              style={{
-                marginLeft: 'auto',
-                marginRight: 'auto',
-              }}
-            >
-              <Accordion.Item eventKey="0">
-                <Accordion.Header>CA #2</Accordion.Header>
-                <Accordion.Body style={{ paddingTop: 10, paddingBottom: 10 }}>
-                  <Row>
-                    <Col style={{ paddingLeft: 0, paddingRight: 0 }}>
-                      {Heatmap({ title: 'Area 1', activity: silence })}
-                    </Col>
-                    <Col style={{ paddingLeft: 0, paddingRight: 0 }}>
-                      {Heatmap({ title: 'Area 2', activity: silence })}
-                    </Col>
-                    <Col style={{ paddingLeft: 0, paddingRight: 0 }}>
-                      {Heatmap({ title: 'Area 3', activity: silence })}
-                    </Col>
-                    <Col style={{ paddingLeft: 0, paddingRight: 0 }}>
-                      {Heatmap({ title: 'Area 4', activity: silence })}
-                    </Col>
-                    <Col style={{ paddingLeft: 0, paddingRight: 0 }}>
-                      {Heatmap({ title: 'Area 5', activity: silence })}
-                    </Col>
-                    <Col style={{ paddingLeft: 0, paddingRight: 0 }}>
-                      {Heatmap({ title: 'Area 6', activity: silence })}
-                    </Col>
-                  </Row>
-                </Accordion.Body>
-              </Accordion.Item>
-            </Accordion>
+          <Col xs={6}>
+            <CellAssembly name={'CA #2'} activity={[]}></CellAssembly>
           </Col>
         </Row>
         <Row
@@ -213,55 +137,28 @@ export default function App() {
           }}
         >
           <Col>
-            <Accordion
-              defaultActiveKey="0"
-              style={{
-                marginLeft: 'auto',
-                marginRight: 'auto',
-              }}
-            >
-              <Accordion.Item eventKey="0">
-                <Accordion.Header style={{ padding: 0 }}>
-                  Potentials
-                </Accordion.Header>
-                <Accordion.Body style={{ paddingTop: 10, paddingBottom: 10 }}>
-                  <Row>
-                    <Col>
-                      {Heatmap({
-                        title: 'Sensory Input 1',
-                        activity: sensoryInput1,
-                        size: 150,
-                      })}
-                    </Col>
-                    <Col>
-                      {Heatmap({ title: 'Area 1', activity: area1, size: 150 })}
-                    </Col>
-                    <Col>
-                      {Heatmap({ title: 'Area 2', activity: area2, size: 150 })}
-                    </Col>
-                    <Col>
-                      {Heatmap({ title: 'Area 3', activity: area3, size: 150 })}
-                    </Col>
-                    <Col>
-                      {Heatmap({ title: 'Area 4', activity: area4, size: 150 })}
-                    </Col>
-                    <Col>
-                      {Heatmap({ title: 'Area 5', activity: area5, size: 150 })}
-                    </Col>
-                    <Col>
-                      {Heatmap({ title: 'Area 6', activity: area6, size: 150 })}
-                    </Col>
-                    <Col>
-                      {Heatmap({
-                        title: 'Motor Input 1',
-                        activity: motorInput1,
-                        size: 150,
-                      })}
-                    </Col>
-                  </Row>
-                </Accordion.Body>
-              </Accordion.Item>
-            </Accordion>
+            <Potentials
+              sensoryInput1={sensoryInput1}
+              area1={area1}
+              area2={area2}
+              area3={area3}
+              area4={area4}
+              area5={area5}
+              area6={area6}
+              motorInput1={motorInput1}
+            ></Potentials>
+          </Col>
+        </Row>
+        <Row
+          style={{
+            marginBottom: '30px',
+            marginLeft: '100px',
+            marginRight: '100px',
+          }}
+        >
+          <Col xs={6}></Col>
+          <Col xs={6}>
+            <CellAssemblyOverlaps activity={[]}></CellAssemblyOverlaps>
           </Col>
         </Row>
 
@@ -374,337 +271,3 @@ export default function App() {
     </div>
   );
 }
-
-/**
- * @todo move to separate file
- */
-const Heatmap = ({
-  activity,
-  title,
-  size = 100,
-}: {
-  activity: number[][];
-  title: string;
-  size?: number;
-}) => {
-  // scales the value domain (min neural activation - max neural activation) to a colour range
-  const colourScale: Plotly.ColorScale = [
-    [0, '#b0ceff'],
-    [1, '#0a2f6b'],
-  ];
-
-  const data: Plotly.Data[] = [
-    {
-      type: 'heatmap',
-      z: activity,
-      colorscale: colourScale,
-      showscale: false,
-      hoverinfo: 'none',
-      showlegend: false,
-      mode: 'none',
-      hovertext: 'none',
-      hovertemplate: '',
-    },
-  ];
-
-  return (
-    <>
-      <Plot
-        config={{ displayModeBar: false, editable: false, staticPlot: true }}
-        style={{
-          marginLeft: 'auto',
-          marginRight: 'auto',
-          pointerEvents: 'none',
-        }}
-        data={data}
-        layout={{
-          plot_bgcolor: '#e2e3e5',
-          showlegend: false,
-          margin: { t: 0, b: 0, l: 0, r: 0 },
-          hidesources: true,
-          height: size,
-          width: size,
-          xaxis: {
-            showgrid: false,
-            zeroline: false,
-            visible: false,
-          },
-          yaxis: {
-            automargin: true,
-            showgrid: false,
-            zeroline: false,
-            visible: false,
-          },
-        }}
-      />
-    </>
-  );
-};
-
-/**
- * @todo move to separate file
- */
-const ControlPanel = ({
-  visible,
-  onHide,
-}: {
-  visible: boolean;
-  onHide: () => void;
-}) => {
-  // sliders
-  const [io, setIo] = useState<number>(0);
-  const [noise, setNoise] = useState<number>(0);
-  const [steps, setSteps] = useState<number>(0);
-  const [displaySteps, setDisplaySteps] = useState<number>(0);
-  const [sensoryInputRow, setSensoryInputRow] = useState<number>(0);
-  const [sensoryInputCol, setSensoryInputCol] = useState<number>(0);
-  const [motorInputRow, setMotorInputRow] = useState<number>(0);
-  const [motorInputCol, setMotorInputCol] = useState<number>(0);
-  const [gain, setGain] = useState<number>(0);
-  const [theta, setTheta] = useState<number>(0);
-  const [sensoryStimAmp, setSensoryStimAmp] = useState<number>(0);
-  const [motorStimAmp, setMotorStimAmp] = useState<number>(0);
-  const [pattern, setPattern] = useState<number>(0);
-  const [learn, setLearn] = useState<number>(0);
-  const [diluteProb, setDiluteProb] = useState<number>(0);
-  const [diluteArea, setDiluteArea] = useState<number>(0);
-  const [jFfb, setJffb] = useState<number>(0);
-  const [jRec, setJRec] = useState<number>(0);
-  const [jInh, setJInh] = useState<number>(0);
-  const [jSlow, setJSlow] = useState<number>(0);
-
-  return (
-    <Offcanvas
-      show={visible}
-      onHide={onHide}
-      placement="bottom"
-      scroll={true}
-      style={{ height: '60%' }}
-    >
-      <Offcanvas.Header closeButton>
-        <Offcanvas.Title>Control Panel</Offcanvas.Title>
-      </Offcanvas.Header>
-      <Offcanvas.Body>
-        <Row>
-          <Col xs={3}>
-            <Slider
-              title="IO"
-              min={-1000}
-              max={1000}
-              value={io}
-              setValue={setIo}
-            ></Slider>
-            <Slider
-              title="Noise"
-              min={0}
-              max={1000}
-              value={noise}
-              setValue={setNoise}
-            ></Slider>
-            <Slider
-              title="Steps"
-              min={1}
-              max={100}
-              value={steps}
-              setValue={setSteps}
-            ></Slider>
-            <Slider
-              title="Display steps"
-              min={1}
-              max={100}
-              value={displaySteps}
-              setValue={setDisplaySteps}
-            ></Slider>
-            <Slider
-              title="Jffb"
-              min={0}
-              max={5000}
-              value={jFfb}
-              setValue={setJffb}
-            ></Slider>
-          </Col>
-          <Col xs={3}>
-            <Slider
-              title="Sensory input row"
-              min={1}
-              max={2}
-              value={sensoryInputRow}
-              setValue={setSensoryInputRow}
-            ></Slider>
-            <Slider
-              title="Sensory input col"
-              min={1}
-              max={3}
-              value={sensoryInputCol}
-              setValue={setSensoryInputCol}
-            ></Slider>
-            <Slider
-              title="Motor input row"
-              min={1}
-              max={2}
-              value={motorInputRow}
-              setValue={setMotorInputRow}
-            ></Slider>
-            <Slider
-              title="Motor input col"
-              min={1}
-              max={6}
-              value={motorInputCol}
-              setValue={setMotorInputCol}
-            ></Slider>
-            <Slider
-              title="Jrec"
-              min={0}
-              max={5000}
-              value={jRec}
-              setValue={setJRec}
-            ></Slider>
-          </Col>
-          <Col xs={3}>
-            <Slider
-              title="Gain"
-              min={0}
-              max={5000}
-              value={gain}
-              setValue={setGain}
-            ></Slider>
-            <Slider
-              title="Theta"
-              min={0}
-              max={5000}
-              value={theta}
-              setValue={setTheta}
-            ></Slider>
-            <Slider
-              title="Sensory stim. amp"
-              min={0}
-              max={1000}
-              value={sensoryStimAmp}
-              setValue={setSensoryStimAmp}
-            ></Slider>
-            <Slider
-              title="Motor stim. amp"
-              min={0}
-              max={1000}
-              value={motorStimAmp}
-              setValue={setMotorStimAmp}
-            ></Slider>
-            <Slider
-              title="Jinh"
-              min={0}
-              max={5000}
-              value={jInh}
-              setValue={setJInh}
-            ></Slider>
-          </Col>
-          <Col xs={3}>
-            <Slider
-              title="Pattern #"
-              min={0}
-              max={13}
-              value={pattern}
-              setValue={setPattern}
-            ></Slider>
-            <Slider
-              title="Learn"
-              min={0}
-              max={1000}
-              value={learn}
-              setValue={setLearn}
-            ></Slider>
-            <Slider
-              title="Dilute prob"
-              min={0}
-              max={100}
-              value={diluteProb}
-              setValue={setDiluteProb}
-            ></Slider>
-            <Slider
-              title="Dilute area"
-              min={0}
-              max={6}
-              value={diluteArea}
-              setValue={setDiluteArea}
-            ></Slider>
-            <Slider
-              title="J-slow"
-              min={0}
-              max={5000}
-              value={jSlow}
-              setValue={setJSlow}
-            ></Slider>
-          </Col>
-        </Row>
-      </Offcanvas.Body>
-    </Offcanvas>
-  );
-};
-
-/**
- * @todo move to separate file
- */
-const Slider = ({
-  title,
-  min,
-  max,
-  value,
-  setValue,
-}: {
-  title: string;
-  min: number;
-  max: number;
-  value: number;
-  setValue: (v: number) => void;
-}) => {
-  return (
-    <Form style={{ marginTop: '10px', marginRight: '10px' }}>
-      <Form.Group as={Row}>
-        <Form.Label>{title}</Form.Label>
-        <Col xs="8">
-          <RangeSlider
-            value={value}
-            min={min}
-            max={max}
-            onChange={(e) => setValue(Number(e.target.value))}
-          />
-        </Col>
-        <Col xs="4">
-          <Form.Control
-            size="sm"
-            value={`${value} / ${max}`}
-            disabled={false}
-          />
-        </Col>
-      </Form.Group>
-    </Form>
-  );
-};
-
-/**
- * @todo move to separate file
- */
-const Switch = ({
-  title,
-  value,
-  checked,
-  setChecked,
-}: {
-  title: string;
-  value: string;
-  checked: boolean;
-  setChecked: (checked: boolean) => void;
-}) => {
-  return (
-    <ToggleButton
-      className="mb-2"
-      id="toggle-check"
-      type="checkbox"
-      variant="outline-primary"
-      checked={checked}
-      value={value}
-      onChange={(e) => setChecked(e.currentTarget.checked)}
-    >
-      {title}
-    </ToggleButton>
-  );
-};
