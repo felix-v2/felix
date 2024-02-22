@@ -1,6 +1,7 @@
 FROM node:20.6.0
 
 WORKDIR /app
+RUN npm cache clean --force
 COPY package.json ./
 COPY package-lock.json ./
 
