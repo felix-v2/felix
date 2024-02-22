@@ -9,6 +9,7 @@ import { Potentials } from './components/potentials';
 import { CellAssemblyOverlaps } from './components/cell-assembly-overlaps';
 import { CellAssembly } from './components/cell-assembly';
 import { ControlPanel } from './components/control-panel';
+import { CellAssemblyPotentialsOverlaps } from './components/cell-assembly-potentials-overlaps';
 
 const socket = io('ws://localhost:5000', { autoConnect: true });
 
@@ -118,14 +119,14 @@ export default function App() {
         <Row
           style={{
             marginBottom: '30px',
-            marginLeft: '20px',
-            marginRight: '20px',
+            marginLeft: '100px',
+            marginRight: '100px',
           }}
         >
-          <Col xs={6}>
+          <Col xs={5}>
             <CellAssembly name={'CA #1'} activity={[]}></CellAssembly>
           </Col>
-          <Col xs={6}>
+          <Col xs={5}>
             <CellAssembly name={'CA #2'} activity={[]}></CellAssembly>
           </Col>
         </Row>
@@ -136,7 +137,7 @@ export default function App() {
             marginRight: '100px',
           }}
         >
-          <Col>
+          <Col xs={10}>
             <Potentials
               sensoryInput1={sensoryInput1}
               area1={area1}
@@ -156,9 +157,21 @@ export default function App() {
             marginRight: '100px',
           }}
         >
-          <Col xs={6}></Col>
-          <Col xs={6}>
+          <Col xs={5}>
             <CellAssemblyOverlaps activity={[]}></CellAssemblyOverlaps>
+          </Col>
+        </Row>
+        <Row
+          style={{
+            marginBottom: '30px',
+            marginLeft: '100px',
+            marginRight: '100px',
+          }}
+        >
+          <Col xs={7}>
+            <CellAssemblyPotentialsOverlaps
+              activity={[]}
+            ></CellAssemblyPotentialsOverlaps>
           </Col>
         </Row>
 

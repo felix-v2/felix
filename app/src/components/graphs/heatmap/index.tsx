@@ -3,11 +3,13 @@ import Plot from 'react-plotly.js';
 export const Heatmap = ({
   activity,
   title,
-  size = 100,
+  height = 90,
+  width = height,
 }: {
   activity: number[][];
   title: string;
-  size?: number;
+  width?: number;
+  height?: number;
 }) => {
   // scales the value domain (min neural activation - max neural activation) to a colour range
   const colourScale: Plotly.ColorScale = [
@@ -43,8 +45,8 @@ export const Heatmap = ({
           showlegend: false,
           margin: { t: 0, b: 0, l: 0, r: 0 },
           hidesources: true,
-          height: size,
-          width: size,
+          height,
+          width,
           xaxis: {
             showgrid: false,
             zeroline: false,
