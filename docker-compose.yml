@@ -4,8 +4,8 @@ services:
   gui:
     build: ./app
     container_name: felix-app
-    # volumes:
-    #     - ./app:/app # mount the app directory into the container
+    volumes:
+        - ./app:/app # mount the app directory into the container
     ports:
         - "3000:3000" # maps host port to container port
 

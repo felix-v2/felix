@@ -30,7 +30,10 @@ npm start
 
 Install Docker desktop.
 
+Note: we install the dependencies in the container itself, but then due to mounting, overwrite the installed packaged with our empty node modules on the host machine. Running npm i on the host machine mitigates this. Is there a more conventional way to do this?
+
 ```
+npm i
 docker-compose up
 ```
 
