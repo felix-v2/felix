@@ -41,7 +41,17 @@ npm i
 docker-compose up
 ```
 
-## Rebuilding the neural net
+## Modifying the GUI
+
+Due to a combination of hot reloads (by the Create React App library) and the mounting of the app as a volume onto its container, you can make changes to the React application whilst it's running, and once you save a file, you will see your changes reflected almost instantly.
+
+## Modifying the neural net
+
+To start with, we will not enable hot reloading for the Python backend. Hot reloads - auto-reloading the server - will destroy any in-progress simulation.
+
+Instead you can make change to the Python backend and neural net anytime you like, even during a simulation run, but your changes will not take effect until you manually rebuild the backend image and serve it to its container.
+
+When you want to do this, you should run the following commands:
 
 ```
 docker-compose down
