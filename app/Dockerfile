@@ -3,6 +3,11 @@ FROM node:20.6.0
 WORKDIR /app
 COPY package.json ./
 COPY package-lock.json ./
+
+# Print installed npm packages
+RUN echo "Hello, world!"
+RUN npm list --depth=0
+
 RUN npm install
 
 # Print installed npm packages
