@@ -30,7 +30,11 @@ npm start
 
 Install Docker desktop.
 
-Note: we install the dependencies in the container itself, but then due to mounting, overwrite the installed packaged with our empty node modules on the host machine. Running npm i on the host machine mitigates this. Is there a more conventional way to do this?
+Note: when docker builds the image, the node_modules directory is created within the container's app directory, and all the dependencies are installed there. Then on runtime the app directory from outside docker (the app on the host machine,with no installed node_modules) is mounted into the docker instance, essentially overwriting the node_modules that were just installed within the container.
+
+Running npm i on the host machine, before running docker compose, mitigates this. But is there a more conventional way to do this?
+
+https://stackoverflow.com/questions/30043872/docker-compose-node-modules-not-present-in-a-volume-after-npm-install-succeeds
 
 ```
 npm i
