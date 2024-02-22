@@ -6,6 +6,7 @@ COPY package-lock.json ./
 RUN npm install
 
 # Print installed npm packages
+RUN echo "Hello, world!"
 RUN npm list --depth=0
 
 RUN npm install -g react-scripts
