@@ -126,8 +126,148 @@ export default function App() {
   return (
     <div className="App">
       <Col style={{ marginTop: '30px' }}>
+        {/* ACTIVITY COMPONENTS */}
+        <Row
+          style={{
+            marginBottom: '30px',
+            marginLeft: '20px',
+            marginRight: '20px',
+          }}
+        >
+          <Col xs={6}>
+            <Accordion
+              defaultActiveKey="0"
+              style={{
+                marginLeft: 'auto',
+                marginRight: 'auto',
+              }}
+            >
+              <Accordion.Item eventKey="0">
+                <Accordion.Header>CA #1</Accordion.Header>
+                <Accordion.Body style={{ paddingTop: 10, paddingBottom: 10 }}>
+                  <Row>
+                    <Col style={{ paddingLeft: 0, paddingRight: 0 }}>
+                      {Heatmap({ title: 'Area 1', activity: silence })}
+                    </Col>
+                    <Col style={{ paddingLeft: 0, paddingRight: 0 }}>
+                      {Heatmap({ title: 'Area 2', activity: silence })}
+                    </Col>
+                    <Col style={{ paddingLeft: 0, paddingRight: 0 }}>
+                      {Heatmap({ title: 'Area 3', activity: silence })}
+                    </Col>
+                    <Col style={{ paddingLeft: 0, paddingRight: 0 }}>
+                      {Heatmap({ title: 'Area 4', activity: silence })}
+                    </Col>
+                    <Col style={{ paddingLeft: 0, paddingRight: 0 }}>
+                      {Heatmap({ title: 'Area 5', activity: silence })}
+                    </Col>
+                    <Col style={{ paddingLeft: 0, paddingRight: 0 }}>
+                      {Heatmap({ title: 'Area 6', activity: silence })}
+                    </Col>
+                  </Row>
+                </Accordion.Body>
+              </Accordion.Item>
+            </Accordion>
+          </Col>
+          <Col xl={6}>
+            <Accordion
+              defaultActiveKey="0"
+              style={{
+                marginLeft: 'auto',
+                marginRight: 'auto',
+              }}
+            >
+              <Accordion.Item eventKey="0">
+                <Accordion.Header>CA #2</Accordion.Header>
+                <Accordion.Body style={{ paddingTop: 10, paddingBottom: 10 }}>
+                  <Row>
+                    <Col style={{ paddingLeft: 0, paddingRight: 0 }}>
+                      {Heatmap({ title: 'Area 1', activity: silence })}
+                    </Col>
+                    <Col style={{ paddingLeft: 0, paddingRight: 0 }}>
+                      {Heatmap({ title: 'Area 2', activity: silence })}
+                    </Col>
+                    <Col style={{ paddingLeft: 0, paddingRight: 0 }}>
+                      {Heatmap({ title: 'Area 3', activity: silence })}
+                    </Col>
+                    <Col style={{ paddingLeft: 0, paddingRight: 0 }}>
+                      {Heatmap({ title: 'Area 4', activity: silence })}
+                    </Col>
+                    <Col style={{ paddingLeft: 0, paddingRight: 0 }}>
+                      {Heatmap({ title: 'Area 5', activity: silence })}
+                    </Col>
+                    <Col style={{ paddingLeft: 0, paddingRight: 0 }}>
+                      {Heatmap({ title: 'Area 6', activity: silence })}
+                    </Col>
+                  </Row>
+                </Accordion.Body>
+              </Accordion.Item>
+            </Accordion>
+          </Col>
+        </Row>
+        <Row
+          style={{
+            marginBottom: '30px',
+            marginLeft: '100px',
+            marginRight: '100px',
+          }}
+        >
+          <Col>
+            <Accordion
+              defaultActiveKey="0"
+              style={{
+                marginLeft: 'auto',
+                marginRight: 'auto',
+              }}
+            >
+              <Accordion.Item eventKey="0">
+                <Accordion.Header style={{ padding: 0 }}>
+                  Potentials
+                </Accordion.Header>
+                <Accordion.Body style={{ paddingTop: 10, paddingBottom: 10 }}>
+                  <Row>
+                    <Col>
+                      {Heatmap({
+                        title: 'Sensory Input 1',
+                        activity: sensoryInput1,
+                        size: 150,
+                      })}
+                    </Col>
+                    <Col>
+                      {Heatmap({ title: 'Area 1', activity: area1, size: 150 })}
+                    </Col>
+                    <Col>
+                      {Heatmap({ title: 'Area 2', activity: area2, size: 150 })}
+                    </Col>
+                    <Col>
+                      {Heatmap({ title: 'Area 3', activity: area3, size: 150 })}
+                    </Col>
+                    <Col>
+                      {Heatmap({ title: 'Area 4', activity: area4, size: 150 })}
+                    </Col>
+                    <Col>
+                      {Heatmap({ title: 'Area 5', activity: area5, size: 150 })}
+                    </Col>
+                    <Col>
+                      {Heatmap({ title: 'Area 6', activity: area6, size: 150 })}
+                    </Col>
+                    <Col>
+                      {Heatmap({
+                        title: 'Motor Input 1',
+                        activity: motorInput1,
+                        size: 150,
+                      })}
+                    </Col>
+                  </Row>
+                </Accordion.Body>
+              </Accordion.Item>
+            </Accordion>
+          </Col>
+        </Row>
+
+        {/* MAIN SIMULATION MENU */}
         <Row style={{ marginBottom: '15px', marginLeft: '100px' }}>
-          <Col sm={3}>
+          <Col xs={3}>
             <ToggleButton
               style={{ marginRight: '10px' }}
               variant={applySensoryInput ? 'primary' : 'outline-primary'}
@@ -157,7 +297,7 @@ export default function App() {
             marginBottom: '30px',
           }}
         >
-          <Col sm={4}>
+          <Col xs={4}>
             <Card
               style={{
                 marginLeft: 'auto',
@@ -166,7 +306,7 @@ export default function App() {
             >
               <Card.Header style={{ paddingTop: 15, paddingBottom: 15 }}>
                 <Row>
-                  <Col sm={6}>
+                  <Col xs={6}>
                     <Button
                       onClick={() => setShowControlPanel(true)}
                       variant="outline-dark"
@@ -179,7 +319,7 @@ export default function App() {
                     visible={showControlPanel}
                     onHide={() => setShowControlPanel(false)}
                   ></ControlPanel>
-                  <Col sm={6}>
+                  <Col xs={6}>
                     <ProgressBar
                       style={{ height: '2rem' }}
                       animated
@@ -229,117 +369,6 @@ export default function App() {
             </Card>
           </Col>
         </Row>
-        <Row
-          style={{
-            marginBottom: '30px',
-            marginLeft: '20px',
-            marginRight: '20px',
-          }}
-        >
-          <Col sm={6}>
-            <Accordion
-              defaultActiveKey="0"
-              style={{
-                marginLeft: 'auto',
-                marginRight: 'auto',
-              }}
-            >
-              <Accordion.Item eventKey="0">
-                <Accordion.Header>CA #1</Accordion.Header>
-                <Accordion.Body style={{ paddingTop: 30, paddingBottom: 30 }}>
-                  <Row>
-                    <Col>{Heatmap({ title: 'Area 1', activity: silence })}</Col>
-                    <Col>{Heatmap({ title: 'Area 2', activity: silence })}</Col>
-                    <Col>{Heatmap({ title: 'Area 3', activity: silence })}</Col>
-                    <Col>{Heatmap({ title: 'Area 4', activity: silence })}</Col>
-                    <Col>{Heatmap({ title: 'Area 5', activity: silence })}</Col>
-                    <Col>{Heatmap({ title: 'Area 6', activity: silence })}</Col>
-                  </Row>
-                </Accordion.Body>
-              </Accordion.Item>
-            </Accordion>
-          </Col>
-          <Col sm={6}>
-            <Accordion
-              defaultActiveKey="0"
-              style={{
-                marginLeft: 'auto',
-                marginRight: 'auto',
-              }}
-            >
-              <Accordion.Item eventKey="0">
-                <Accordion.Header>CA #2</Accordion.Header>
-                <Accordion.Body style={{ paddingTop: 30, paddingBottom: 30 }}>
-                  <Row>
-                    <Col>{Heatmap({ title: 'Area 1', activity: silence })}</Col>
-                    <Col>{Heatmap({ title: 'Area 2', activity: silence })}</Col>
-                    <Col>{Heatmap({ title: 'Area 3', activity: silence })}</Col>
-                    <Col>{Heatmap({ title: 'Area 4', activity: silence })}</Col>
-                    <Col>{Heatmap({ title: 'Area 5', activity: silence })}</Col>
-                    <Col>{Heatmap({ title: 'Area 6', activity: silence })}</Col>
-                  </Row>
-                </Accordion.Body>
-              </Accordion.Item>
-            </Accordion>
-          </Col>
-        </Row>
-        <Row
-          style={{
-            marginBottom: '30px',
-            marginLeft: '100px',
-            marginRight: '100px',
-          }}
-        >
-          <Col>
-            <Accordion
-              defaultActiveKey="0"
-              style={{
-                marginLeft: 'auto',
-                marginRight: 'auto',
-              }}
-            >
-              <Accordion.Item eventKey="0">
-                <Accordion.Header>Potentials</Accordion.Header>
-                <Accordion.Body style={{ paddingTop: 30, paddingBottom: 30 }}>
-                  <Row>
-                    <Col>
-                      {Heatmap({
-                        title: 'Sensory Input 1',
-                        activity: sensoryInput1,
-                        size: 150,
-                      })}
-                    </Col>
-                    <Col>
-                      {Heatmap({ title: 'Area 1', activity: area1, size: 150 })}
-                    </Col>
-                    <Col>
-                      {Heatmap({ title: 'Area 2', activity: area2, size: 150 })}
-                    </Col>
-                    <Col>
-                      {Heatmap({ title: 'Area 3', activity: area3, size: 150 })}
-                    </Col>
-                    <Col>
-                      {Heatmap({ title: 'Area 4', activity: area4, size: 150 })}
-                    </Col>
-                    <Col>
-                      {Heatmap({ title: 'Area 5', activity: area5, size: 150 })}
-                    </Col>
-                    <Col>
-                      {Heatmap({ title: 'Area 6', activity: area6, size: 150 })}
-                    </Col>
-                    <Col>
-                      {Heatmap({
-                        title: 'Motor Input 1',
-                        activity: motorInput1,
-                        size: 150,
-                      })}
-                    </Col>
-                  </Row>
-                </Accordion.Body>
-              </Accordion.Item>
-            </Accordion>
-          </Col>
-        </Row>
       </Col>
       ;
     </div>
@@ -370,19 +399,22 @@ const Heatmap = ({
       z: activity,
       colorscale: colourScale,
       showscale: false,
-      showlegend: false,
       hoverinfo: 'none',
+      showlegend: false,
       mode: 'none',
       hovertext: 'none',
+      hovertemplate: '',
     },
   ];
 
   return (
     <>
       <Plot
+        config={{ displayModeBar: false, editable: false, staticPlot: true }}
         style={{
           marginLeft: 'auto',
           marginRight: 'auto',
+          pointerEvents: 'none',
         }}
         data={data}
         layout={{
@@ -405,18 +437,6 @@ const Heatmap = ({
           },
         }}
       />
-      <Button
-        style={{
-          width: size,
-          marginLeft: 'auto',
-          marginRight: 'auto',
-          marginTop: '10px',
-        }}
-        variant="outline-primary"
-        size="sm"
-      >
-        {title}
-      </Button>
     </>
   );
 };
@@ -466,7 +486,7 @@ const ControlPanel = ({
       </Offcanvas.Header>
       <Offcanvas.Body>
         <Row>
-          <Col lg={3}>
+          <Col xs={3}>
             <Slider
               title="IO"
               min={-1000}
@@ -503,7 +523,7 @@ const ControlPanel = ({
               setValue={setJffb}
             ></Slider>
           </Col>
-          <Col lg={3}>
+          <Col xs={3}>
             <Slider
               title="Sensory input row"
               min={1}
@@ -540,7 +560,7 @@ const ControlPanel = ({
               setValue={setJRec}
             ></Slider>
           </Col>
-          <Col lg={3}>
+          <Col xs={3}>
             <Slider
               title="Gain"
               min={0}
@@ -577,7 +597,7 @@ const ControlPanel = ({
               setValue={setJInh}
             ></Slider>
           </Col>
-          <Col lg={3}>
+          <Col xs={3}>
             <Slider
               title="Pattern #"
               min={0}
