@@ -18,7 +18,7 @@ export const Slider = ({
     <Form style={{ marginTop: '10px', marginRight: '0' }}>
       <Form.Group as={Row}>
         <Form.Label>{title}</Form.Label>
-        <Col xs="8">
+        <Col xs="12">
           <RangeSlider
             value={value}
             min={min}
@@ -26,13 +26,13 @@ export const Slider = ({
             onChange={(e) => setValue(Number(e.target.value))}
           />
         </Col>
-        <Col xs="4">
+        {/* <Col xs="4">
           <Form.Control
             size="sm"
             value={`${value} / ${max}`}
             disabled={false}
           />
-        </Col>
+        </Col> */}
       </Form.Group>
     </Form>
   );

@@ -56,7 +56,7 @@ export const ControlPanel = ({
           </Col>
         </Row>
         <Row style={{ paddingTop: 30 }}>
-          <Col xs={8}>
+          <Col xs={12}>
             <SimulationModelParameters />
           </Col>
         </Row>
@@ -186,146 +186,213 @@ const SimulationModelParameters = () => {
 
   return (
     <>
-      <Slider
-        title="IO"
-        min={-1000}
-        max={1000}
-        value={io}
-        setValue={setIo}
-      ></Slider>
-      <Slider
-        title="Noise"
-        min={0}
-        max={1000}
-        value={noise}
-        setValue={setNoise}
-      ></Slider>
-      <Slider
-        title="Steps"
-        min={1}
-        max={100}
-        value={steps}
-        setValue={setSteps}
-      ></Slider>
-      <Slider
-        title="Display steps"
-        min={1}
-        max={100}
-        value={displaySteps}
-        setValue={setDisplaySteps}
-      ></Slider>
-      <Slider
-        title="Jffb"
-        min={0}
-        max={5000}
-        value={jFfb}
-        setValue={setJffb}
-      ></Slider>
-      <Slider
-        title="Sensory input row"
-        min={1}
-        max={2}
-        value={sensoryInputRow}
-        setValue={setSensoryInputRow}
-      ></Slider>
-      <Slider
-        title="Sensory input col"
-        min={1}
-        max={3}
-        value={sensoryInputCol}
-        setValue={setSensoryInputCol}
-      ></Slider>
-      <Slider
-        title="Motor input row"
-        min={1}
-        max={2}
-        value={motorInputRow}
-        setValue={setMotorInputRow}
-      ></Slider>
-      <Slider
-        title="Motor input col"
-        min={1}
-        max={6}
-        value={motorInputCol}
-        setValue={setMotorInputCol}
-      ></Slider>
-      <Slider
-        title="Jrec"
-        min={0}
-        max={5000}
-        value={jRec}
-        setValue={setJRec}
-      ></Slider>
-      <Slider
-        title="Gain"
-        min={0}
-        max={5000}
-        value={gain}
-        setValue={setGain}
-      ></Slider>
-      <Slider
-        title="Theta"
-        min={0}
-        max={5000}
-        value={theta}
-        setValue={setTheta}
-      ></Slider>
-      <Slider
-        title="Sensory stim. amp"
-        min={0}
-        max={1000}
-        value={sensoryStimAmp}
-        setValue={setSensoryStimAmp}
-      ></Slider>
-      <Slider
-        title="Motor stim. amp"
-        min={0}
-        max={1000}
-        value={motorStimAmp}
-        setValue={setMotorStimAmp}
-      ></Slider>
-      <Slider
-        title="Jinh"
-        min={0}
-        max={5000}
-        value={jInh}
-        setValue={setJInh}
-      ></Slider>
-      <Slider
-        title="Pattern #"
-        min={0}
-        max={13}
-        value={pattern}
-        setValue={setPattern}
-      ></Slider>
-      <Slider
-        title="Learn"
-        min={0}
-        max={1000}
-        value={learn}
-        setValue={setLearn}
-      ></Slider>
-      <Slider
-        title="Dilute prob"
-        min={0}
-        max={100}
-        value={diluteProb}
-        setValue={setDiluteProb}
-      ></Slider>
-      <Slider
-        title="Dilute area"
-        min={0}
-        max={6}
-        value={diluteArea}
-        setValue={setDiluteArea}
-      ></Slider>
-      <Slider
-        title="J-slow"
-        min={0}
-        max={5000}
-        value={jSlow}
-        setValue={setJSlow}
-      ></Slider>
+      <Row>
+        <Col xs={6}></Col>
+        <Col xs={6}></Col>
+      </Row>
+      <Row>
+        <Col xs={6}>
+          <Slider
+            title="IO"
+            min={-1000}
+            max={1000}
+            value={io}
+            setValue={setIo}
+          ></Slider>
+        </Col>
+        <Col xs={6}>
+          <Slider
+            title="Noise"
+            min={0}
+            max={1000}
+            value={noise}
+            setValue={setNoise}
+          ></Slider>
+        </Col>
+      </Row>
+      <Row>
+        <Col xs={6}>
+          <Slider
+            title="Display steps"
+            min={1}
+            max={100}
+            value={displaySteps}
+            setValue={setDisplaySteps}
+          ></Slider>
+        </Col>
+        <Col xs={6}>
+          <Slider
+            title="Steps"
+            min={1}
+            max={100}
+            value={steps}
+            setValue={setSteps}
+          ></Slider>
+        </Col>
+      </Row>
+      <Row>
+        <Col xs={6}>
+          {' '}
+          <Slider
+            title="Motor input row"
+            min={1}
+            max={2}
+            value={motorInputRow}
+            setValue={setMotorInputRow}
+          ></Slider>
+        </Col>
+        <Col xs={6}>
+          <Slider
+            title="Motor input col"
+            min={1}
+            max={6}
+            value={motorInputCol}
+            setValue={setMotorInputCol}
+          ></Slider>
+        </Col>
+      </Row>
+      <Row>
+        <Col xs={6}>
+          <Slider
+            title="Sensory input row"
+            min={1}
+            max={2}
+            value={sensoryInputRow}
+            setValue={setSensoryInputRow}
+          ></Slider>
+        </Col>
+        <Col xs={6}>
+          <Slider
+            title="Sensory input col"
+            min={1}
+            max={3}
+            value={sensoryInputCol}
+            setValue={setSensoryInputCol}
+          ></Slider>
+        </Col>
+      </Row>
+      <Row>
+        <Col xs={6}>
+          <Slider
+            title="Jffb"
+            min={0}
+            max={5000}
+            value={jFfb}
+            setValue={setJffb}
+          ></Slider>
+        </Col>
+        <Col xs={6}>
+          <Slider
+            title="Jrec"
+            min={0}
+            max={5000}
+            value={jRec}
+            setValue={setJRec}
+          ></Slider>
+        </Col>
+      </Row>
+      <Row>
+        <Col xs={6}>
+          <Slider
+            title="Gain"
+            min={0}
+            max={5000}
+            value={gain}
+            setValue={setGain}
+          ></Slider>
+        </Col>
+        <Col xs={6}>
+          <Slider
+            title="Theta"
+            min={0}
+            max={5000}
+            value={theta}
+            setValue={setTheta}
+          ></Slider>
+        </Col>
+      </Row>
+      <Row>
+        <Col xs={6}>
+          <Slider
+            title="Sensory stim. amp"
+            min={0}
+            max={1000}
+            value={sensoryStimAmp}
+            setValue={setSensoryStimAmp}
+          ></Slider>
+        </Col>
+        <Col xs={6}>
+          <Slider
+            title="Motor stim. amp"
+            min={0}
+            max={1000}
+            value={motorStimAmp}
+            setValue={setMotorStimAmp}
+          ></Slider>
+        </Col>
+      </Row>
+      <Row>
+        <Col xs={6}>
+          <Slider
+            title="Jinh"
+            min={0}
+            max={5000}
+            value={jInh}
+            setValue={setJInh}
+          ></Slider>
+        </Col>
+        <Col xs={6}>
+          <Slider
+            title="Pattern #"
+            min={0}
+            max={13}
+            value={pattern}
+            setValue={setPattern}
+          ></Slider>
+        </Col>
+      </Row>
+      <Row>
+        <Col xs={6}>
+          <Slider
+            title="Learn"
+            min={0}
+            max={1000}
+            value={learn}
+            setValue={setLearn}
+          ></Slider>
+        </Col>
+        <Col xs={6}>
+          {' '}
+          <Slider
+            title="Dilute prob"
+            min={0}
+            max={100}
+            value={diluteProb}
+            setValue={setDiluteProb}
+          ></Slider>
+        </Col>
+      </Row>
+      <Row>
+        <Col xs={6}>
+          <Slider
+            title="Dilute area"
+            min={0}
+            max={6}
+            value={diluteArea}
+            setValue={setDiluteArea}
+          ></Slider>
+        </Col>
+        <Col xs={6}>
+          {' '}
+          <Slider
+            title="J-slow"
+            min={0}
+            max={5000}
+            value={jSlow}
+            setValue={setJSlow}
+          ></Slider>
+        </Col>
+      </Row>
     </>
   );
 };
