@@ -15,7 +15,7 @@ export const Slider = ({
   setValue: (v: number) => void;
 }) => {
   return (
-    <Form style={{ marginTop: '10px', marginRight: '10px' }}>
+    <Form style={{ marginTop: '10px', marginRight: '0' }}>
       <Form.Group as={Row}>
         <Form.Label>{title}</Form.Label>
         <Col xs="8">

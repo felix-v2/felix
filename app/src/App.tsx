@@ -1,15 +1,14 @@
 import { useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
-import Button from 'react-bootstrap/Button';
-import { Card, Col, ProgressBar, Row } from 'react-bootstrap';
+import { Col, Row } from 'react-bootstrap';
 import ToggleButton from 'react-bootstrap/ToggleButton';
 
 import 'react-bootstrap-range-slider/dist/react-bootstrap-range-slider.css';
 import { Potentials } from './components/potentials';
 import { CellAssemblyOverlaps } from './components/cell-assembly-overlaps';
 import { CellAssembly } from './components/cell-assembly';
-import { ControlPanel } from './components/control-panel';
 import { CellAssemblyPotentialsOverlaps } from './components/cell-assembly-potentials-overlaps';
+import { ControlPanel } from './components/control-panel';
 
 const socket = io('ws://localhost:5000', { autoConnect: true });
 
@@ -115,11 +114,12 @@ export default function App() {
 
   return (
     <div className="App">
-      <Col style={{ marginTop: '30px' }}>
+      <Col style={{ marginTop: '70px' }}>
+        <ControlPanel visible={true} onHide={() => console.log('Hide')} />
         <Row
           style={{
             marginBottom: '30px',
-            marginLeft: '100px',
+            marginLeft: '5px',
             marginRight: '100px',
           }}
         >
@@ -133,7 +133,7 @@ export default function App() {
         <Row
           style={{
             marginBottom: '30px',
-            marginLeft: '100px',
+            marginLeft: '5px',
             marginRight: '100px',
           }}
         >
@@ -153,7 +153,7 @@ export default function App() {
         <Row
           style={{
             marginBottom: '30px',
-            marginLeft: '100px',
+            marginLeft: '5px',
             marginRight: '100px',
           }}
         >
@@ -164,7 +164,7 @@ export default function App() {
         <Row
           style={{
             marginBottom: '30px',
-            marginLeft: '100px',
+            marginLeft: '5px',
             marginRight: '100px',
           }}
         >
@@ -172,111 +172,6 @@ export default function App() {
             <CellAssemblyPotentialsOverlaps
               activity={[]}
             ></CellAssemblyPotentialsOverlaps>
-          </Col>
-        </Row>
-
-        {/* MAIN SIMULATION MENU */}
-        <Row style={{ marginBottom: '15px', marginLeft: '100px' }}>
-          <Col xs={3}>
-            <ToggleButton
-              style={{ marginRight: '10px' }}
-              variant={applySensoryInput ? 'primary' : 'outline-primary'}
-              id="tbg-btn-1"
-              value={1}
-              checked={applySensoryInput}
-              onClick={() => setApplySensoryInput(!applySensoryInput)}
-            >
-              Sensory input active
-            </ToggleButton>
-            <ToggleButton
-              variant={applyMotorInput ? 'primary' : 'outline-primary'}
-              id="tbg-btn-2"
-              value={2}
-              checked={applyMotorInput}
-              onClick={() => setApplyMotorInput(!applyMotorInput)}
-            >
-              Motor input active
-            </ToggleButton>
-          </Col>
-        </Row>
-        <Row
-          style={{
-            marginTop: '50px',
-            marginLeft: '100px',
-            marginRight: '100px',
-            marginBottom: '30px',
-          }}
-        >
-          <Col xs={4}>
-            <Card
-              style={{
-                marginLeft: 'auto',
-                marginRight: 'auto',
-              }}
-            >
-              <Card.Header style={{ paddingTop: 15, paddingBottom: 15 }}>
-                <Row>
-                  <Col xs={6}>
-                    <Button
-                      onClick={() => setShowControlPanel(true)}
-                      variant="outline-dark"
-                      size="sm"
-                    >
-                      Control Panel
-                    </Button>
-                  </Col>
-                  <ControlPanel
-                    visible={showControlPanel}
-                    onHide={() => setShowControlPanel(false)}
-                  ></ControlPanel>
-                  <Col xs={6}>
-                    <ProgressBar
-                      style={{ height: '2rem' }}
-                      animated
-                      variant={connected ? 'success' : 'danger'}
-                      now={100}
-                      label={
-                        connected
-                          ? 'Neural net connection live'
-                          : 'Not connected to neural net'
-                      }
-                    />
-                  </Col>
-                </Row>
-              </Card.Header>
-              <Card.Body>
-                <Card.Title>Simulation</Card.Title>
-                <Button
-                  onClick={() => setRunning(true)}
-                  disabled={!connected || running}
-                  variant="success"
-                  size="sm"
-                  style={{ marginRight: 10, width: '5rem' }}
-                >
-                  Start
-                </Button>
-                <Button
-                  onClick={() => {
-                    // @todo we want this to just stop receiving new activity, not necessarily disconnect
-                    setRunning(false);
-                    // setSensoryInput1(silence);
-                    // setArea1(silence);
-                    // setArea2(silence);
-                    // setArea3(silence);
-                    // setArea4(silence);
-                    // setArea5(silence);
-                    // setArea6(silence);
-                    // setMotorInput1(silence);
-                  }}
-                  disabled={!connected || !running}
-                  variant="danger"
-                  size="sm"
-                  style={{ marginRight: 5, width: '5rem' }}
-                >
-                  Stop
-                </Button>
-              </Card.Body>
-            </Card>
           </Col>
         </Row>
       </Col>
