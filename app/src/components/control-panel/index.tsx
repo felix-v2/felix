@@ -45,14 +45,18 @@ export const ControlPanel = ({
         </Col>
       </Offcanvas.Header>
       <Offcanvas.Body>
-        <Row style={{ paddingTop: 30 }}>
-          <SimulationControlButtons />
+        <Row style={{ paddingTop: 20 }}>
+          <Col xs={8}>
+            <SimulationControlButtons />
+          </Col>
+        </Row>
+        <Row style={{ paddingTop: 40 }}>
+          <Col xs={8}>
+            <SimulationSwitches />
+          </Col>
         </Row>
         <Row style={{ paddingTop: 30 }}>
-          <SimulationSwitches />
-        </Row>
-        <Row style={{ paddingTop: 30 }}>
-          <Col xs={12}>
+          <Col xs={8}>
             <SimulationModelParameters />
           </Col>
         </Row>
