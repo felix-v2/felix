@@ -31,6 +31,7 @@ export const ControlPanel = ({
       backdrop={false}
       style={{
         backgroundColor: '#e2e3e5',
+        transform: 'none',
       }}
     >
       <Offcanvas.Header style={{ paddingTop: 30 }}>

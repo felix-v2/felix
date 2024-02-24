@@ -114,8 +114,8 @@ export default function App() {
 
   return (
     <div className="App">
-      <Col xs={10} style={{ marginTop: '70px' }}>
-        <ControlPanel visible={true} onHide={() => console.log('Hide')} />
+      <ControlPanel visible={true} onHide={() => console.log('Hide')} />
+      <Col xs={10} style={{ marginTop: '40px' }}>
         <Row
           style={{
             marginBottom: '30px',

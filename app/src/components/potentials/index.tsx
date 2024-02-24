@@ -31,7 +31,9 @@ export const Potentials = ({
       }}
     >
       <Accordion.Item eventKey="0">
-        <Accordion.Header style={{ padding: 0 }}>Potentials</Accordion.Header>
+        <Accordion.Header style={{ fontSize: '1rem' }}>
+          Potentials
+        </Accordion.Header>
         <Accordion.Body style={{ paddingTop: 10, paddingBottom: 10 }}>
           <Row>
             <Col>
