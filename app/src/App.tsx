@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
-import { Accordion, Col, Row } from 'react-bootstrap';
+import { Col, Row } from 'react-bootstrap';
 
 import 'react-bootstrap-range-slider/dist/react-bootstrap-range-slider.css';
 import { Potentials } from './sections/potentials';
@@ -8,8 +8,7 @@ import { CellAssemblyOverlaps } from './sections/cell-assembly-overlaps';
 import { CellAssembly } from './sections/cell-assembly';
 import { CellAssemblyPotentialsOverlaps } from './sections/cell-assembly-potentials-overlaps';
 import { ControlPanel } from './sections/control-panel';
-import { LineGraph } from './components/graphs/line';
-import { CollapsibleTimeSeries, Totals } from './sections/totals';
+import { Totals } from './sections/totals';
 
 const socket = io('ws://localhost:5000', { autoConnect: true });
 
