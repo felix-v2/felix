@@ -89,7 +89,6 @@ export const TimeSeriesGraph = ({ title }: { title: string }) => {
         },
       ]}
       layout={{
-        title,
         xaxis: {
           showgrid: false,
           zeroline: false,

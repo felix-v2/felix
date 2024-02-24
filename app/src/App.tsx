@@ -9,7 +9,7 @@ import { CellAssembly } from './sections/cell-assembly';
 import { CellAssemblyPotentialsOverlaps } from './sections/cell-assembly-potentials-overlaps';
 import { ControlPanel } from './sections/control-panel';
 import { LineGraph } from './components/graphs/line';
-import { Totals } from './sections/totals';
+import { CollapsibleTimeSeries, Totals } from './sections/totals';
 
 const socket = io('ws://localhost:5000', { autoConnect: true });
 
@@ -158,9 +158,7 @@ export default function App() {
             marginRight: '100px',
           }}
         >
-          <Col xs={11}>
-            <Totals />
-          </Col>
+          <Totals />
         </Row>
         <Row
           style={{
