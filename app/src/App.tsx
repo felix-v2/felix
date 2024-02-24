@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
 import { Col, Row } from 'react-bootstrap';
-import ToggleButton from 'react-bootstrap/ToggleButton';
 
 import 'react-bootstrap-range-slider/dist/react-bootstrap-range-slider.css';
 import { Potentials } from './components/potentials';
