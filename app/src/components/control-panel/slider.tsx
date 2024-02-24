@@ -24,6 +24,7 @@ export const Slider = ({
             min={min}
             max={max}
             onChange={(e) => setValue(Number(e.target.value))}
+            size="sm"
           />
         </Col>
         {/* <Col xs="4">

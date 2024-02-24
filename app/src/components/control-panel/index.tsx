@@ -29,6 +29,9 @@ export const ControlPanel = ({
       placement="end"
       scroll={true}
       backdrop={false}
+      style={{
+        backgroundColor: '#e2e3e5',
+      }}
     >
       <Offcanvas.Header style={{ paddingTop: 30 }}>
         <Col xs={4}>
@@ -46,12 +49,12 @@ export const ControlPanel = ({
       </Offcanvas.Header>
       <Offcanvas.Body>
         <Row style={{ paddingTop: 20 }}>
-          <Col xs={8}>
+          <Col xs={12}>
             <SimulationControlButtons />
           </Col>
         </Row>
         <Row style={{ paddingTop: 40 }}>
-          <Col xs={8}>
+          <Col xs={12}>
             <SimulationSwitches />
           </Col>
         </Row>
@@ -67,97 +70,107 @@ export const ControlPanel = ({
 
 const SimulationControlButtons = () => {
   return (
-    <>
-      <ButtonGroup size="sm" className="mb-2">
-        <Button style={{ marginRight: 10 }} variant="light">
-          Init
-        </Button>
-        <Button style={{ marginRight: 10 }} variant="danger">
-          Stop
-        </Button>
-        <Button style={{ marginRight: 10 }} variant="info">
-          Steps
-        </Button>
-        <Button style={{ marginRight: 10 }}>Continue</Button>
-        <Button style={{ marginRight: 10 }} variant="success">
-          Run
-        </Button>
-      </ButtonGroup>
-    </>
+    <Card>
+      <Card.Body>
+        <Card.Title style={{ fontSize: '1rem' }}>Controls</Card.Title>
+        <ButtonGroup size="sm" className="mb-2">
+          <Button style={{ marginRight: 10 }} variant="light">
+            Init
+          </Button>
+          <Button style={{ marginRight: 10 }} variant="danger">
+            Stop
+          </Button>
+          <Button style={{ marginRight: 10 }} variant="info">
+            Steps
+          </Button>
+          <Button style={{ marginRight: 10 }}>Continue</Button>
+          <Button style={{ marginRight: 10 }} variant="success">
+            Run
+          </Button>
+        </ButtonGroup>
+      </Card.Body>
+    </Card>
   );
 };
 
 const SimulationSwitches = () => {
   return (
     <>
-      <ButtonGroup size="sm" className="mb-2">
-        <ToggleButton
-          style={{ marginRight: 10 }}
-          variant={'primary'}
-          id="tbg-btn-1"
-          value={1}
-        >
-          sensIn
-        </ToggleButton>
-        <ToggleButton
-          style={{ marginRight: 10 }}
-          variant={'primary'}
-          id="tbg-btn-2"
-          value={1}
-        >
-          motorIn
-        </ToggleButton>
-        <ToggleButton
-          style={{ marginRight: 10 }}
-          variant={'primary'}
-          id="tbg-btn-1"
-          value={1}
-        >
-          dilute
-        </ToggleButton>
-        <ToggleButton
-          style={{ marginRight: 10 }}
-          variant={'primary'}
-          id="tbg-btn-1"
-          value={1}
-        >
-          saveNet
-        </ToggleButton>
-      </ButtonGroup>
-      <ButtonGroup size="sm" className="mb-2">
-        <ToggleButton
-          style={{ marginRight: 10 }}
-          variant={'primary'}
-          id="tbg-btn-1"
-          value={1}
-        >
-          loadNet
-        </ToggleButton>
-        <ToggleButton
-          style={{ marginRight: 10 }}
-          variant={'primary'}
-          id="tbg-btn-2"
-          value={1}
-        >
-          trainNet
-        </ToggleButton>
-        <ToggleButton
-          style={{ marginRight: 10 }}
-          variant={'primary'}
-          id="tbg-btn-1"
-          value={1}
-        >
-          printNet
-        </ToggleButton>
-        <ToggleButton
-          style={{ marginRight: 10 }}
-          variant={'primary'}
-          id="tbg-btn-1"
-          value={1}
-        >
-          computeCA/Ovlps
-        </ToggleButton>
-      </ButtonGroup>
+      <Card>
+        <Card.Body>
+          <Card.Title style={{ fontSize: '1rem' }}>Switches</Card.Title>
+          <ButtonGroup size="sm" className="mb-2">
+            <ToggleButton
+              style={{ marginRight: 10 }}
+              variant={'primary'}
+              id="tbg-btn-1"
+              value={1}
+            >
+              sensIn
+            </ToggleButton>
+            <ToggleButton
+              style={{ marginRight: 10 }}
+              variant={'primary'}
+              id="tbg-btn-2"
+              value={1}
+            >
+              motorIn
+            </ToggleButton>
+            <ToggleButton
+              style={{ marginRight: 10 }}
+              variant={'primary'}
+              id="tbg-btn-1"
+              value={1}
+            >
+              dilute
+            </ToggleButton>
+            <ToggleButton
+              style={{ marginRight: 10 }}
+              variant={'primary'}
+              id="tbg-btn-1"
+              value={1}
+            >
+              saveNet
+            </ToggleButton>
+          </ButtonGroup>
+          <ButtonGroup size="sm" className="mb-2">
+            <ToggleButton
+              style={{ marginRight: 10 }}
+              variant={'primary'}
+              id="tbg-btn-1"
+              value={1}
+            >
+              loadNet
+            </ToggleButton>
+            <ToggleButton
+              style={{ marginRight: 10 }}
+              variant={'primary'}
+              id="tbg-btn-2"
+              value={1}
+            >
+              trainNet
+            </ToggleButton>
+            <ToggleButton
+              style={{ marginRight: 10 }}
+              variant={'primary'}
+              id="tbg-btn-1"
+              value={1}
+            >
+              printNet
+            </ToggleButton>
+          </ButtonGroup>
+          <ButtonGroup size="sm" className="mb-2">
+            <ToggleButton
+              style={{ marginRight: 10 }}
+              variant={'primary'}
+              id="tbg-btn-1"
+              value={1}
+            >
+              computeCA/Ovlps
+            </ToggleButton>
+          </ButtonGroup>
+        </Card.Body>
+      </Card>
     </>
   );
 };
@@ -186,213 +199,216 @@ const SimulationModelParameters = () => {
 
   return (
     <>
-      <Row>
-        <Col xs={6}></Col>
-        <Col xs={6}></Col>
-      </Row>
-      <Row>
-        <Col xs={6}>
-          <Slider
-            title="IO"
-            min={-1000}
-            max={1000}
-            value={io}
-            setValue={setIo}
-          ></Slider>
-        </Col>
-        <Col xs={6}>
-          <Slider
-            title="Noise"
-            min={0}
-            max={1000}
-            value={noise}
-            setValue={setNoise}
-          ></Slider>
-        </Col>
-      </Row>
-      <Row>
-        <Col xs={6}>
-          <Slider
-            title="Display steps"
-            min={1}
-            max={100}
-            value={displaySteps}
-            setValue={setDisplaySteps}
-          ></Slider>
-        </Col>
-        <Col xs={6}>
-          <Slider
-            title="Steps"
-            min={1}
-            max={100}
-            value={steps}
-            setValue={setSteps}
-          ></Slider>
-        </Col>
-      </Row>
-      <Row>
-        <Col xs={6}>
-          {' '}
-          <Slider
-            title="Motor input row"
-            min={1}
-            max={2}
-            value={motorInputRow}
-            setValue={setMotorInputRow}
-          ></Slider>
-        </Col>
-        <Col xs={6}>
-          <Slider
-            title="Motor input col"
-            min={1}
-            max={6}
-            value={motorInputCol}
-            setValue={setMotorInputCol}
-          ></Slider>
-        </Col>
-      </Row>
-      <Row>
-        <Col xs={6}>
-          <Slider
-            title="Sensory input row"
-            min={1}
-            max={2}
-            value={sensoryInputRow}
-            setValue={setSensoryInputRow}
-          ></Slider>
-        </Col>
-        <Col xs={6}>
-          <Slider
-            title="Sensory input col"
-            min={1}
-            max={3}
-            value={sensoryInputCol}
-            setValue={setSensoryInputCol}
-          ></Slider>
-        </Col>
-      </Row>
-      <Row>
-        <Col xs={6}>
-          <Slider
-            title="Jffb"
-            min={0}
-            max={5000}
-            value={jFfb}
-            setValue={setJffb}
-          ></Slider>
-        </Col>
-        <Col xs={6}>
-          <Slider
-            title="Jrec"
-            min={0}
-            max={5000}
-            value={jRec}
-            setValue={setJRec}
-          ></Slider>
-        </Col>
-      </Row>
-      <Row>
-        <Col xs={6}>
-          <Slider
-            title="Gain"
-            min={0}
-            max={5000}
-            value={gain}
-            setValue={setGain}
-          ></Slider>
-        </Col>
-        <Col xs={6}>
-          <Slider
-            title="Theta"
-            min={0}
-            max={5000}
-            value={theta}
-            setValue={setTheta}
-          ></Slider>
-        </Col>
-      </Row>
-      <Row>
-        <Col xs={6}>
-          <Slider
-            title="Sensory stim. amp"
-            min={0}
-            max={1000}
-            value={sensoryStimAmp}
-            setValue={setSensoryStimAmp}
-          ></Slider>
-        </Col>
-        <Col xs={6}>
-          <Slider
-            title="Motor stim. amp"
-            min={0}
-            max={1000}
-            value={motorStimAmp}
-            setValue={setMotorStimAmp}
-          ></Slider>
-        </Col>
-      </Row>
-      <Row>
-        <Col xs={6}>
-          <Slider
-            title="Jinh"
-            min={0}
-            max={5000}
-            value={jInh}
-            setValue={setJInh}
-          ></Slider>
-        </Col>
-        <Col xs={6}>
-          <Slider
-            title="Pattern #"
-            min={0}
-            max={13}
-            value={pattern}
-            setValue={setPattern}
-          ></Slider>
-        </Col>
-      </Row>
-      <Row>
-        <Col xs={6}>
-          <Slider
-            title="Learn"
-            min={0}
-            max={1000}
-            value={learn}
-            setValue={setLearn}
-          ></Slider>
-        </Col>
-        <Col xs={6}>
-          {' '}
-          <Slider
-            title="Dilute prob"
-            min={0}
-            max={100}
-            value={diluteProb}
-            setValue={setDiluteProb}
-          ></Slider>
-        </Col>
-      </Row>
-      <Row>
-        <Col xs={6}>
-          <Slider
-            title="Dilute area"
-            min={0}
-            max={6}
-            value={diluteArea}
-            setValue={setDiluteArea}
-          ></Slider>
-        </Col>
-        <Col xs={6}>
-          {' '}
-          <Slider
-            title="J-slow"
-            min={0}
-            max={5000}
-            value={jSlow}
-            setValue={setJSlow}
-          ></Slider>
-        </Col>
-      </Row>
+      <Card style={{ fontSize: '0.8rem' }}>
+        <Card.Body>
+          <Card.Title style={{ fontSize: '1rem' }}>Parameters</Card.Title>
+          <Row>
+            <Col xs={6}></Col>
+            <Col xs={6}></Col>
+          </Row>
+          <Row>
+            <Col xs={6}>
+              <Slider
+                title="IO"
+                min={-1000}
+                max={1000}
+                value={io}
+                setValue={setIo}
+              ></Slider>
+            </Col>
+            <Col xs={6}>
+              <Slider
+                title="Noise"
+                min={0}
+                max={1000}
+                value={noise}
+                setValue={setNoise}
+              ></Slider>
+            </Col>
+          </Row>
+          <Row>
+            <Col xs={6}>
+              <Slider
+                title="Display steps"
+                min={1}
+                max={100}
+                value={displaySteps}
+                setValue={setDisplaySteps}
+              ></Slider>
+            </Col>
+            <Col xs={6}>
+              <Slider
+                title="Steps"
+                min={1}
+                max={100}
+                value={steps}
+                setValue={setSteps}
+              ></Slider>
+            </Col>
+          </Row>
+          <Row>
+            <Col xs={6}>
+              <Slider
+                title="Motor input row"
+                min={1}
+                max={2}
+                value={motorInputRow}
+                setValue={setMotorInputRow}
+              ></Slider>
+            </Col>
+            <Col xs={6}>
+              <Slider
+                title="Motor input col"
+                min={1}
+                max={6}
+                value={motorInputCol}
+                setValue={setMotorInputCol}
+              ></Slider>
+            </Col>
+          </Row>
+          <Row>
+            <Col xs={6}>
+              <Slider
+                title="Sensory input row"
+                min={1}
+                max={2}
+                value={sensoryInputRow}
+                setValue={setSensoryInputRow}
+              ></Slider>
+            </Col>
+            <Col xs={6}>
+              <Slider
+                title="Sensory input col"
+                min={1}
+                max={3}
+                value={sensoryInputCol}
+                setValue={setSensoryInputCol}
+              ></Slider>
+            </Col>
+          </Row>
+          <Row>
+            <Col xs={6}>
+              <Slider
+                title="Jffb"
+                min={0}
+                max={5000}
+                value={jFfb}
+                setValue={setJffb}
+              ></Slider>
+            </Col>
+            <Col xs={6}>
+              <Slider
+                title="Jrec"
+                min={0}
+                max={5000}
+                value={jRec}
+                setValue={setJRec}
+              ></Slider>
+            </Col>
+          </Row>
+          <Row>
+            <Col xs={6}>
+              <Slider
+                title="Gain"
+                min={0}
+                max={5000}
+                value={gain}
+                setValue={setGain}
+              ></Slider>
+            </Col>
+            <Col xs={6}>
+              <Slider
+                title="Theta"
+                min={0}
+                max={5000}
+                value={theta}
+                setValue={setTheta}
+              ></Slider>
+            </Col>
+          </Row>
+          <Row>
+            <Col xs={6}>
+              <Slider
+                title="Sensory stim. amp"
+                min={0}
+                max={1000}
+                value={sensoryStimAmp}
+                setValue={setSensoryStimAmp}
+              ></Slider>
+            </Col>
+            <Col xs={6}>
+              <Slider
+                title="Motor stim. amp"
+                min={0}
+                max={1000}
+                value={motorStimAmp}
+                setValue={setMotorStimAmp}
+              ></Slider>
+            </Col>
+          </Row>
+          <Row>
+            <Col xs={6}>
+              <Slider
+                title="Jinh"
+                min={0}
+                max={5000}
+                value={jInh}
+                setValue={setJInh}
+              ></Slider>
+            </Col>
+            <Col xs={6}>
+              <Slider
+                title="Pattern #"
+                min={0}
+                max={13}
+                value={pattern}
+                setValue={setPattern}
+              ></Slider>
+            </Col>
+          </Row>
+          <Row>
+            <Col xs={6}>
+              <Slider
+                title="Learn"
+                min={0}
+                max={1000}
+                value={learn}
+                setValue={setLearn}
+              ></Slider>
+            </Col>
+            <Col xs={6}>
+              {' '}
+              <Slider
+                title="Dilute prob"
+                min={0}
+                max={100}
+                value={diluteProb}
+                setValue={setDiluteProb}
+              ></Slider>
+            </Col>
+          </Row>
+          <Row>
+            <Col xs={6}>
+              <Slider
+                title="Dilute area"
+                min={0}
+                max={6}
+                value={diluteArea}
+                setValue={setDiluteArea}
+              ></Slider>
+            </Col>
+            <Col xs={6}>
+              <Slider
+                title="J-slow"
+                min={0}
+                max={5000}
+                value={jSlow}
+                setValue={setJSlow}
+              ></Slider>
+            </Col>
+          </Row>
+        </Card.Body>
+      </Card>
     </>
   );
 };

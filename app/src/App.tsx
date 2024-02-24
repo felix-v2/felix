@@ -114,7 +114,7 @@ export default function App() {
 
   return (
     <div className="App">
-      <Col style={{ marginTop: '70px' }}>
+      <Col xs={10} style={{ marginTop: '70px' }}>
         <ControlPanel visible={true} onHide={() => console.log('Hide')} />
         <Row
           style={{
@@ -123,10 +123,10 @@ export default function App() {
             marginRight: '100px',
           }}
         >
-          <Col xs={5}>
+          <Col xs={6}>
             <CellAssembly name={'CA #1'} activity={[]}></CellAssembly>
           </Col>
-          <Col xs={5}>
+          <Col xs={6}>
             <CellAssembly name={'CA #2'} activity={[]}></CellAssembly>
           </Col>
         </Row>
@@ -137,7 +137,7 @@ export default function App() {
             marginRight: '100px',
           }}
         >
-          <Col xs={10}>
+          <Col xs={12}>
             <Potentials
               sensoryInput1={sensoryInput1}
               area1={area1}
