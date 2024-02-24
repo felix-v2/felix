@@ -119,7 +119,7 @@ export default function App() {
       <Col xs={10} style={{ marginTop: '40px' }}>
         <Row
           style={{
-            marginBottom: '30px',
+            marginBottom: '50px',
             marginLeft: '5px',
             marginRight: '100px',
           }}
@@ -133,7 +133,7 @@ export default function App() {
         </Row>
         <Row
           style={{
-            marginBottom: '30px',
+            marginBottom: '50px',
             marginLeft: '5px',
             marginRight: '100px',
           }}
@@ -153,7 +153,7 @@ export default function App() {
         </Row>
         <Row
           style={{
-            marginBottom: '30px',
+            marginBottom: '50px',
             marginLeft: '5px',
             marginRight: '100px',
           }}
@@ -164,23 +164,23 @@ export default function App() {
         </Row>
         <Row
           style={{
-            marginBottom: '30px',
+            marginBottom: '50px',
             marginLeft: '5px',
             marginRight: '100px',
           }}
         >
-          <Col xs={5}>
+          <Col xs={6}>
             <CellAssemblyOverlaps activity={[]}></CellAssemblyOverlaps>
           </Col>
         </Row>
         <Row
           style={{
-            marginBottom: '30px',
+            marginBottom: '50px',
             marginLeft: '5px',
             marginRight: '100px',
           }}
         >
-          <Col xs={7}>
+          <Col xs={8}>
             <CellAssemblyPotentialsOverlaps
               activity={[]}
             ></CellAssemblyPotentialsOverlaps>
