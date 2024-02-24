@@ -1,13 +1,15 @@
 import { useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
-import { Col, Row } from 'react-bootstrap';
+import { Accordion, Col, Row } from 'react-bootstrap';
 
 import 'react-bootstrap-range-slider/dist/react-bootstrap-range-slider.css';
-import { Potentials } from './components/potentials';
-import { CellAssemblyOverlaps } from './components/cell-assembly-overlaps';
-import { CellAssembly } from './components/cell-assembly';
-import { CellAssemblyPotentialsOverlaps } from './components/cell-assembly-potentials-overlaps';
-import { ControlPanel } from './components/control-panel';
+import { Potentials } from './sections/potentials';
+import { CellAssemblyOverlaps } from './sections/cell-assembly-overlaps';
+import { CellAssembly } from './sections/cell-assembly';
+import { CellAssemblyPotentialsOverlaps } from './sections/cell-assembly-potentials-overlaps';
+import { ControlPanel } from './sections/control-panel';
+import { LineGraph } from './components/graphs/line';
+import { Totals } from './sections/totals';
 
 const socket = io('ws://localhost:5000', { autoConnect: true });
 
@@ -147,6 +149,17 @@ export default function App() {
               area6={area6}
               motorInput1={motorInput1}
             ></Potentials>
+          </Col>
+        </Row>
+        <Row
+          style={{
+            marginBottom: '30px',
+            marginLeft: '5px',
+            marginRight: '100px',
+          }}
+        >
+          <Col xs={11}>
+            <Totals />
           </Col>
         </Row>
         <Row

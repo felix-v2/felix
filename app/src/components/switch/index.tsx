@@ -1,6 +1,6 @@
 import { ToggleButton } from 'react-bootstrap';
 
-const Switch = ({
+export const Switch = ({
   title,
   value,
   checked,

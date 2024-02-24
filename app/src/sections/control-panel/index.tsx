@@ -11,7 +11,7 @@ import {
 } from 'react-bootstrap';
 
 import 'react-bootstrap-range-slider/dist/react-bootstrap-range-slider.css';
-import { Slider } from './slider';
+import { Slider } from '../../components/slider';
 
 import 'react-bootstrap-range-slider/dist/react-bootstrap-range-slider.css';
 

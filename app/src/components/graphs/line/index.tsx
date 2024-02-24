@@ -31,11 +31,12 @@ export const LineGraph = () => {
           showlegend: false,
           hovertext: 'none',
           hovertemplate: '',
+          showscale: true,
         },
       ]}
       layout={{
-        height: 200,
-        width: 300,
+        height: 100,
+        width: 200,
         xaxis: {
           showgrid: false,
           zeroline: false,

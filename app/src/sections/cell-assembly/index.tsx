@@ -1,7 +1,7 @@
 import { Accordion, Col, Row } from 'react-bootstrap';
 
 import 'react-bootstrap-range-slider/dist/react-bootstrap-range-slider.css';
-import { Heatmap } from '../graphs/heatmap';
+import { Heatmap } from '../../components/graphs/heatmap';
 
 function generateArrayWithOnes(
   rows: number,
