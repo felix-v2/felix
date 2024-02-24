@@ -9,6 +9,7 @@ import { CellAssembly } from './sections/cell-assembly';
 import { CellAssemblyPotentialsOverlaps } from './sections/cell-assembly-potentials-overlaps';
 import { ControlPanel } from './sections/control-panel';
 import { Totals } from './sections/totals';
+import TransientToast from './components/toast';
 
 const socket = io('ws://localhost:5000', { autoConnect: true });
 
@@ -114,6 +115,7 @@ export default function App() {
 
   return (
     <div className="App">
+      {/* <TransientToast error={true} /> */}
       <ControlPanel visible={true} onHide={() => console.log('Hide')} />
       <Col xs={10} style={{ marginTop: '40px' }}>
         <Row
