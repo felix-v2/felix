@@ -37,6 +37,7 @@ export const Potentials = ({
         <Accordion.Body style={{ paddingTop: 10, paddingBottom: 10 }}>
           <Row>
             <Col>
+              Sensory Input 1
               {Heatmap({
                 title: 'Sensory Input 1',
                 activity: sensoryInput1,
@@ -44,24 +45,25 @@ export const Potentials = ({
               })}
             </Col>
             <Col>
-              {Heatmap({ title: 'Area 1', activity: area1, height: 130 })}
+              Area 1{Heatmap({ title: 'Area 1', activity: area1, height: 130 })}
             </Col>
             <Col>
-              {Heatmap({ title: 'Area 2', activity: area2, height: 130 })}
+              Area 2{Heatmap({ title: 'Area 2', activity: area2, height: 130 })}
             </Col>
             <Col>
-              {Heatmap({ title: 'Area 3', activity: area3, height: 130 })}
+              Area 3{Heatmap({ title: 'Area 3', activity: area3, height: 130 })}
             </Col>
             <Col>
-              {Heatmap({ title: 'Area 4', activity: area4, height: 130 })}
+              Area 4{Heatmap({ title: 'Area 4', activity: area4, height: 130 })}
             </Col>
             <Col>
-              {Heatmap({ title: 'Area 5', activity: area5, height: 130 })}
+              Area 5{Heatmap({ title: 'Area 5', activity: area5, height: 130 })}
             </Col>
             <Col>
-              {Heatmap({ title: 'Area 6', activity: area6, height: 130 })}
+              Area 6{Heatmap({ title: 'Area 6', activity: area6, height: 130 })}
             </Col>
             <Col>
+              Motor Input 1
               {Heatmap({
                 title: 'Motor Input 1',
                 activity: motorInput1,

@@ -21,6 +21,7 @@ export const CellAssemblyPotentialsOverlaps = ({
         <Accordion.Body style={{ paddingTop: 10, paddingBottom: 10 }}>
           <Row>
             <Col style={{ paddingLeft: 0, paddingRight: 0 }}>
+              A1
               {Heatmap({
                 title: 'A1',
                 width: 130,
@@ -28,6 +29,7 @@ export const CellAssemblyPotentialsOverlaps = ({
               })}
             </Col>
             <Col style={{ paddingLeft: 0, paddingRight: 0 }}>
+              A2
               {Heatmap({
                 title: 'A2',
                 width: 130,
@@ -35,6 +37,7 @@ export const CellAssemblyPotentialsOverlaps = ({
               })}
             </Col>
             <Col style={{ paddingLeft: 0, paddingRight: 0 }}>
+              A3
               {Heatmap({
                 title: 'A3',
                 width: 130,
@@ -42,6 +45,7 @@ export const CellAssemblyPotentialsOverlaps = ({
               })}
             </Col>
             <Col style={{ paddingLeft: 0, paddingRight: 0 }}>
+              A4
               {Heatmap({
                 title: 'A4',
                 width: 130,
@@ -49,6 +53,7 @@ export const CellAssemblyPotentialsOverlaps = ({
               })}
             </Col>
             <Col style={{ paddingLeft: 0, paddingRight: 0 }}>
+              A5
               {Heatmap({
                 title: 'A5',
                 width: 130,
@@ -56,6 +61,7 @@ export const CellAssemblyPotentialsOverlaps = ({
               })}
             </Col>
             <Col style={{ paddingLeft: 0, paddingRight: 0 }}>
+              A6
               {Heatmap({
                 title: 'A6',
                 width: 130,

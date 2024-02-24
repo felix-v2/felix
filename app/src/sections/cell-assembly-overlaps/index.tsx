@@ -36,36 +36,42 @@ export const CellAssemblyOverlaps = ({
         <Accordion.Body style={{ paddingTop: 10, paddingBottom: 10 }}>
           <Row>
             <Col style={{ paddingLeft: 0, paddingRight: 0 }}>
+              A1
               {Heatmap({
                 title: 'A1',
                 activity: generateRandomArray(12, 12),
               })}
             </Col>
             <Col style={{ paddingLeft: 0, paddingRight: 0 }}>
+              A2
               {Heatmap({
                 title: 'A2',
                 activity: generateRandomArray(12, 12),
               })}
             </Col>
             <Col style={{ paddingLeft: 0, paddingRight: 0 }}>
+              A3
               {Heatmap({
                 title: 'A3',
                 activity: generateRandomArray(12, 12),
               })}
             </Col>
             <Col style={{ paddingLeft: 0, paddingRight: 0 }}>
+              A4
               {Heatmap({
                 title: 'A4',
                 activity: generateRandomArray(12, 12),
               })}
             </Col>
             <Col style={{ paddingLeft: 0, paddingRight: 0 }}>
+              A5
               {Heatmap({
                 title: 'A5',
                 activity: generateRandomArray(12, 12),
               })}
             </Col>
             <Col style={{ paddingLeft: 0, paddingRight: 0 }}>
+              A6
               {Heatmap({
                 title: 'A6',
                 activity: generateRandomArray(12, 12),

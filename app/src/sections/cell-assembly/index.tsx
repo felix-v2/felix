@@ -48,36 +48,42 @@ export const CellAssembly = ({
         <Accordion.Body style={{ paddingTop: 10, paddingBottom: 10 }}>
           <Row>
             <Col style={{ paddingLeft: 0, paddingRight: 0 }}>
+              Area 1
               {Heatmap({
                 title: 'Area 1',
                 activity: inputAreas,
               })}
             </Col>
             <Col style={{ paddingLeft: 0, paddingRight: 0 }}>
+              Area 2
               {Heatmap({
                 title: 'Area 2',
                 activity: otherAreas,
               })}
             </Col>
             <Col style={{ paddingLeft: 0, paddingRight: 0 }}>
+              Area 3
               {Heatmap({
                 title: 'Area 3',
                 activity: otherAreas,
               })}
             </Col>
             <Col style={{ paddingLeft: 0, paddingRight: 0 }}>
+              Area 4
               {Heatmap({
                 title: 'Area 4',
                 activity: otherAreas,
               })}
             </Col>
             <Col style={{ paddingLeft: 0, paddingRight: 0 }}>
+              Area 5
               {Heatmap({
                 title: 'Area 5',
                 activity: otherAreas,
               })}
             </Col>
             <Col style={{ paddingLeft: 0, paddingRight: 0 }}>
+              Area 6
               {Heatmap({
                 title: 'Area 6',
                 activity: inputAreas,
