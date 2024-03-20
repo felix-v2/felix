@@ -1,6 +1,4 @@
-import { useState } from 'react';
 import {
-  Button,
   ButtonGroup,
   Card,
   Col,
@@ -14,6 +12,8 @@ import 'react-bootstrap-range-slider/dist/react-bootstrap-range-slider.css';
 import { Slider } from '../../components/slider';
 
 import 'react-bootstrap-range-slider/dist/react-bootstrap-range-slider.css';
+import { useParameters } from '../../providers/parameters-provider';
+import { useSimulationStatus } from '../../providers/simulation-status-provider';
 
 export const ControlPanel = ({
   visible,
@@ -70,24 +70,26 @@ export const ControlPanel = ({
 };
 
 const SimulationControlButtons = () => {
+  const { simulationStatus, dispatch } = useSimulationStatus();
+
   return (
     <Card>
       <Card.Body>
         <Card.Title style={{ fontSize: '1rem' }}>Controls</Card.Title>
         <ButtonGroup size="sm" className="mb-2">
-          <Button style={{ marginRight: 10 }} variant="light">
+          <ToggleButton style={{ marginRight: 10 }} variant="light" value={1} id='init'>
             Init
-          </Button>
-          <Button style={{ marginRight: 10 }} variant="danger">
+          </ToggleButton>
+          <ToggleButton style={{ marginRight: 10 }} variant="danger" value={2} id='stop' checked={!simulationStatus.running}  onChange={(event) => dispatch({ running: !event.target.checked })} disabled={!simulationStatus.running}>
             Stop
-          </Button>
-          <Button style={{ marginRight: 10 }} variant="info">
+          </ToggleButton>
+          <ToggleButton style={{ marginRight: 10 }} variant="info" value={3} id='steps'>
             Steps
-          </Button>
-          <Button style={{ marginRight: 10 }}>Continue</Button>
-          <Button style={{ marginRight: 10 }} variant="success">
+          </ToggleButton>
+          <ToggleButton style={{ marginRight: 10 }} value={4} id='test'>Continue</ToggleButton>
+          <ToggleButton style={{ marginRight: 10 }} variant="success" value={5} id='run' checked={!simulationStatus.running} onChange={(event) => dispatch({ running: event.target.checked })} disabled={simulationStatus.running}>
             Run
-          </Button>
+          </ToggleButton>
         </ButtonGroup>
       </Card.Body>
     </Card>
@@ -95,6 +97,8 @@ const SimulationControlButtons = () => {
 };
 
 const SimulationSwitches = () => {
+  const { parameters, dispatch } = useParameters();
+
   return (
     <>
       <Card>
@@ -105,7 +109,9 @@ const SimulationSwitches = () => {
               style={{ marginRight: 10 }}
               variant={'primary'}
               id="tbg-btn-1"
+              checked={parameters.hasSensoryInput}
               value={1}
+              onChange={(event) => dispatch({ hasSensoryInput: event.target.checked })}
             >
               sensIn
             </ToggleButton>
@@ -113,7 +119,9 @@ const SimulationSwitches = () => {
               style={{ marginRight: 10 }}
               variant={'primary'}
               id="tbg-btn-2"
-              value={1}
+              onChange={(event) => dispatch({ hasMotorInput: event.target.checked })}
+              checked={parameters.hasMotorInput}
+              value={2}
             >
               motorIn
             </ToggleButton>
@@ -121,7 +129,9 @@ const SimulationSwitches = () => {
               style={{ marginRight: 10 }}
               variant={'primary'}
               id="tbg-btn-1"
-              value={1}
+              checked={parameters.hasDilute}
+              onChange={(event) => dispatch({ hasDilute: event.target.checked })}
+              value={3}
             >
               dilute
             </ToggleButton>
@@ -129,7 +139,9 @@ const SimulationSwitches = () => {
               style={{ marginRight: 10 }}
               variant={'primary'}
               id="tbg-btn-1"
-              value={1}
+              checked={parameters.hasSaveNet}
+              onChange={(event) => dispatch({ hasSaveNet: event.target.checked })}
+              value={4}
             >
               saveNet
             </ToggleButton>
@@ -139,7 +151,9 @@ const SimulationSwitches = () => {
               style={{ marginRight: 10 }}
               variant={'primary'}
               id="tbg-btn-1"
-              value={1}
+              onChange={(event) => dispatch({ hasLoadNet: event.target.checked })}
+              checked={parameters.hasLoadNet}
+              value={5}
             >
               loadNet
             </ToggleButton>
@@ -147,7 +161,9 @@ const SimulationSwitches = () => {
               style={{ marginRight: 10 }}
               variant={'primary'}
               id="tbg-btn-2"
-              value={1}
+              checked={parameters.hasTrainNet}
+              onChange={(event) => dispatch({ hasTrainNet: event.target.checked })}
+              value={6}
             >
               trainNet
             </ToggleButton>
@@ -155,7 +171,9 @@ const SimulationSwitches = () => {
               style={{ marginRight: 10 }}
               variant={'primary'}
               id="tbg-btn-1"
-              value={1}
+              checked={parameters.hasPrintNet}
+              onChange={(event) => dispatch({ hasPrintNet: event.target.checked })}
+              value={7}
             >
               printNet
             </ToggleButton>
@@ -165,7 +183,9 @@ const SimulationSwitches = () => {
               style={{ marginRight: 10 }}
               variant={'primary'}
               id="tbg-btn-1"
-              value={1}
+              checked={parameters.hasComputeCA}
+              onChange={(event) => dispatch({ hasComputeCA: event.target.checked })}
+              value={8}
             >
               computeCA/Ovlps
             </ToggleButton>
@@ -177,26 +197,7 @@ const SimulationSwitches = () => {
 };
 
 const SimulationModelParameters = () => {
-  const [io, setIo] = useState<number>(0);
-  const [noise, setNoise] = useState<number>(0);
-  const [steps, setSteps] = useState<number>(0);
-  const [displaySteps, setDisplaySteps] = useState<number>(0);
-  const [sensoryInputRow, setSensoryInputRow] = useState<number>(0);
-  const [sensoryInputCol, setSensoryInputCol] = useState<number>(0);
-  const [motorInputRow, setMotorInputRow] = useState<number>(0);
-  const [motorInputCol, setMotorInputCol] = useState<number>(0);
-  const [gain, setGain] = useState<number>(0);
-  const [theta, setTheta] = useState<number>(0);
-  const [sensoryStimAmp, setSensoryStimAmp] = useState<number>(0);
-  const [motorStimAmp, setMotorStimAmp] = useState<number>(0);
-  const [pattern, setPattern] = useState<number>(0);
-  const [learn, setLearn] = useState<number>(0);
-  const [diluteProb, setDiluteProb] = useState<number>(0);
-  const [diluteArea, setDiluteArea] = useState<number>(0);
-  const [jFfb, setJffb] = useState<number>(0);
-  const [jRec, setJRec] = useState<number>(0);
-  const [jInh, setJInh] = useState<number>(0);
-  const [jSlow, setJSlow] = useState<number>(0);
+  const { parameters, dispatch } = useParameters();
 
   return (
     <>
@@ -213,8 +214,8 @@ const SimulationModelParameters = () => {
                 title="IO"
                 min={-1000}
                 max={1000}
-                value={io}
-                setValue={setIo}
+                value={parameters.io}
+                setValue={(value) => dispatch({ io: value})}
               ></Slider>
             </Col>
             <Col xs={6}>
@@ -222,8 +223,8 @@ const SimulationModelParameters = () => {
                 title="Noise"
                 min={0}
                 max={1000}
-                value={noise}
-                setValue={setNoise}
+                value={parameters.noise}
+                setValue={(value) => dispatch({ noise: value })}
               ></Slider>
             </Col>
           </Row>
@@ -233,8 +234,8 @@ const SimulationModelParameters = () => {
                 title="Display steps"
                 min={1}
                 max={100}
-                value={displaySteps}
-                setValue={setDisplaySteps}
+                value={parameters.displaySteps}
+                setValue={(value) => dispatch({ diplaySteps: value })}
               ></Slider>
             </Col>
             <Col xs={6}>
@@ -242,8 +243,8 @@ const SimulationModelParameters = () => {
                 title="Steps"
                 min={1}
                 max={100}
-                value={steps}
-                setValue={setSteps}
+                value={parameters.steps}
+                setValue={(value) => dispatch({ steps: value})}
               ></Slider>
             </Col>
           </Row>
@@ -253,8 +254,8 @@ const SimulationModelParameters = () => {
                 title="Motor input row"
                 min={1}
                 max={2}
-                value={motorInputRow}
-                setValue={setMotorInputRow}
+                value={parameters.motorInputRow}
+                setValue={(value) => dispatch({ motorInputRow: value})}
               ></Slider>
             </Col>
             <Col xs={6}>
@@ -262,8 +263,8 @@ const SimulationModelParameters = () => {
                 title="Motor input col"
                 min={1}
                 max={6}
-                value={motorInputCol}
-                setValue={setMotorInputCol}
+                value={parameters.motorInputCol}
+                setValue={(value) => dispatch({ motorInputCol: value})}
               ></Slider>
             </Col>
           </Row>
@@ -273,8 +274,8 @@ const SimulationModelParameters = () => {
                 title="Sensory input row"
                 min={1}
                 max={2}
-                value={sensoryInputRow}
-                setValue={setSensoryInputRow}
+                value={parameters.sensoryInputRow}
+                setValue={(value) => dispatch({ sensoryInputRow: value})}
               ></Slider>
             </Col>
             <Col xs={6}>
@@ -282,8 +283,8 @@ const SimulationModelParameters = () => {
                 title="Sensory input col"
                 min={1}
                 max={3}
-                value={sensoryInputCol}
-                setValue={setSensoryInputCol}
+                value={parameters.sensoryInputCol}
+                setValue={(value) => dispatch({ sensoryInputCol: value})}
               ></Slider>
             </Col>
           </Row>
@@ -293,8 +294,8 @@ const SimulationModelParameters = () => {
                 title="Jffb"
                 min={0}
                 max={5000}
-                value={jFfb}
-                setValue={setJffb}
+                value={parameters.jFfb}
+                setValue={(value) => dispatch({ jFfb: value})}
               ></Slider>
             </Col>
             <Col xs={6}>
@@ -302,8 +303,8 @@ const SimulationModelParameters = () => {
                 title="Jrec"
                 min={0}
                 max={5000}
-                value={jRec}
-                setValue={setJRec}
+                value={parameters.jRec}
+                setValue={(value) => dispatch({ jRec: value})}
               ></Slider>
             </Col>
           </Row>
@@ -313,8 +314,8 @@ const SimulationModelParameters = () => {
                 title="Gain"
                 min={0}
                 max={5000}
-                value={gain}
-                setValue={setGain}
+                value={parameters.gain}
+                setValue={(value) => dispatch({ gain: value})}
               ></Slider>
             </Col>
             <Col xs={6}>
@@ -322,8 +323,8 @@ const SimulationModelParameters = () => {
                 title="Theta"
                 min={0}
                 max={5000}
-                value={theta}
-                setValue={setTheta}
+                value={parameters.theta}
+                setValue={(value) => dispatch({ theta: value})}
               ></Slider>
             </Col>
           </Row>
@@ -333,8 +334,8 @@ const SimulationModelParameters = () => {
                 title="Sensory stim. amp"
                 min={0}
                 max={1000}
-                value={sensoryStimAmp}
-                setValue={setSensoryStimAmp}
+                value={parameters.sensoryStimAmp}
+                setValue={(value) => dispatch({ sensoryStimAmp: value})}
               ></Slider>
             </Col>
             <Col xs={6}>
@@ -342,8 +343,8 @@ const SimulationModelParameters = () => {
                 title="Motor stim. amp"
                 min={0}
                 max={1000}
-                value={motorStimAmp}
-                setValue={setMotorStimAmp}
+                value={parameters.motorStimAmp}
+                setValue={(value) => dispatch({ motorStimAmp: value})}
               ></Slider>
             </Col>
           </Row>
@@ -353,8 +354,8 @@ const SimulationModelParameters = () => {
                 title="Jinh"
                 min={0}
                 max={5000}
-                value={jInh}
-                setValue={setJInh}
+                value={parameters.jInh}
+                setValue={(value) => dispatch({ jInh: value})}
               ></Slider>
             </Col>
             <Col xs={6}>
@@ -362,8 +363,8 @@ const SimulationModelParameters = () => {
                 title="Pattern #"
                 min={0}
                 max={13}
-                value={pattern}
-                setValue={setPattern}
+                value={parameters.pattern}
+                setValue={(value) => dispatch({ pattern: value})}
               ></Slider>
             </Col>
           </Row>
@@ -373,8 +374,8 @@ const SimulationModelParameters = () => {
                 title="Learn"
                 min={0}
                 max={1000}
-                value={learn}
-                setValue={setLearn}
+                value={parameters.learn}
+                setValue={(value) => dispatch({ learn: value})}
               ></Slider>
             </Col>
             <Col xs={6}>
@@ -383,8 +384,8 @@ const SimulationModelParameters = () => {
                 title="Dilute prob"
                 min={0}
                 max={100}
-                value={diluteProb}
-                setValue={setDiluteProb}
+                value={parameters.diluteProb}
+                setValue={(value) => dispatch({ diluteProb: value})}
               ></Slider>
             </Col>
           </Row>
@@ -394,8 +395,8 @@ const SimulationModelParameters = () => {
                 title="Dilute area"
                 min={0}
                 max={6}
-                value={diluteArea}
-                setValue={setDiluteArea}
+                value={parameters.diluteArea}
+                setValue={(value) => dispatch({ diluteArea: value})}
               ></Slider>
             </Col>
             <Col xs={6}>
@@ -403,8 +404,8 @@ const SimulationModelParameters = () => {
                 title="J-slow"
                 min={0}
                 max={5000}
-                value={jSlow}
-                setValue={setJSlow}
+                value={parameters.jSlow}
+                setValue={(value) => dispatch({ jSlow: value})}
               ></Slider>
             </Col>
           </Row>
