@@ -364,10 +364,7 @@ class StandardNet6Areas:
 
         ##  INITIALISE ALL THE KERNELS ##
         util.Clear_Vector(self.J)
-        print('SELF J after clear:', self.J)
-        print('SLICED J:', self.J[2:2])
 
-        # todo: FIX - vector J is wrong
         for j in range(self.NAREAS):
             for i in range(self.NAREAS):
                 # Does area j have REC. links?
@@ -379,7 +376,8 @@ class StandardNet6Areas:
                     self.init_patchy_gauss_kern(self.N11, self.N12, self.NREC1, self.NREC2, self.J[conn:conn+1],
                                                 self.SIGMAX_REC, self.SIGMAY_REC, self.J_REC_PROB, self.J_UPPER)
                 elif self.K[self.NAREAS * j + i]:  # Does AREA (j+1) --> (i+1)?
-                    self.init_patchy_gauss_kern(self.N11, self.N12, self.NFFB1, self.NFFB2, self.J[self.NSQR1 * (self.NAREAS * j + i)],
+                    conn = self.NSQR1 * (self.NAREAS * j + i)
+                    self.init_patchy_gauss_kern(self.N11, self.N12, self.NFFB1, self.NFFB2, self.J[conn:conn+1],
                                                 self.SIGMAX, self.SIGMAY, self.J_PROB, self.J_UPPER)
 
         # # There is only 1 inhibitory kernel (FIXED & identical for all)
@@ -511,7 +509,8 @@ class StandardNet6Areas:
         for x in range(mx):
             for y in range(my):
                 h = (x - cx) * (x - cx) * h1 + (y - cy) * (y - cy) * h2
-                J[y * mx + x] = ampl * math.exp(-h)
+                index = y * mx + x
+                J[index:index+1] = ampl * math.exp(-h)
 
         # Copy kernel (0,0) to other locations
         mm = mx * my
@@ -546,11 +545,11 @@ class StandardNet6Areas:
 
         # ...then transform them into the requested synaptic values.
         for i in range(nx * ny * mx * my):
-            if random.random() < J[i]:
+            if random.random() < J[i:i+1]:
                 # random.uniform(0, upper) could be used instead of upper*random.random()
-                J[i] = upper * random.random()
+                J[i:i+1] = upper * random.random()
             else:
-                J[i] = 0  # NO_SYNAPSE
+                J[i:i+1] = 0  # NO_SYNAPSE
 
     # @todo unit test
     def train_projection_cyclic(self, pre: np.ndarray, post_pot: np.ndarray, J: np.ndarray, nx: int, ny: int, mx: int, my: int, hrate: float, totLTP: float, totLTD: float):
