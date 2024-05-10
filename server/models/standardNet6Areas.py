@@ -210,6 +210,11 @@ class StandardNet6Areas:
     # Matrix specifying the network's Connectivity structure #
     # A "1" at coord. (x,y) means Area #x ==> Area #y
     # Note: keeping this 1d in the spirit of "like for like" translation
+    # (Since each area has 625 cells, there are 625 * 625 area-to-area cellular connections
+    # So if you want to index a particular connection in the entire network, in 1d:
+    # E.g get index of connection between cell 500 and cell 200 in areas 2 and 3:
+    # self.J[500*200*(6*2*3)] -> index is 1,500,000
+    # total connections is 625*625*36 = 14,062,500)
     K: util.bVectorType = np.array([
         # (to area)
         # 1, 2, 3, 4, 5, 6
@@ -359,17 +364,23 @@ class StandardNet6Areas:
 
         ##  INITIALISE ALL THE KERNELS ##
         util.Clear_Vector(self.J)
+        print('SELF J after clear:', self.J)
+        print('SLICED J:', self.J[2:2])
 
         # todo: FIX - vector J is wrong
-        # for j in range(self.NAREAS):
-        #     for i in range(self.NAREAS):
-        #         # Does area j have REC. links?
-        #         if j == i and self.K[(self.NAREAS + 1) * j]:
-        #             self.init_patchy_gauss_kern(self.N11, self.N12, self.NREC1, self.NREC2, self.J[self.NSQR1 * (self.NAREAS * i + i)],
-        #                                         self.SIGMAX_REC, self.SIGMAY_REC, self.J_REC_PROB, self.J_UPPER)
-        #         elif self.K[self.NAREAS * j + i]:  # Does AREA (j+1) --> (i+1)?
-        #             self.init_patchy_gauss_kern(self.N11, self.N12, self.NFFB1, self.NFFB2, self.J[self.NSQR1 * (self.NAREAS * j + i)],
-        #                                         self.SIGMAX, self.SIGMAY, self.J_PROB, self.J_UPPER)
+        for j in range(self.NAREAS):
+            for i in range(self.NAREAS):
+                # Does area j have REC. links?
+                if j == i and self.K[(self.NAREAS + 1) * j]:
+                    # we need to pass the element as part of a slice, so it "points" to its "counterpart" in the original J
+                    # so downstream operations modify it in place
+                    # otherwise just passing J[index] passes the float element itself and downstream indexing of J throws an error
+                    conn = self.NSQR1 * (self.NAREAS * i + i)
+                    self.init_patchy_gauss_kern(self.N11, self.N12, self.NREC1, self.NREC2, self.J[conn:conn+1],
+                                                self.SIGMAX_REC, self.SIGMAY_REC, self.J_REC_PROB, self.J_UPPER)
+                elif self.K[self.NAREAS * j + i]:  # Does AREA (j+1) --> (i+1)?
+                    self.init_patchy_gauss_kern(self.N11, self.N12, self.NFFB1, self.NFFB2, self.J[self.NSQR1 * (self.NAREAS * j + i)],
+                                                self.SIGMAX, self.SIGMAY, self.J_PROB, self.J_UPPER)
 
         # # There is only 1 inhibitory kernel (FIXED & identical for all)
         # self.init_gaussian_kernel(1, 1, self.NINH1, self.NINH2, self.Jinh,
