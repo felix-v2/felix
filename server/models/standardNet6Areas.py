@@ -234,6 +234,11 @@ class StandardNet6Areas:
     # Contains the ONE and only inhibitory (Gauss.) kernel
     Jinh: util.VectorType
 
+    # Note: in the absence of pointers, when we want to pass around a vector (numpy array) for mutation
+    # by downstream functions, we should use numpy slicing even if what is being referenced is a single element
+    # in the array. E.g.Z
+    # jSliceIndex = self.NSQR1 * (self.NAREAS * i + i)
+    # self.init_patchy_gauss_kern( ..., self.J[jSliceIndex:jSliceIndex+1], ... )
     def main_init(self):
         """
         main_init() is called when simulation PROGRAM is started. It does
@@ -372,12 +377,12 @@ class StandardNet6Areas:
                     # we need to pass the element as part of a slice, so it "points" to its "counterpart" in the original J
                     # so downstream operations modify it in place
                     # otherwise just passing J[index] passes the float element itself and downstream indexing of J throws an error
-                    conn = self.NSQR1 * (self.NAREAS * i + i)
-                    self.init_patchy_gauss_kern(self.N11, self.N12, self.NREC1, self.NREC2, self.J[conn:conn+1],
+                    jSliceIndex = self.NSQR1 * (self.NAREAS * i + i)
+                    self.init_patchy_gauss_kern(self.N11, self.N12, self.NREC1, self.NREC2, self.J[jSliceIndex:jSliceIndex+1],
                                                 self.SIGMAX_REC, self.SIGMAY_REC, self.J_REC_PROB, self.J_UPPER)
                 elif self.K[self.NAREAS * j + i]:  # Does AREA (j+1) --> (i+1)?
-                    conn = self.NSQR1 * (self.NAREAS * j + i)
-                    self.init_patchy_gauss_kern(self.N11, self.N12, self.NFFB1, self.NFFB2, self.J[conn:conn+1],
+                    jSliceIndex = self.NSQR1 * (self.NAREAS * j + i)
+                    self.init_patchy_gauss_kern(self.N11, self.N12, self.NFFB1, self.NFFB2, self.J[jSliceIndex:jSliceIndex+1],
                                                 self.SIGMAX, self.SIGMAY, self.J_PROB, self.J_UPPER)
 
         # # There is only 1 inhibitory kernel (FIXED & identical for all)
@@ -509,8 +514,8 @@ class StandardNet6Areas:
         for x in range(mx):
             for y in range(my):
                 h = (x - cx) * (x - cx) * h1 + (y - cy) * (y - cy) * h2
-                index = y * mx + x
-                J[index:index+1] = ampl * math.exp(-h)
+                jSliceIndex = y * mx + x
+                J[jSliceIndex:jSliceIndex+1] = ampl * math.exp(-h)
 
         # Copy kernel (0,0) to other locations
         mm = mx * my
@@ -545,11 +550,12 @@ class StandardNet6Areas:
 
         # ...then transform them into the requested synaptic values.
         for i in range(nx * ny * mx * my):
+            jSliceIndex = i
             if random.random() < J[i:i+1]:
                 # random.uniform(0, upper) could be used instead of upper*random.random()
-                J[i:i+1] = upper * random.random()
+                J[jSliceIndex:jSliceIndex+1] = upper * random.random()
             else:
-                J[i:i+1] = 0  # NO_SYNAPSE
+                J[jSliceIndex:jSliceIndex+1] = 0  # NO_SYNAPSE
 
     # @todo unit test
     def train_projection_cyclic(self, pre: np.ndarray, post_pot: np.ndarray, J: np.ndarray, nx: int, ny: int, mx: int, my: int, hrate: float, totLTP: float, totLTD: float):
