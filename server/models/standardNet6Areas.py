@@ -385,9 +385,9 @@ class StandardNet6Areas:
                     self.init_patchy_gauss_kern(self.N11, self.N12, self.NFFB1, self.NFFB2, self.J[jSliceIndex:jSliceIndex+1],
                                                 self.SIGMAX, self.SIGMAY, self.J_PROB, self.J_UPPER)
 
-        # # There is only 1 inhibitory kernel (FIXED & identical for all)
-        # self.init_gaussian_kernel(1, 1, self.NINH1, self.NINH2, self.Jinh,
-        #                           self.SIGMAX_INH, self.SIGMAY_INH, self.J_INH_INIT)
+        # There is only 1 inhibitory kernel (FIXED & identical for all)
+        self.init_gaussian_kernel(1, 1, self.NINH1, self.NINH2, self.Jinh,
+                                  self.SIGMAX_INH, self.SIGMAY_INH, self.J_INH_INIT)
 
     @staticmethod
     def step():
