@@ -234,11 +234,6 @@ class StandardNet6Areas:
     # Contains the ONE and only inhibitory (Gauss.) kernel
     Jinh: util.VectorType
 
-    # Note: in the absence of pointers, when we want to pass around a vector (numpy array) for mutation
-    # by downstream functions, we should use numpy slicing even if what is being referenced is a single element
-    # in the array. E.g.Z
-    # jSliceIndex = self.NSQR1 * (self.NAREAS * i + i)
-    # self.init_patchy_gauss_kern( ..., self.J[jSliceIndex:jSliceIndex+1], ... )
     def main_init(self):
         """
         main_init() is called when simulation PROGRAM is started. It does
@@ -367,22 +362,25 @@ class StandardNet6Areas:
         self.motorPatt = self.gener_random_bin_patterns(
             self.N1, self.NONES, self.NYAREAS*self.P, self.motorPatt)
 
-        ##  INITIALISE ALL THE KERNELS ##
+        ## INITIALISE ALL THE KERNELS ##
         util.Clear_Vector(self.J)
 
+        # for each of the 36 area-area connections, pass to the kern funcs a slice of J corresponding to its
+        # position in the linear sequence, e.g. for (0,0) pass J[0:390625]
+        # if we just pass J[0:1], the funcs will not be able to modify J at any index beyond 0
         for j in range(self.NAREAS):
             for i in range(self.NAREAS):
                 # Does area j have REC. links?
                 if j == i and self.K[(self.NAREAS + 1) * j]:
-                    # we need to pass the element as part of a slice, so it "points" to its "counterpart" in the original J
+                    # we need to pass a slice representing the section of J corresponding to the synapses for this area connection
                     # so downstream operations modify it in place
-                    # otherwise just passing J[index] passes the float element itself and downstream indexing of J throws an error
+                    # e.g. for the area connection (0,0), J[0:390625]
                     jSliceIndex = self.NSQR1 * (self.NAREAS * i + i)
-                    self.init_patchy_gauss_kern(self.N11, self.N12, self.NREC1, self.NREC2, self.J[jSliceIndex:jSliceIndex+1],
+                    self.init_patchy_gauss_kern(self.N11, self.N12, self.NREC1, self.NREC2, self.J[jSliceIndex:jSliceIndex+self.NSQR1],
                                                 self.SIGMAX_REC, self.SIGMAY_REC, self.J_REC_PROB, self.J_UPPER)
                 elif self.K[self.NAREAS * j + i]:  # Does AREA (j+1) --> (i+1)?
                     jSliceIndex = self.NSQR1 * (self.NAREAS * j + i)
-                    self.init_patchy_gauss_kern(self.N11, self.N12, self.NFFB1, self.NFFB2, self.J[jSliceIndex:jSliceIndex+1],
+                    self.init_patchy_gauss_kern(self.N11, self.N12, self.NFFB1, self.NFFB2, self.J[jSliceIndex:jSliceIndex+self.NSQR1],
                                                 self.SIGMAX, self.SIGMAY, self.J_PROB, self.J_UPPER)
 
         # There is only 1 inhibitory kernel (FIXED & identical for all)
@@ -469,7 +467,6 @@ class StandardNet6Areas:
         return np.vstack(randomBPats)
 
     # @todo unit test
-
     def compute_CApatts(self, threshold):
         """
         Compute the emerging Cell Assemblies using specified threshold
@@ -514,8 +511,7 @@ class StandardNet6Areas:
         for x in range(mx):
             for y in range(my):
                 h = (x - cx) * (x - cx) * h1 + (y - cy) * (y - cy) * h2
-                jSliceIndex = y * mx + x
-                J[jSliceIndex:jSliceIndex+1] = ampl * math.exp(-h)
+                J[y * mx + x:y * mx + x + 1] = ampl * math.exp(-h)
 
         # Copy kernel (0,0) to other locations
         mm = mx * my
@@ -549,13 +545,21 @@ class StandardNet6Areas:
         self.init_gaussian_kernel(nx, ny, mx, my, J, sigmax, sigmay, prob)
 
         # ...then transform them into the requested synaptic values.
+        synapses = 0
         for i in range(nx * ny * mx * my):
-            jSliceIndex = i
-            if random.random() < J[i:i+1]:
+            # passing in `prob` here, instead of any J value.
+            # the c implementation may be doing bool_noise(J[i]) -> which possibly uses the memory address J[i]
+            # to seed the random generator. it should not care about the actual float value of any J element at any point
+            # it just needs to genereate a random connectivity between cells, on initialisation
+            # J[i] = bool_noise(J[i]) ? upper * equal_noise() : NO_SYNAPSE;
+            if util.bool_noise(prob):
+                synapses = synapses + 1
                 # random.uniform(0, upper) could be used instead of upper*random.random()
-                J[jSliceIndex:jSliceIndex+1] = upper * random.random()
+                J[i:i+1] = upper * random.random()
             else:
-                J[jSliceIndex:jSliceIndex+1] = 0  # NO_SYNAPSE
+                J[i:i+1] = 0  # NO_SYNAPSE
+        print('[init_patchy_gauss_kern] total non-zero synapses in J:',
+              sum(1 for element in self.J if element != 0))
 
     # @todo unit test
     def train_projection_cyclic(self, pre: np.ndarray, post_pot: np.ndarray, J: np.ndarray, nx: int, ny: int, mx: int, my: int, hrate: float, totLTP: float, totLTD: float):

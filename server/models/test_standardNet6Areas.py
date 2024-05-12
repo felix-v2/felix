@@ -2,7 +2,7 @@ import unittest
 from standardNet6Areas import StandardNet6Areas
 import numpy as np
 from unittest.mock import patch
-from util import Get_Random_Vector
+from util import Get_Vector
 
 
 class TestStandardNet6Areas(unittest.TestCase):
@@ -123,8 +123,7 @@ class TestStandardNet6Areas(unittest.TestCase):
         self.assertEqual(net.total_output, 0.0)
 
         self.assertSilentVector(net.freq_distrib, net.P)
-
-        # @todo check J - should have some synapses!
+        self.assertTrue(sum(1 for element in net.J if element != 0) > 0)
 
         # @todo mock gener_random_bin_activity
         # self.assertVectorWithActivity(net.sensPatt)
@@ -137,12 +136,10 @@ class TestStandardNet6Areas(unittest.TestCase):
         net = StandardNet6Areas()
         net.main_init()
 
-        mock_j = Get_Random_Vector(net.NAREAS * net.NAREAS *
-                                   net.NSQR1)
+        mock_j = Get_Vector(net.NAREAS * net.NAREAS *
+                            net.NSQR1)
         net.init_patchy_gauss_kern(net.N11, net.N12, net.NREC1, net.NREC2, mock_j[1:2],
                                    net.SIGMAX_REC, net.SIGMAY_REC, net.J_REC_PROB, net.J_UPPER)
-
-        print('J AFTER INIT KERN:', mock_j)
 
     # @todo: this is weird because its a static method but we're passing into class variables
     def test_init_gaussian_kernel(self):

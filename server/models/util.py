@@ -48,6 +48,75 @@ def Clear_bVector(v: bVectorType) -> None:
     v.fill(0)
 
 
+# See todos below: where we do assignment to numpy arrays (vectors, e.g. J) we need to make sure
+# we mutate the original sliced J that is passed in! Check how to do this with numpy
+
+# @todo init_gauss_kern seems to result in J having only a handful of non-zero values. Same issue as below?
+# @todo J is not being updated with the random values - is it referenceing the original self.J that is passed down?
+
+# this is like init_gaussian_kernels
+# creates the (0,0) kernel at the start of the slice
+# then copies it to the end of the area_connection's section of J
+def add_all_kernels_for_area_connection(vector_slice: VectorType, cells_per_area: int, area_connection_id: int):
+    # add the array of 4 synaptic values for the area-area connection, to the start of the slice
+    for x in range(cells_per_area):
+        for y in range(cells_per_area):
+            vector_slice[y*cells_per_area+x] = area_connection_id
+
+    # copy this to the other 4 sections of the vector slice, representing the section of the vector for this area-area connection
+    n = cells_per_area*cells_per_area
+    for i in range(1, n):
+        vector_slice[i*n:(i+1)*n] = vector_slice[:n]
+
+
+def MUTATE_VECTOR():
+    """
+    For illustrative purposes only - not used in the model. This is a simplified version of how
+    J is referenced and mutated in the flow `init() -> init_patchy_gauss_kern() -> init_gaussian_kernel()`.
+
+    1. self.init_patchy_gauss_kern(... , self.J[start:end], ...)
+    2.   init_gauss_kernel(..., J, ...)
+    3.     J[y * mx + x:y * mx + x + 1] = ampl * math.exp(-h)
+
+    (A) at level 1, if we pass down a single element, the downstream logic breaks because it tries to
+      index the element itself e.g. J[index] -> 0.0. Therefore we have to pass down a single-element 
+      slice of self.J - `J[index:index+1]` -> [0.0].
+
+    (B) however, at level 3, we need to mutate the original J in memory - but we can only mutate values within the index range of the passed slice.
+        Therefore if we pass down the single element from index i as a slice, we can't do anything with the elements i+1, i+2, ..., i+n 
+        Therefore we need to pass down a sliced *range* of J corresponding to the section of J that is apportioned to the specific area-area connection
+        E.g. for the area connection (0,0), we should pass to init_patchy_gauss_kern: J[0:390625]
+
+    Example: 6 areas, each area has 2 cells, 4 synapses. Each area-area connection has 4*4 synapses, 16.
+    36 area-connections
+    Each area-connection has 16 synapses
+    J = [ 1*16 | 2*16 | ... | 36*16 ] - 576 total network synapses, 16 for each of the 36 "area connections"
+    """
+    areas = 6
+    area_connections = areas*areas  # 36
+    cells_per_area = 2
+    synapses_per_area = cells_per_area*cells_per_area  # 4
+    synapses_per_area_connection = synapses_per_area*synapses_per_area  # 16
+    total_network_synapses = area_connections * \
+        synapses_per_area_connection  # 36*16 = 576
+
+    # this original vector should be mutated directly by the downstream func
+    vector = Get_Vector(total_network_synapses)
+
+    # for each of the 36 area connections
+    for i in range(area_connections):
+        vector_start = synapses_per_area_connection * i
+        vector_end = vector_start + synapses_per_area_connection
+        print(
+            f"Area connection [{i+1}/{area_connections}]: adding synapse data to J at ({vector_start}, {vector_end})"),
+
+        # the vector slice below represents the start-end positions in J of the synapses for *this* area connection
+        add_all_kernels_for_area_connection(
+            vector[vector_start:vector_end], cells_per_area, i+1)
+
+    return vector
+
+
 def bbSkalar(n: int, v1: bVectorType, v2: bVectorType):
     """
     Calculates the dot product of two binary vectors v1 and v2 up to index n.

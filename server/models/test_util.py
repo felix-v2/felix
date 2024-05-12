@@ -6,6 +6,11 @@ import math
 
 
 class TestUtil(unittest.TestCase):
+    def test_MUTATE_VECTOR(self):
+        mutated = util.MUTATE_VECTOR()
+        self.assertEqual(len(mutated), 576)
+        self.assertEqual(sum(1 for element in mutated if element != 0), 576)
+
     def test_Get_Vector(self):
         expected = np.zeros(10)
         got = util.Get_Vector(10)
@@ -136,4 +141,5 @@ class TestUtil(unittest.TestCase):
 
 
 if __name__ == "__main__":
+    ()
     unittest.main()
