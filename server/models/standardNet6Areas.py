@@ -234,6 +234,11 @@ class StandardNet6Areas:
     # Contains the ONE and only inhibitory (Gauss.) kernel
     Jinh: util.VectorType
 
+    # GUI variables - not in the original C implementation
+    sdilute: bool = True
+    sdiluteprob: float = 0.1
+    sdilutearea: int = 1
+
     def main_init(self):
         """
         main_init() is called when simulation PROGRAM is started. It does
@@ -386,6 +391,30 @@ class StandardNet6Areas:
         # There is only 1 inhibitory kernel (FIXED & identical for all)
         self.init_gaussian_kernel(1, 1, self.NINH1, self.NINH2, self.Jinh,
                                   self.SIGMAX_INH, self.SIGMAY_INH, self.J_INH_INIT)
+
+        # If dilute switch is pressed, "damage" the appropriate area(s)
+        # ("sdilutearea" slider indicates area to be lesioned; 0==ALL)
+        # NB: this is only executed ONCE, at network INITIALISATION.
+        if self.sdilute:
+            for area in range(self.NAREAS):
+                h = 0.01 * self.sdiluteprob  # sdiluteprob: a slider value
+                if self.sdilutearea == 0 or (area + 1) == self.sdilutearea:
+                    # temp. pointer to this area
+                    # pdil = self.diluted[self.N1 * area]
+                    pdil = self.diluted[area*self.N1:(area+1)*self.N1]
+                    # A "1" in vector "diluted" will mean that cell is damaged
+                    for i in range(self.N1):
+                        pdil[i] = int(util.bool_noise(h))
+            # SET_SWITCH(sdilute, FALSEs)
+            # @todo emit event to GUI
+            self.sdilute = False
+
+        self.training_phase = 0  # Init. training phase (used in TRAINING)
+        self.stps_2b_avgd = 0    # Reset averaging steps count (4 TRAINING)
+        self.test_phase = 0      # initialise testing phase (4 TESTING mode)
+        self.stimRepet = 0       # Counter (no. of stimulation repetitions)
+
+        self.stp = 0  # Initialise simulation-step
 
     @staticmethod
     def step():

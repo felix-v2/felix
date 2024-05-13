@@ -113,7 +113,6 @@ class TestStandardNet6Areas(unittest.TestCase):
         self.assertSilentVector(net.ca_patts, net.NAREAS * net.N1 * net.P)
         self.assertSilentVector(net.ca_ovlps, net.NAREAS * net.P * net.P)
         self.assertSilentVector(net.ovlps, net.NAREAS * net.P)
-        self.assertSilentVector(net.diluted, net.NAREAS * net.N1)
         self.assertSilentVector(net.inh, net.NAREAS * net.N1)
         self.assertSilentVector(net.slowinh, net.NAREAS)
         self.assertSilentVector(net.sensInput, net.NYAREAS * net.N1)
@@ -123,7 +122,12 @@ class TestStandardNet6Areas(unittest.TestCase):
         self.assertEqual(net.total_output, 0.0)
 
         self.assertSilentVector(net.freq_distrib, net.P)
+
+        # @todo mock init_kern funcs and test them in isolation
         self.assertTrue(sum(1 for element in net.J if element != 0) > 0)
+
+        # @todo test that this is initialised properly (need to mock random)
+        # self.assertSilentVector(net.diluted, net.NAREAS * net.N1)
 
         # @todo mock gener_random_bin_activity
         # self.assertVectorWithActivity(net.sensPatt)
