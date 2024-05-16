@@ -234,10 +234,32 @@ class StandardNet6Areas:
     # Contains the ONE and only inhibitory (Gauss.) kernel
     Jinh: util.VectorType
 
-    # GUI variables - not in the original C implementation
-    sdilute: bool = True
+    ## GUI variables - not in the original C implementation ##
+
+    # sliders (typical numeric) @todo clarify types (and initialisation values ?)
     sdiluteprob: float = 0.1
+    slrate: float = 0.0
+    sgain: float = 0.0
+    stheta: float = 0.0
+    snoise: float = 0.0
+    spatno: int = 0
     sdilutearea: int = 1
+    sJslow: int = 0
+    sI0: int = 0
+
+    # switches (bools)
+    sdilute: bool = False
+    ssaveNet: bool = False
+    sloadNet: bool = False
+    strainNet: bool = False
+    sCA_ovlps: bool = False
+    sSInp: bool = False
+    sPrintTest: bool = False
+
+    # these are referenced in conditionals, but do not seem to be set or modified anywhere
+    sMInp: bool = False
+    sSInRow: int = 0
+    sMInRow: int = 0
 
     def main_init(self):
         """
@@ -315,11 +337,11 @@ class StandardNet6Areas:
 
     def resetNet(self):
         """
-        Reset completely the network activity (the synaptic weights are 
+        Reset completely the network activity (the synaptic weights are
         left untouched). Recent "history" of TESTING activity is erased.
 
         Note: we modify the value of the mutable vector directly inside the function
-        Note: I don't think we need to pass the len in here, but I'll leave it for now, 
+        Note: I don't think we need to pass the len in here, but I'll leave it for now,
         in the spirit of "like for like" translation
         """
         util.Clear_Vector(self.pot)
@@ -335,8 +357,8 @@ class StandardNet6Areas:
 
     def init(self):
         """
-        init() is called whenever "INIT" or "RUN" buttons in the GUI are 
-        pressed; it initialises individual simulation runs               
+        init() is called whenever "INIT" or "RUN" buttons in the GUI are
+        pressed; it initialises individual simulation runs
         """
         util.Clear_Vector(self.pot)
         util.Clear_Vector(self.rates)
@@ -362,9 +384,9 @@ class StandardNet6Areas:
         util.Clear_bVector(self.freq_distrib)
 
         ## Randomly initialise all sensorimotor input patterns ##
-        self.sensPatt = self.gener_random_bin_patterns(
+        self.sensPatt = self.gener_random_bin_patterns_linear(
             self.N1, self.NONES, self.NYAREAS*self.P, self.sensPatt)
-        self.motorPatt = self.gener_random_bin_patterns(
+        self.motorPatt = self.gener_random_bin_patterns_linear(
             self.N1, self.NONES, self.NYAREAS*self.P, self.motorPatt)
 
         ## INITIALISE ALL THE KERNELS ##
@@ -416,12 +438,70 @@ class StandardNet6Areas:
 
         self.stp = 0  # Initialise simulation-step
 
-    @staticmethod
-    def step():
+    # composed as a func, so it can be unit testeds
+    # @todo understand structure of sensInput/motorInput, and sensPatt/motorPatt
+    def set_up_current_sensorimotor_input(self, noise: float):
+        # Get & rescale NOISE(for "input" areas)
+        if self.spatno == 0:  # 0 = no input: CLEAR all activity
+            util.Clear_bVector(self.sensInput)
+            util.Clear_bVector(self.motorInput)
+        else:  # spatno > 0: SOME input stimulation
+            # Create white noise in ALL sensory & motor input areas (EXCEPT
+            # if we are TRAINING the netw. AND a stim. is being presented).
+            # Some areas might be later "overwritten" by "real" s-m. patts.
+            # If NOT training OR currently NOT presenting a stimulus
+            if not self.strainNet or self.training_phase != 2:
+                for j in range(self.NYAREAS):  # For all "rows" of the net
+                    # Get addr. of sens. input area for current netw.'s "row"
+                    pinput = self.sensInput[self.N1 * j:self.N1 * (j + 1)]
+                    # Produce white noise there (noise def. at start of step())
+                    for i in range(self.N1):
+                        pinput[i] = util.bool_noise(noise)
+
+                    # Get addr. of motor input area for current netw.'s "row"
+                    pinput = self.motorInput[self.N1 * j:self.N1 * (j + 1)]
+                    # Produce white noise there (noise def. at start of step())
+                    for i in range(self.N1):
+                        pinput[i] = util.bool_noise(noise)
+
+            # COPY SENSORY PATTERNS to INPUT AREAS
+            if self.sSInp and self.spatno < self.P + 1:  # Is there a sens. patt. to be presented?
+                for j in range(self.NYAREAS):  # for each "row" of the network
+                    # Check whether this "row" of the net should get any input
+                    # NYAREAS+1 == ALL
+                    if self.sSInRow == (j + 1) or self.sSInRow == self.NYAREAS + 1:
+                        # Get pointer to relevant pattern in "sensPatt" matrix
+                        pinput = self.sensPatt[(self.P * self.N1) * j + self.N1 *
+                                               (self.spatno - 1):(self.P * self.N1) * j + self.N1 * self.spatno]
+
+                        # Copy the sensory pattern
+                        for i in range(self.N1):
+                            self.sensInput[(self.N1 * j) + i] = pinput[i]
+
+            # COPY MOTOR PATTERNS to INPUT AREAS
+            if self.sMInp and self.spatno < self.P + 1:  # Is there a motor patt. to be presented?
+                for j in range(self.NYAREAS):  # for each "row" of the network
+                    # Check whether this "row" of the net should get any input
+                    # NYAREAS+1 == ALL
+                    if self.sMInRow == (j + 1) or self.sMInRow == self.NYAREAS + 1:
+                        # Get pointer to relevant pattern in "motorPatt" matrix
+                        pinput = self.motorPatt[(self.P * self.N1) * j + self.N1 *
+                                                (self.spatno - 1):(self.P * self.N1) * j + self.N1 * self.spatno]
+                        # Copy the motor pattern
+                        for i in range(self.N1):
+                            self.motorInput[(self.N1 * j) + i] = pinput[i]
+
+    def step(self):
         """
         MAIN  "STEP" FUNCTION, executed at each sim. step
         """
-        return
+        hrate: float = .0001 * self.slrate  # Get & rescale LEARN. rate specif. by slider
+        gain = .001 * self.sgain  # Get & rescale GAIN value specif. by slider
+        theta = .001 * self.stheta  # Get & rescale THRESH. value "    "   " "
+        noise = .0001 * self.snoise  # Get & rescale NOISE(for "input" areas)
+
+        ## SET UP THE CURRENT SENSORIMOTOR INPUT ##
+        self.set_up_current_sensorimotor_input(noise)
 
     def display_K(self):
         """
@@ -494,6 +574,32 @@ class StandardNet6Areas:
             randomBPats.append(randomBPat)
 
         return np.vstack(randomBPats)
+
+    @staticmethod
+    def gener_random_bin_patterns_linear(n: int, nones: int, p: int, pats: util.bVectorType):
+        """
+        A linearised version of gener_random_bin_patterns. This is the one used. My original translation 
+        vectorised the structure but this won't work with the rest of the logic, so we stick to linearised structures.
+        Instead of returning the patterns matrix (12,625), it returns a 1D NumPy array with shape (12*625, ),
+        having a total of 12 * 625 = 7500 elements arranged consecutively in a single dimension. 
+        Each block of 625 elements represents a single pattern.
+        """
+        util.Clear_bVector(pats)  # Clear content of ALL patterns
+        for j in range(p):  # for each pattern
+            start_index = n * j
+            # Get the slice representing the current pattern
+            temp_pat = pats[start_index:start_index + n]
+
+            # Randomly set "nones" number of elements to 1
+            random_indices = np.random.choice(n, nones, replace=False)
+            temp_pat[random_indices] = 1
+
+            # Ensure exactly "nones" number of 1s in the pattern
+            while np.sum(temp_pat) < nones:  # inefficient, but fast enough
+                random_index = np.random.randint(0, n)
+                temp_pat[random_index] = 1
+
+        return pats
 
     # @todo unit test
     def compute_CApatts(self, threshold):
