@@ -439,7 +439,6 @@ class StandardNet6Areas:
         self.stp = 0  # Initialise simulation-step
 
     # composed as a func, so it can be unit testeds
-    # @todo understand structure of sensInput/motorInput, and sensPatt/motorPatt
     def set_up_current_sensorimotor_input(self, noise: float):
         # Get & rescale NOISE(for "input" areas)
         if self.spatno == 0:  # 0 = no input: CLEAR all activity
