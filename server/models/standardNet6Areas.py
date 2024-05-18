@@ -490,6 +490,14 @@ class StandardNet6Areas:
                         for i in range(self.N1):
                             self.motorInput[(self.N1 * j) + i] = pinput[i]
 
+    # @todo unit test
+    def compute_emerging_cell_assemblies_and_overlaps(self):
+        if self.sCA_ovlps:
+            self.compute_CApatts(self.CA_THRESH)  # re-compute all CAs
+            self.compute_CAoverlaps()  # re-compute CA overlaps
+            self.write_CApatts()  # write CA-cells numbers to file
+            self.sCA_ovlps = False
+
     def compute_new_adaptation(self):
         for area in range(self.NAREAS):
             area_start_index = self.N1 * area
@@ -503,6 +511,26 @@ class StandardNet6Areas:
                 padapt[i] = util.leaky_integrate(
                     self.TAUADAPT, padapt[i], self.ADAPTSTRENGTH, prates[i])
 
+    def compute_overlap_between_cell_assemblies_and_current_activity(self):
+        """
+        For each area, compute the overlap between the activity and each of the 12 cell assemblies.
+        """
+        for i in range(self.P):
+            for area in range(self.NAREAS):
+                # e.g. 0:625 for area 1, 625:1250 for area 2 etc.
+                rates_start = self.N1 * area
+                rates_end = self.N1 * (area + 1)
+
+                # e.g. 0:625       for intersection of Area 1 and CA 1  (aka 1st segment of 1st area)
+                # e.g. 44375:45000 for intersection of Area 6 and CA 12 (aka 12th segment of 6th area)
+                ca_patts_start = self.N1 * (self.NAREAS * i + area)
+                ca_patts_end = self.N1 * (self.NAREAS * i + (area + 1))
+
+                # e.g. 71 for 12th CA of 6th area (5*12+11)
+                area_ca_overlap = area * self.P + i
+                self.ovlps[area_ca_overlap] = util.bSkalar(
+                    self.N1, self.rates[rates_start:rates_end], self.ca_patts[ca_patts_start:ca_patts_end])
+
     def step(self):
         """
         MAIN  "STEP" FUNCTION, executed at each sim. step
@@ -515,34 +543,31 @@ class StandardNet6Areas:
         prates = util.Get_Vector(self.NAREAS * self.N1)
         padapt = util.Get_Vector(self.NAREAS * self.N1)
 
-        ## (11) Save the entire network to file (incl. input patts.) ##
+        ## Save the entire network to file (incl. input patts.) ##
 
-        ## (10) Load entire network from file (incl. input patts.) ##
+        ## Load entire network from file (incl. input patts.) ##
 
-        ## (8) MANAGE network TRAINING ##
+        ## MANAGE network TRAINING ##
 
         ## SET UP THE CURRENT SENSORIMOTOR INPUT ##
         self.set_up_current_sensorimotor_input(noise)
 
-        ## (6) COMPUTE NEW MEMBRANE POTENTIALS ##
+        ## COMPUTE NEW MEMBRANE POTENTIALS ##
 
-        ## (5) COMPUTE FIRING RATES (OUTPUTS) ##
+        ## COMPUTE FIRING RATES (OUTPUTS) ##
 
-        ## (3) COMPUTE NEW ADAPTATION ##
+        ## COMPUTE NEW ADAPTATION ##
         self.compute_new_adaptation()
 
-        ## (7) LEARNING ##
+        ## LEARNING ##
 
-        ## (4) RECORD AVERAGE RESPONSES DURING TRAINING ##
+        ## RECORD AVERAGE RESPONSES DURING TRAINING ##
 
-        ## (1) COMPUTE EMERGING CAs and their OVERLAPS ##
-        # if self.sCA_ovlps:
-        #     self.compute_CApatts(self.CA_THRESH)  # re-compute all CAs
-        #     self.compute_CAoverlaps()  # re-compute CA overlaps
-        #     self.write_CApatts()  # write CA-cells numbers to file
-        #     self.sCA_ovlps = False
+        ## COMPUTE EMERGING CAs and their OVERLAPS ##
+        # self.compute_emerging_cell_assemblies_and_overlaps()
 
-        ## (2) COMPUTE OVERLAP BETW. CAs and CURRENT ACTIV. ##
+        ## COMPUTE OVERLAP BETW. CAs and CURRENT ACTIV. ##
+        self.compute_overlap_between_cell_assemblies_and_current_activity()
 
         ## (9) AUTOMATED TESTING ##
 
@@ -564,7 +589,7 @@ class StandardNet6Areas:
             print(" \n")
         return areaConnections
 
-    # @todo unit test
+    # @todo index properly; unit test
     def compute_CAoverlaps(self):
         """
         Compute the PxP overlaps between the emergin Cell Assemblies
@@ -575,7 +600,7 @@ class StandardNet6Areas:
                     self.ca_ovlps[self.P*(self.P*area+i) + j] = util.bbSkalar(self.N1, self.ca_patts[self.N1*(
                         self.NAREAS*i+area)], self.ca_patts[self.N1*(self.NAREAS*j+area)]) / self.NONES
 
-    # @todo unit test
+    # @todo index properly; unit test
     def write_CApatts(self):
         """
         Write no. of CA-cells of all CA.s to file (for all CA.s & areas). 
@@ -592,30 +617,6 @@ class StandardNet6Areas:
                         fiCA.write("{} ".format(
                             sum(self.N1, self.ca_patts[self.N1*(self.NAREAS*i+area)])))
                 print("\n\n")
-
-    @staticmethod
-    def gener_random_bin_patterns(n: int, nones: int, p: int, pats: util.bVectorType):
-        """Creates p binary random vectors of length n, where "nones" units are="1" 
-        at random positions. "pats" is the array of vectors/patts
-
-        Keyword arguments:
-        n     -- IN: no. cells per pattern
-        nones -- IN: no. of "1"s per patt.
-        p     -- IN: tot. no. patterns
-        pats  -- OUT: the array of patterns
-        """
-        util.Clear_bVector(pats)  # Clear content of ALL patterns
-        randomBPats = []
-
-        for j in range(p):  # For each pattern
-            # Generate nones random indices and set them to 1
-            randomBPat = np.zeros(n, dtype=int)
-            # Select "nones" random indices
-            # Set the selected indices to 1
-            randomBPat[np.random.choice(n, nones, replace=False)] = 1
-            randomBPats.append(randomBPat)
-
-        return np.vstack(randomBPats)
 
     @staticmethod
     def gener_random_bin_patterns_linear(n: int, nones: int, p: int, pats: util.bVectorType):
