@@ -500,11 +500,9 @@ class StandardNet6Areas:
 
     def compute_new_adaptation(self):
         for area in range(self.NAREAS):
-            area_start_index = self.N1 * area
-            area_end_index = self.N1 * (area + 1)
-
-            prates = self.rates[area_start_index:area_end_index]
-            padapt = self.adapt[area_start_index:area_end_index]
+            # e.g. 0:625 for area 1, 625:1250 for area 2 etc.
+            prates = self.rates[self.N1 * area:self.N1 * (area + 1)]
+            padapt = self.adapt[self.N1 * area:self.N1 * (area + 1)]
 
             # Cell's adaptation = low-pass filter of cell's output (f.rate)
             for i in range(self.N1):
@@ -518,18 +516,15 @@ class StandardNet6Areas:
         for i in range(self.P):
             for area in range(self.NAREAS):
                 # e.g. 0:625 for area 1, 625:1250 for area 2 etc.
-                rates_start = self.N1 * area
-                rates_end = self.N1 * (area + 1)
+                prates = self.rates[self.N1 * area:self.N1 * (area + 1)]
 
                 # e.g. 0:625       for intersection of Area 1 and CA 1  (aka 1st segment of 1st area)
                 # e.g. 44375:45000 for intersection of Area 6 and CA 12 (aka 12th segment of 6th area)
-                ca_patts_start = self.N1 * (self.NAREAS * i + area)
-                ca_patts_end = self.N1 * (self.NAREAS * i + (area + 1))
+                pcapatts = self.ca_patts[self.N1 * (
+                    self.NAREAS * i + area):self.N1 * (self.NAREAS * i + (area + 1))]
 
-                # e.g. 71 for 12th CA of 6th area (5*12+11)
-                area_ca_overlap = area * self.P + i
-                self.ovlps[area_ca_overlap] = util.bSkalar(
-                    self.N1, self.rates[rates_start:rates_end], self.ca_patts[ca_patts_start:ca_patts_end])
+                self.ovlps[area * self.P + i] = util.bSkalar(
+                    self.N1, prates, pcapatts)
 
     def compute_firing_rates(self, gain: float, theta: float):
         for area in range(self.NAREAS):  # For ALL areas in the network
