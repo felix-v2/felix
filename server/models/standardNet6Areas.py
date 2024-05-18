@@ -6,7 +6,7 @@ import util
 import time
 
 
-# @todo For clearing vectors, just do a fill(0) or fill(0.0) - ignore the len and types
+# TODO For clearing vectors, just do a fill(0) or fill(0.0) - ignore the len and types
 class StandardNet6Areas:
     NXAREAS = 6
     NYAREAS = 1
@@ -236,7 +236,7 @@ class StandardNet6Areas:
 
     ## GUI variables - not in the original C implementation ##
 
-    # sliders (typical numeric) @todo clarify types (and initialisation values ?)
+    # sliders (typical numeric) TODO clarify types (and initialisation values ?)
     sdiluteprob: float = 0.1
     slrate: float = 0.0
     sgain: float = 0.0
@@ -384,9 +384,9 @@ class StandardNet6Areas:
         util.Clear_bVector(self.freq_distrib)
 
         ## Randomly initialise all sensorimotor input patterns ##
-        self.sensPatt = self.gener_random_bin_patterns_linear(
+        self.sensPatt = self.gener_random_bin_patterns(
             self.N1, self.NONES, self.NYAREAS*self.P, self.sensPatt)
-        self.motorPatt = self.gener_random_bin_patterns_linear(
+        self.motorPatt = self.gener_random_bin_patterns(
             self.N1, self.NONES, self.NYAREAS*self.P, self.motorPatt)
 
         ## INITIALISE ALL THE KERNELS ##
@@ -428,7 +428,7 @@ class StandardNet6Areas:
                     for i in range(self.N1):
                         pdil[i] = int(util.bool_noise(h))
             # SET_SWITCH(sdilute, FALSEs)
-            # @todo emit event to GUI
+            # TODO emit event to GUI
             self.sdilute = False
 
         self.training_phase = 0  # Init. training phase (used in TRAINING)
@@ -490,7 +490,7 @@ class StandardNet6Areas:
                         for i in range(self.N1):
                             self.motorInput[(self.N1 * j) + i] = pinput[i]
 
-    # @todo unit test
+    # TODO unit test
     def compute_emerging_cell_assemblies_and_overlaps(self):
         if self.sCA_ovlps:
             self.compute_CApatts(self.CA_THRESH)  # re-compute all CAs
@@ -531,6 +531,18 @@ class StandardNet6Areas:
                 self.ovlps[area_ca_overlap] = util.bSkalar(
                     self.N1, self.rates[rates_start:rates_end], self.ca_patts[ca_patts_start:ca_patts_end])
 
+    def compute_firing_rates(self, gain: float, theta: float):
+        for area in range(self.NAREAS):  # For ALL areas in the network
+            # "Define some helpful pointers (mostly for speed)"
+            ppot = self.pot[self.N1 * area:self.N1 * (area + 1)]
+            prates = self.rates[self.N1 * area:self.N1 * (area + 1)]
+            padapt = self.adapt[self.N1 * area:self.N1 * (area + 1)]
+
+            # self.total_output = 0.0 # TODO i'm not sure we want to do this?
+            for i in range(self.N1):  # For ALL cells in current area
+                prates[i] = self.FUNC(gain * (ppot[i] - theta - padapt[i]))
+                self.total_output += prates[i]  # update total network output
+
     def step(self):
         """
         MAIN  "STEP" FUNCTION, executed at each sim. step
@@ -540,8 +552,9 @@ class StandardNet6Areas:
         theta = .001 * self.stheta  # Get & rescale THRESH. value "    "   " "
         noise = .0001 * self.snoise  # Get & rescale NOISE(for "input" areas)
 
-        prates = util.Get_Vector(self.NAREAS * self.N1)
-        padapt = util.Get_Vector(self.NAREAS * self.N1)
+        # TODO I think not needed for the Python implementation?
+        # prates = util.Get_Vector(self.NAREAS * self.N1)
+        # padapt = util.Get_Vector(self.NAREAS * self.N1)
 
         ## Save the entire network to file (incl. input patts.) ##
 
@@ -555,6 +568,7 @@ class StandardNet6Areas:
         ## COMPUTE NEW MEMBRANE POTENTIALS ##
 
         ## COMPUTE FIRING RATES (OUTPUTS) ##
+        self.compute_firing_rates(gain, theta)
 
         ## COMPUTE NEW ADAPTATION ##
         self.compute_new_adaptation()
@@ -589,7 +603,7 @@ class StandardNet6Areas:
             print(" \n")
         return areaConnections
 
-    # @todo index properly; unit test
+    # TODO index properly; unit test
     def compute_CAoverlaps(self):
         """
         Compute the PxP overlaps between the emergin Cell Assemblies
@@ -600,7 +614,7 @@ class StandardNet6Areas:
                     self.ca_ovlps[self.P*(self.P*area+i) + j] = util.bbSkalar(self.N1, self.ca_patts[self.N1*(
                         self.NAREAS*i+area)], self.ca_patts[self.N1*(self.NAREAS*j+area)]) / self.NONES
 
-    # @todo index properly; unit test
+    # TODO index properly; unit test
     def write_CApatts(self):
         """
         Write no. of CA-cells of all CA.s to file (for all CA.s & areas). 
@@ -619,7 +633,7 @@ class StandardNet6Areas:
                 print("\n\n")
 
     @staticmethod
-    def gener_random_bin_patterns_linear(n: int, nones: int, p: int, pats: util.bVectorType):
+    def gener_random_bin_patterns(n: int, nones: int, p: int, pats: util.bVectorType):
         """
         A linearised version of gener_random_bin_patterns. This is the one used. My original translation 
         vectorised the structure but this won't work with the rest of the logic, so we stick to linearised structures.
@@ -644,7 +658,7 @@ class StandardNet6Areas:
 
         return pats
 
-    # @todo unit test
+    # TODO index properly; unit test
     def compute_CApatts(self, threshold):
         """
         Compute the emerging Cell Assemblies using specified threshold
@@ -737,7 +751,7 @@ class StandardNet6Areas:
         print('[init_patchy_gauss_kern] total non-zero synapses in J:',
               sum(1 for element in self.J if element != 0))
 
-    # @todo unit test
+    # TODO index properly; unit test
     def train_projection_cyclic(self, pre: np.ndarray, post_pot: np.ndarray, J: np.ndarray, nx: int, ny: int, mx: int, my: int, hrate: float, totLTP: float, totLTD: float):
         """Train" all the synapses connecting area X to area Y (incl. X==Y)
 

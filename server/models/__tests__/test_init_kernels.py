@@ -33,7 +33,7 @@ class TestInitKernels(unittest.TestCase):
         net.init_patchy_gauss_kern(net.N11, net.N12, net.NREC1, net.NREC2, mock_j[1:2],
                                    net.SIGMAX_REC, net.SIGMAY_REC, net.J_REC_PROB, net.J_UPPER)
 
-    # @todo: this is weird because its a static method but we're passing into class variables
+    # TODO: this is weird because its a static method but we're passing into class variables
     def test_init_gaussian_kernel(self):
         net = StandardNet6Areas()
         net.main_init()

@@ -124,7 +124,7 @@ class TestStandardNet6Areas(unittest.TestCase):
 
         self.assertTrue(sum(1 for element in net.J if element != 0) > 0)
 
-        # @todo test that this is initialised properly (need to mock random)
+        # TODO test that this is initialised properly (need to mock random)
         # self.assertSilentVector(net.diluted, net.NAREAS * net.N1)
 
         # self.assertVectorWithActivity(net.sensPatt)
