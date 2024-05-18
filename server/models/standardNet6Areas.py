@@ -490,6 +490,19 @@ class StandardNet6Areas:
                         for i in range(self.N1):
                             self.motorInput[(self.N1 * j) + i] = pinput[i]
 
+    def compute_new_adaptation(self):
+        for area in range(self.NAREAS):
+            area_start_index = self.N1 * area
+            area_end_index = self.N1 * (area + 1)
+
+            prates = self.rates[area_start_index:area_end_index]
+            padapt = self.adapt[area_start_index:area_end_index]
+
+            # Cell's adaptation = low-pass filter of cell's output (f.rate)
+            for i in range(self.N1):
+                padapt[i] = util.leaky_integrate(
+                    self.TAUADAPT, padapt[i], self.ADAPTSTRENGTH, prates[i])
+
     def step(self):
         """
         MAIN  "STEP" FUNCTION, executed at each sim. step
@@ -499,8 +512,41 @@ class StandardNet6Areas:
         theta = .001 * self.stheta  # Get & rescale THRESH. value "    "   " "
         noise = .0001 * self.snoise  # Get & rescale NOISE(for "input" areas)
 
+        prates = util.Get_Vector(self.NAREAS * self.N1)
+        padapt = util.Get_Vector(self.NAREAS * self.N1)
+
+        ## (11) Save the entire network to file (incl. input patts.) ##
+
+        ## (10) Load entire network from file (incl. input patts.) ##
+
+        ## (8) MANAGE network TRAINING ##
+
         ## SET UP THE CURRENT SENSORIMOTOR INPUT ##
         self.set_up_current_sensorimotor_input(noise)
+
+        ## (6) COMPUTE NEW MEMBRANE POTENTIALS ##
+
+        ## (5) COMPUTE FIRING RATES (OUTPUTS) ##
+
+        ## (3) COMPUTE NEW ADAPTATION ##
+        self.compute_new_adaptation()
+
+        ## (7) LEARNING ##
+
+        ## (4) RECORD AVERAGE RESPONSES DURING TRAINING ##
+
+        ## (1) COMPUTE EMERGING CAs and their OVERLAPS ##
+        # if self.sCA_ovlps:
+        #     self.compute_CApatts(self.CA_THRESH)  # re-compute all CAs
+        #     self.compute_CAoverlaps()  # re-compute CA overlaps
+        #     self.write_CApatts()  # write CA-cells numbers to file
+        #     self.sCA_ovlps = False
+
+        ## (2) COMPUTE OVERLAP BETW. CAs and CURRENT ACTIV. ##
+
+        ## (9) AUTOMATED TESTING ##
+
+        ## (12) ASCII DATA FILE WRITING ##
 
     def display_K(self):
         """
@@ -547,9 +593,6 @@ class StandardNet6Areas:
                             sum(self.N1, self.ca_patts[self.N1*(self.NAREAS*i+area)])))
                 print("\n\n")
 
-    # @todo unit test
-    # Note: I slightly pythonic-ised the implementation because the C version was using pointers (we may need to optimise)
-    # Note: static because in the C version relies only on args that are passed in - not globals like everywhere else
     @staticmethod
     def gener_random_bin_patterns(n: int, nones: int, p: int, pats: util.bVectorType):
         """Creates p binary random vectors of length n, where "nones" units are="1" 
@@ -620,7 +663,6 @@ class StandardNet6Areas:
                               self.ca_patts[self.N1*(self.NAREAS*i+area)])
                 # Else: NO cells are set to 1 in the 'ca_patts' vector
 
-    # @todo unit test
     @staticmethod
     def init_gaussian_kernel(nx: int, ny: int, mx: int, my: int, J: np.ndarray, sigmax: float, sigmay: float, ampl: float):
         """Initializes nx*ny kernels of size mx*my in the Array J with Gaussian 
@@ -652,7 +694,6 @@ class StandardNet6Areas:
         for i in range(1, nx * ny):
             J[i * mm: (i + 1) * mm] = J[:mm]
 
-    # @todo unit test
     def init_patchy_gauss_kern(self, nx: int, ny: int, mx: int, my: int, J: np.ndarray, sigmax: float, sigmay: float, prob: float, upper: float):
         """This routine initializes nx*ny kernels of size mx*my in the Array
         J such that the probability of creating a synapse follows a Gaus-
