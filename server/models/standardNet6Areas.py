@@ -6,7 +6,6 @@ import util
 import time
 
 
-# TODO For clearing vectors, just do a fill(0) or fill(0.0) - ignore the len and types
 class StandardNet6Areas:
     NXAREAS = 6
     NYAREAS = 1
@@ -260,6 +259,121 @@ class StandardNet6Areas:
     sMInp: bool = False
     sSInRow: int = 0
     sMInRow: int = 0
+
+    def display_K(self):
+        """
+        Visualise (as text output) the links of connectivity matrix K[].
+        """
+        areaConnections = dict()
+        for i in range(self.NAREAS):
+            areaConnectsTo = []
+            print("Area %d receives from ", i+1)
+            for j in range(self.NAREAS):
+                if self.K[self.NAREAS*j+i]:
+                    areaConnectsTo.append(j+1)
+                    print(" %d", j+1)
+            areaConnections[i+1] = areaConnectsTo
+            print(" \n")
+        return areaConnections
+
+    @staticmethod
+    def gener_random_bin_patterns(n: int, nones: int, p: int, pats: util.bVectorType):
+        """
+        A linearised version of gener_random_bin_patterns. This is the one used. My original translation 
+        vectorised the structure but this won't work with the rest of the logic, so we stick to linearised structures.
+        Instead of returning the patterns matrix (12,625), it returns a 1D NumPy array with shape (12*625, ),
+        having a total of 12 * 625 = 7500 elements arranged consecutively in a single dimension. 
+        Each block of 625 elements represents a single pattern.
+        """
+        util.Clear_bVector(pats)  # Clear content of ALL patterns
+        for j in range(p):  # for each pattern
+            start_index = n * j
+            # Get the slice representing the current pattern
+            temp_pat = pats[start_index:start_index + n]
+
+            # Randomly set "nones" number of elements to 1
+            random_indices = np.random.choice(n, nones, replace=False)
+            temp_pat[random_indices] = 1
+
+            # Ensure exactly "nones" number of 1s in the pattern
+            while np.sum(temp_pat) < nones:  # inefficient, but fast enough
+                random_index = np.random.randint(0, n)
+                temp_pat[random_index] = 1
+
+        return pats
+
+    @staticmethod
+    def init_gaussian_kernel(nx: int, ny: int, mx: int, my: int, J: np.ndarray, sigmax: float, sigmay: float, ampl: float):
+        """Initializes nx*ny kernels of size mx*my in the Array J with Gaussian 
+        profile - sigmax and sigmay are standard deviations of the Gaussian in x 
+        and y direction; ampl is scaling factor (= amplit. of the Gaussian function 
+        at the center, point (0,0) ).
+
+        Keyword arguments:
+        nx, ny          -- IN: area size (1cell<=>1kernel)
+        mx, my          -- IN: kernel size
+        J               -- OUT: the kernels (linearised)
+        sigmax, sigmay  -- IN: std. deviations
+        ampl            -- IN: value at Gaussian center
+        """
+        cx = mx // 2
+        cy = my // 2
+
+        h1 = 1.0 / (sigmax * sigmax)
+        h2 = 1.0 / (sigmay * sigmay)
+
+        # Set up kernel (0,0)
+        for x in range(mx):
+            for y in range(my):
+                h = (x - cx) * (x - cx) * h1 + (y - cy) * (y - cy) * h2
+                J[y * mx + x:y * mx + x + 1] = ampl * math.exp(-h)
+
+        # Copy kernel (0,0) to other locations
+        mm = mx * my
+        for i in range(1, nx * ny):
+            J[i * mm: (i + 1) * mm] = J[:mm]
+
+    def init_patchy_gauss_kern(self, nx: int, ny: int, mx: int, my: int, J: np.ndarray, sigmax: float, sigmay: float, prob: float, upper: float):
+        """This routine initializes nx*ny kernels of size mx*my in the Array
+        J such that the probability of creating a synapse follows a Gaus-
+        sian distribution falling with distance from center with standard
+        deviations sigmax and sigmay in x and y direction and probability
+        "prob" for the synapses at the center. If a synapse is present,  
+        its value will be a random no. in range [0,upper[. Otherwise, the
+        synaptic value is set to NO_SYNAPSE (indicating a FIXED synapse).
+
+        Keyword arguments:
+        nx, ny          -- IN: area size (1kern/cell)
+        mx, my          -- IN: kernel size
+        J               -- OUT: the actual Kernels
+        sigmax, sigmay  -- IN: std. deviations
+        prob            -- IN: IN: Gaussian amplitude
+        upper           -- IN: upper synaptic value
+        """
+        # Checks that max. probability is within bounds
+        if prob < 0.0 or prob > 1.0:
+            print("ERROR: init_<..>_kernel() probab. not in [0,1]")
+            exit(-1)
+
+        # First, we compute the probabilities...
+        self.init_gaussian_kernel(nx, ny, mx, my, J, sigmax, sigmay, prob)
+
+        # ...then transform them into the requested synaptic values.
+        synapses = 0
+        for i in range(nx * ny * mx * my):
+            # passing in `prob` here, instead of any J value.
+            # the c implementation may be doing bool_noise(J[i]) -> which possibly uses the memory address J[i]
+            # to seed the random generator. it should not care about the actual float value of any J element at any point
+            # it just needs to genereate a random connectivity between cells, on initialisation
+            # J[i] = bool_noise(J[i]) ? upper * equal_noise() : NO_SYNAPSE;
+            if util.bool_noise(prob):
+                synapses = synapses + 1
+                # random.uniform(0, upper) could be used instead of upper*random.random()
+                J[i:i+1] = upper * random.random()
+            else:
+                J[i:i+1] = 0  # NO_SYNAPSE
+        print('[init_patchy_gauss_kern] total non-zero synapses in J:',
+              sum(1 for element in self.J if element != 0))
 
     def main_init(self):
         """
@@ -562,63 +676,6 @@ class StandardNet6Areas:
 
             self.stps_2b_avgd -= 1  # Averaging is done only for a limited time
 
-    def step(self):
-        """
-        MAIN  "STEP" FUNCTION, executed at each sim. step
-        """
-        hrate: float = .0001 * self.slrate  # Get & rescale LEARN. rate specif. by slider
-        gain = .001 * self.sgain  # Get & rescale GAIN value specif. by slider
-        theta = .001 * self.stheta  # Get & rescale THRESH. value "    "   " "
-        noise = .0001 * self.snoise  # Get & rescale NOISE(for "input" areas)
-
-        ## TODO Save the entire network to file (incl. input patts.) ##
-
-        ## TODO Load entire network from file (incl. input patts.) ##
-
-        ## TODO MANAGE network TRAINING ##
-
-        ## SET UP THE CURRENT SENSORIMOTOR INPUT ##
-        self.set_up_current_sensorimotor_input(noise)
-
-        ## TODO COMPUTE NEW MEMBRANE POTENTIALS ##
-
-        ## COMPUTE FIRING RATES (OUTPUTS) ##
-        self.compute_firing_rates(gain, theta)
-
-        ## COMPUTE NEW ADAPTATION ##
-        self.compute_new_adaptation()
-
-        ## TODO LEARNING ##
-
-        ## RECORD AVERAGE RESPONSES DURING TRAINING ##
-        self.record_average_responses_during_training()
-
-        ## TODO COMPUTE EMERGING CAs and their OVERLAPS ##
-        self.compute_emerging_cell_assemblies_and_overlaps()
-
-        ## COMPUTE OVERLAP BETW. CAs and CURRENT ACTIV. ##
-        self.compute_overlap_between_cell_assemblies_and_current_activity()
-
-        ## TODO AUTOMATED TESTING ##
-
-        ## TODO ASCII DATA FILE WRITING ##
-
-    def display_K(self):
-        """
-        Visualise (as text output) the links of connectivity matrix K[].
-        """
-        areaConnections = dict()
-        for i in range(self.NAREAS):
-            areaConnectsTo = []
-            print("Area %d receives from ", i+1)
-            for j in range(self.NAREAS):
-                if self.K[self.NAREAS*j+i]:
-                    areaConnectsTo.append(j+1)
-                    print(" %d", j+1)
-            areaConnections[i+1] = areaConnectsTo
-            print(" \n")
-        return areaConnections
-
     def compute_CAoverlaps(self):
         for area in range(self.NAREAS):
             for i in range(self.P):
@@ -648,32 +705,6 @@ class StandardNet6Areas:
                             sum(self.N1, self.ca_patts[self.N1*(self.NAREAS*i+area)])))
                 print("\n\n")
 
-    @staticmethod
-    def gener_random_bin_patterns(n: int, nones: int, p: int, pats: util.bVectorType):
-        """
-        A linearised version of gener_random_bin_patterns. This is the one used. My original translation 
-        vectorised the structure but this won't work with the rest of the logic, so we stick to linearised structures.
-        Instead of returning the patterns matrix (12,625), it returns a 1D NumPy array with shape (12*625, ),
-        having a total of 12 * 625 = 7500 elements arranged consecutively in a single dimension. 
-        Each block of 625 elements represents a single pattern.
-        """
-        util.Clear_bVector(pats)  # Clear content of ALL patterns
-        for j in range(p):  # for each pattern
-            start_index = n * j
-            # Get the slice representing the current pattern
-            temp_pat = pats[start_index:start_index + n]
-
-            # Randomly set "nones" number of elements to 1
-            random_indices = np.random.choice(n, nones, replace=False)
-            temp_pat[random_indices] = 1
-
-            # Ensure exactly "nones" number of 1s in the pattern
-            while np.sum(temp_pat) < nones:  # inefficient, but fast enough
-                random_index = np.random.randint(0, n)
-                temp_pat[random_index] = 1
-
-        return pats
-
     def compute_CApatts(self, threshold):
         """
         Compute the emerging Cell Assemblies using specified threshold
@@ -695,79 +726,6 @@ class StandardNet6Areas:
                     util.Fire(self.N1, self.avg_patts[start_idx:end_idx], threshold*max_act,
                               self.ca_patts[start_idx:end_idx])
                 # Else: NO cells are set to 1 in the 'ca_patts' vector
-
-    @staticmethod
-    def init_gaussian_kernel(nx: int, ny: int, mx: int, my: int, J: np.ndarray, sigmax: float, sigmay: float, ampl: float):
-        """Initializes nx*ny kernels of size mx*my in the Array J with Gaussian 
-        profile - sigmax and sigmay are standard deviations of the Gaussian in x 
-        and y direction; ampl is scaling factor (= amplit. of the Gaussian function 
-        at the center, point (0,0) ).
-
-        Keyword arguments:
-        nx, ny          -- IN: area size (1cell<=>1kernel)
-        mx, my          -- IN: kernel size
-        J               -- OUT: the kernels (linearised)
-        sigmax, sigmay  -- IN: std. deviations
-        ampl            -- IN: value at Gaussian center
-        """
-        cx = mx // 2
-        cy = my // 2
-
-        h1 = 1.0 / (sigmax * sigmax)
-        h2 = 1.0 / (sigmay * sigmay)
-
-        # Set up kernel (0,0)
-        for x in range(mx):
-            for y in range(my):
-                h = (x - cx) * (x - cx) * h1 + (y - cy) * (y - cy) * h2
-                J[y * mx + x:y * mx + x + 1] = ampl * math.exp(-h)
-
-        # Copy kernel (0,0) to other locations
-        mm = mx * my
-        for i in range(1, nx * ny):
-            J[i * mm: (i + 1) * mm] = J[:mm]
-
-    def init_patchy_gauss_kern(self, nx: int, ny: int, mx: int, my: int, J: np.ndarray, sigmax: float, sigmay: float, prob: float, upper: float):
-        """This routine initializes nx*ny kernels of size mx*my in the Array
-        J such that the probability of creating a synapse follows a Gaus-
-        sian distribution falling with distance from center with standard
-        deviations sigmax and sigmay in x and y direction and probability
-        "prob" for the synapses at the center. If a synapse is present,  
-        its value will be a random no. in range [0,upper[. Otherwise, the
-        synaptic value is set to NO_SYNAPSE (indicating a FIXED synapse).
-
-        Keyword arguments:
-        nx, ny          -- IN: area size (1kern/cell)
-        mx, my          -- IN: kernel size
-        J               -- OUT: the actual Kernels
-        sigmax, sigmay  -- IN: std. deviations
-        prob            -- IN: IN: Gaussian amplitude
-        upper           -- IN: upper synaptic value
-        """
-        # Checks that max. probability is within bounds
-        if prob < 0.0 or prob > 1.0:
-            print("ERROR: init_<..>_kernel() probab. not in [0,1]")
-            exit(-1)
-
-        # First, we compute the probabilities...
-        self.init_gaussian_kernel(nx, ny, mx, my, J, sigmax, sigmay, prob)
-
-        # ...then transform them into the requested synaptic values.
-        synapses = 0
-        for i in range(nx * ny * mx * my):
-            # passing in `prob` here, instead of any J value.
-            # the c implementation may be doing bool_noise(J[i]) -> which possibly uses the memory address J[i]
-            # to seed the random generator. it should not care about the actual float value of any J element at any point
-            # it just needs to genereate a random connectivity between cells, on initialisation
-            # J[i] = bool_noise(J[i]) ? upper * equal_noise() : NO_SYNAPSE;
-            if util.bool_noise(prob):
-                synapses = synapses + 1
-                # random.uniform(0, upper) could be used instead of upper*random.random()
-                J[i:i+1] = upper * random.random()
-            else:
-                J[i:i+1] = 0  # NO_SYNAPSE
-        print('[init_patchy_gauss_kern] total non-zero synapses in J:',
-              sum(1 for element in self.J if element != 0))
 
     # TODO index properly; unit test
     def train_projection_cyclic(self, pre: np.ndarray, post_pot: np.ndarray, J: np.ndarray, nx: int, ny: int, mx: int, my: int, hrate: float, totLTP: float, totLTD: float):
@@ -828,6 +786,47 @@ class StandardNet6Areas:
                                         kern[0] = self.JMIN
 
                         kern = kern[1:]  # Move to the next synaptic link
+
+    def step(self):
+        """
+        MAIN  "STEP" FUNCTION, executed at each sim. step
+        """
+        hrate: float = .0001 * self.slrate  # Get & rescale LEARN. rate specif. by slider
+        gain = .001 * self.sgain  # Get & rescale GAIN value specif. by slider
+        theta = .001 * self.stheta  # Get & rescale THRESH. value "    "   " "
+        noise = .0001 * self.snoise  # Get & rescale NOISE(for "input" areas)
+
+        ## TODO Save the entire network to file (incl. input patts.) ##
+
+        ## TODO Load entire network from file (incl. input patts.) ##
+
+        ## TODO MANAGE network TRAINING ##
+
+        ## SET UP THE CURRENT SENSORIMOTOR INPUT ##
+        self.set_up_current_sensorimotor_input(noise)
+
+        ## TODO COMPUTE NEW MEMBRANE POTENTIALS ##
+
+        ## COMPUTE FIRING RATES (OUTPUTS) ##
+        self.compute_firing_rates(gain, theta)
+
+        ## COMPUTE NEW ADAPTATION ##
+        self.compute_new_adaptation()
+
+        ## TODO LEARNING ##
+
+        ## RECORD AVERAGE RESPONSES DURING TRAINING ##
+        self.record_average_responses_during_training()
+
+        ## COMPUTE EMERGING CAs and their OVERLAPS ##
+        self.compute_emerging_cell_assemblies_and_overlaps()
+
+        ## COMPUTE OVERLAP BETW. CAs and CURRENT ACTIV. ##
+        self.compute_overlap_between_cell_assemblies_and_current_activity()
+
+        ## TODO AUTOMATED TESTING ##
+
+        ## TODO ASCII DATA FILE WRITING ##
 
     def MAIN_INIT_RANDOM_ACTIVITY(self):
         """
