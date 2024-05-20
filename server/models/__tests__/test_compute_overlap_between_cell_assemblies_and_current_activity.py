@@ -4,14 +4,6 @@ import numpy as np
 
 
 class TestComputeOverlapBetweenCellAssembliesAndCurrentActivity(unittest.TestCase):
-    @staticmethod
-    def assertSilentVector(arr: np.array, n: int):
-        """
-        Testing util func: asserts the 1d array with {els} elements, all with zero values.
-        Aka an initialised empty vector (after main_init, but before simulation has started)
-        """
-        np.testing.assert_array_equal(arr, np.zeros(n))
-
     def test_compute_overlap_between_cell_assemblies_and_current_activity(self):
         net = StandardNet6Areas()
         net.main_init()

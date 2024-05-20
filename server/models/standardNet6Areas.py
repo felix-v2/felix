@@ -438,7 +438,6 @@ class StandardNet6Areas:
 
         self.stp = 0  # Initialise simulation-step
 
-    # composed as a func, so it can be unit testeds
     def set_up_current_sensorimotor_input(self, noise: float):
         # Get & rescale NOISE(for "input" areas)
         if self.spatno == 0:  # 0 = no input: CLEAR all activity
@@ -507,7 +506,7 @@ class StandardNet6Areas:
             # Cell's adaptation = low-pass filter of cell's output (f.rate)
             for i in range(self.N1):
                 padapt[i] = util.leaky_integrate(
-                    self.TAUADAPT, padapt[i], self.ADAPTSTRENGTH, prates[i])
+                    self.TAUADAPT, padapt[i], self.ADAPTSTRENGTH * prates[i], self.STEPSIZE)
 
     def compute_overlap_between_cell_assemblies_and_current_activity(self):
         """
@@ -527,6 +526,9 @@ class StandardNet6Areas:
                     self.N1, prates, pcapatts)
 
     def compute_firing_rates(self, gain: float, theta: float):
+        """
+        COMPUTE FIRING RATES (OUTPUTS)
+        """
         for area in range(self.NAREAS):  # For ALL areas in the network
             # "Define some helpful pointers (mostly for speed)"
             ppot = self.pot[self.N1 * area:self.N1 * (area + 1)]
@@ -537,6 +539,29 @@ class StandardNet6Areas:
             for i in range(self.N1):  # For ALL cells in current area
                 prates[i] = self.FUNC(gain * (ppot[i] - theta - padapt[i]))
                 self.total_output += prates[i]  # update total network output
+
+    def record_average_responses_during_training(self):
+        """
+        RECORD AVERAGE RESPONSES DURING TRAINING
+        """
+        if (self.stps_2b_avgd > 0) and (self.spatno > 0) and (self.spatno < self.P + 1):
+            for area in range(self.NAREAS):
+                # Get addr. of 1st "cell" of pattern-specific averaging array
+                start_index = self.N1 * \
+                    (self.NAREAS * (self.spatno - 1) + area)
+                end_index = self.N1 * \
+                    (self.NAREAS * (self.spatno - 1) + area + 1)
+
+                prates_avg = self.avg_patts[start_index:end_index]
+
+                # point to f.rate of 1st cell of area
+                prates = self.rates[self.N1 * area: self.N1 * (area + 1)]
+                for i in range(self.N1):  # For all cells of this area
+                    # Integrate cell's current f. rate into its average f. rate
+                    prates_avg[i] = util.leaky_integrate(
+                        self.TAU_AVG_RATES, prates_avg[i], prates[i], self.STEPSIZE)
+
+            self.stps_2b_avgd -= 1  # Averaging is done only for a limited time
 
     def step(self):
         """

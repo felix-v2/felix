@@ -6,22 +6,6 @@ from util import Get_Vector
 
 
 class TestInitKernels(unittest.TestCase):
-
-    @staticmethod
-    def assertSilentVector(arr: np.array, n: int):
-        """
-        Testing util func: asserts the 1d array with {els} elements, all with zero values.
-        Aka an initialised empty vector (after main_init, but before simulation has started)
-        """
-        np.testing.assert_array_equal(arr, np.zeros(n))
-
-    def assertVectorWithActivity(self, arr: np.array):
-        """
-        Testing util func: asserts the array has some non-zero values.
-        Aka an initialised non-empty vector (during simulation)
-        """
-        self.assertTrue(not np.all(arr == 0))
-
     @patch('random.random')
     def test_init_patchy_gaussian_kernel(self, mock_random):
         mock_random.return_value = 0.5
