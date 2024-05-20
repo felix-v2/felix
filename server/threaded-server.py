@@ -60,7 +60,7 @@ class Simulator:
             'motorInput1': self.silence() if self.config.get('applyMotorInput') is False else self.randomActivity(),
         }
 
-    # @todo move threading into socketio handlers
+    # TODO move threading into socketio handlers
     # start simulation loop in background thread
     def start_simulation(self):
         with self.simulation_lock:
@@ -93,7 +93,7 @@ class Simulator:
             print(f'Sim step {step + 1} motor input rows: {len(motorInput)}')
 
             # Send the result_data to the client
-            # @todo rename to "simulation_step_activity"
+            # TODO rename to "simulation_step_activity"
             socketio.emit('new-activity', activity)
 
             # Sleep to simulate a delay between steps
@@ -116,7 +116,7 @@ def handle_connection():
     print(f'Client {request.sid} connected!')
 
 
-# @todo stop simulation and kill thread
+# TODO stop simulation and kill thread
 @socketio.on('disconnect')
 def handle_disconnection():
     print(f'Client {request.sid} disconnected!')
