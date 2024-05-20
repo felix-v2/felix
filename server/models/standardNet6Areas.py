@@ -489,12 +489,11 @@ class StandardNet6Areas:
                         for i in range(self.N1):
                             self.motorInput[(self.N1 * j) + i] = pinput[i]
 
-    # TODO unit test
     def compute_emerging_cell_assemblies_and_overlaps(self):
         if self.sCA_ovlps:
             self.compute_CApatts(self.CA_THRESH)  # re-compute all CAs
             self.compute_CAoverlaps()  # re-compute CA overlaps
-            self.write_CApatts()  # write CA-cells numbers to file
+            # TODO self.write_CApatts()  # write CA-cells numbers to file
             self.sCA_ovlps = False
 
     def compute_new_adaptation(self):
@@ -572,20 +571,16 @@ class StandardNet6Areas:
         theta = .001 * self.stheta  # Get & rescale THRESH. value "    "   " "
         noise = .0001 * self.snoise  # Get & rescale NOISE(for "input" areas)
 
-        # TODO I think not needed for the Python implementation?
-        # prates = util.Get_Vector(self.NAREAS * self.N1)
-        # padapt = util.Get_Vector(self.NAREAS * self.N1)
+        ## TODO Save the entire network to file (incl. input patts.) ##
 
-        ## Save the entire network to file (incl. input patts.) ##
+        ## TODO Load entire network from file (incl. input patts.) ##
 
-        ## Load entire network from file (incl. input patts.) ##
-
-        ## MANAGE network TRAINING ##
+        ## TODO MANAGE network TRAINING ##
 
         ## SET UP THE CURRENT SENSORIMOTOR INPUT ##
         self.set_up_current_sensorimotor_input(noise)
 
-        ## COMPUTE NEW MEMBRANE POTENTIALS ##
+        ## TODO COMPUTE NEW MEMBRANE POTENTIALS ##
 
         ## COMPUTE FIRING RATES (OUTPUTS) ##
         self.compute_firing_rates(gain, theta)
@@ -593,19 +588,20 @@ class StandardNet6Areas:
         ## COMPUTE NEW ADAPTATION ##
         self.compute_new_adaptation()
 
-        ## LEARNING ##
+        ## TODO LEARNING ##
 
         ## RECORD AVERAGE RESPONSES DURING TRAINING ##
+        self.record_average_responses_during_training()
 
-        ## COMPUTE EMERGING CAs and their OVERLAPS ##
-        # self.compute_emerging_cell_assemblies_and_overlaps()
+        ## TODO COMPUTE EMERGING CAs and their OVERLAPS ##
+        self.compute_emerging_cell_assemblies_and_overlaps()
 
         ## COMPUTE OVERLAP BETW. CAs and CURRENT ACTIV. ##
         self.compute_overlap_between_cell_assemblies_and_current_activity()
 
-        ## (9) AUTOMATED TESTING ##
+        ## TODO AUTOMATED TESTING ##
 
-        ## (12) ASCII DATA FILE WRITING ##
+        ## TODO ASCII DATA FILE WRITING ##
 
     def display_K(self):
         """
@@ -623,16 +619,16 @@ class StandardNet6Areas:
             print(" \n")
         return areaConnections
 
-    # TODO index properly; unit test
     def compute_CAoverlaps(self):
-        """
-        Compute the PxP overlaps between the emergin Cell Assemblies
-        """
         for area in range(self.NAREAS):
             for i in range(self.P):
                 for j in range(self.P):
-                    self.ca_ovlps[self.P*(self.P*area+i) + j] = util.bbSkalar(self.N1, self.ca_patts[self.N1*(
-                        self.NAREAS*i+area)], self.ca_patts[self.N1*(self.NAREAS*j+area)]) / self.NONES
+                    idx_i = self.N1 * (self.NAREAS * i + area)
+                    idx_j = self.N1 * (self.NAREAS * j + area)
+                    overlap = util.bbSkalar(
+                        self.N1, self.ca_patts[idx_i:idx_i + self.N1], self.ca_patts[idx_j:idx_j + self.N1])
+                    self.ca_ovlps[self.P * (self.P * area + i) +
+                                  j] = overlap / float(self.NONES)
 
     # TODO index properly; unit test
     def write_CApatts(self):
@@ -678,7 +674,6 @@ class StandardNet6Areas:
 
         return pats
 
-    # TODO index properly; unit test
     def compute_CApatts(self, threshold):
         """
         Compute the emerging Cell Assemblies using specified threshold
@@ -688,14 +683,17 @@ class StandardNet6Areas:
         """
         for area in range(self.NAREAS):  # For all areas
             for i in range(self.P):  # for all input pattern pairs
+                start_idx = self.N1 * (self.NAREAS * i + area)
+                end_idx = start_idx + self.N1
+
                 # Get firing rate of maximally responsive cell in current area
-                max_act = max(self.avg_patts[self.N1*(self.NAREAS*i+area)])
+                max_act = util.Max_Elem(self.avg_patts[start_idx:end_idx])
 
                 # Check if there is at least 1 cell strongly responsive
                 if max_act >= self.MIN_CELLRATE:
                     # If cell rate > threshold, set cell to 1 in 'ca_patts'
-                    util.Fire(self.N1, self.avg_patts[self.N1*(self.NAREAS*i+area)], threshold*max_act,
-                              self.ca_patts[self.N1*(self.NAREAS*i+area)])
+                    util.Fire(self.N1, self.avg_patts[start_idx:end_idx], threshold*max_act,
+                              self.ca_patts[start_idx:end_idx])
                 # Else: NO cells are set to 1 in the 'ca_patts' vector
 
     @staticmethod

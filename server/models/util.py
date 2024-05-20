@@ -51,8 +51,8 @@ def Clear_bVector(v: bVectorType) -> None:
 # See todos below: where we do assignment to numpy arrays (vectors, e.g. J) we need to make sure
 # we mutate the original sliced J that is passed in! Check how to do this with numpy
 
-# TODO init_gauss_kern seems to result in J having only a handful of non-zero values. Same issue as below?
-# TODO J is not being updated with the random values - is it referenceing the original self.J that is passed down?
+# @todo init_gauss_kern seems to result in J having only a handful of non-zero values. Same issue as below?
+# @todo J is not being updated with the random values - is it referenceing the original self.J that is passed down?
 
 # this is like init_gaussian_kernels
 # creates the (0,0) kernel at the start of the slice
@@ -226,7 +226,7 @@ def Sum(n: int, v: VectorType):
     # return sum(chunk_sums)
 
 
-def Max_Elem(n: int, v: VectorType) -> BaseType:
+def Max_Elem(v: VectorType) -> BaseType:
     """
     Finds the maximum element in a given vector v of length n.
 

@@ -74,18 +74,20 @@ class TestUtil(unittest.TestCase):
 
     def test_Max_Elem(self):
         v = [1.1, 6.9, 2.2, 4.8, 9.7, 3.3, 8.5, 5.5]
-        self.assertEqual(util.Max_Elem(len(v), v), 9.7)
+        self.assertEqual(util.Max_Elem(v), 9.7)
 
     def test_Fire(self):
         vektor = [1.1, 2, 2.2, 3.3, 0.0]
         n = len(vektor)
         teta = 2
-        dest = [1, 0, 1, 0, 1]
+        dest = np.array([1, 0, 1, 0, 1])
 
         got = util.Fire(n, vektor, teta, dest)
-        expected = [0, 0, 1, 1, 0]
+        expected = np.array([0, 0, 1, 1, 0])
 
-        self.assertEqual(got, expected)
+        np.testing.assert_array_equal(got, expected)
+        # it should modify it in place, too
+        np.testing.assert_array_equal(dest, expected)
 
     def test_leaky_integrate(self):
         tau = 0.1
