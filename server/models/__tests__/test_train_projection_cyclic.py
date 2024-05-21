@@ -1,6 +1,7 @@
 import unittest
 from standardNet6Areas import StandardNet6Areas
 import json
+import numpy as np
 
 
 class TestTrainProjectionCyclic(unittest.TestCase):
@@ -41,11 +42,14 @@ class TestTrainProjectionCyclic(unittest.TestCase):
         k_end_idx = k_start_idx + net.NSQR1
         kernels = net.J[k_start_idx:k_end_idx]
 
+        # the func modifies it in place, so we create a copy here so we can compare with the post-execution value
+        j_before = net.J.copy()
+
         print(json.dumps({
             'origin area': origin_area_j,
             'dest area': dest_area_i,
-            'kernels for origin <-> dest (start)': k_start_idx,
-            'kernels for origin <-> dest (end)': k_end_idx,
+            'kernels for origin -> dest (start)': k_start_idx,
+            'kernels for origin -> dest (end)': k_end_idx,
             'origin pre-synaptic firing rates (start)': rates_start_idx,
             'origin pre-synaptic firing rates (end)': rates_end_idx,
             'dest post-synaptic potentials (start)': pot_start_idx,
@@ -54,6 +58,13 @@ class TestTrainProjectionCyclic(unittest.TestCase):
 
         net.train_projection_cyclic(
             rates, pot, kernels, net.N11, net.N12, net.NREC1, net.NREC2, .0001 * 15)
+
+        # check only the (area 0 -> area 1) section of J has changed
+        self.assertTrue(np.allclose(
+            j_before[0:k_start_idx], net.J[0:k_start_idx]))
+        self.assertFalse(np.allclose(j_before, net.J))
+        self.assertTrue(np.allclose(
+            j_before[k_end_idx:], net.J[k_end_idx:]))
 
 
 if __name__ == "__main__":
