@@ -30,20 +30,25 @@ class TestTrainProjectionCyclic(unittest.TestCase):
         dest_area_i = 1
         origin_area_j = 0
 
+        # rates is a 1d numpy array with 6*625 elements (areas * cells per area)
         rates_start_idx = net.N1 * origin_area_j
         rates_end_idx = net.N1 * (origin_area_j + 1)
         rates = net.rates[rates_start_idx:rates_end_idx]
 
+        # pot is a 1d numpy array with 6*625 elements (areas * cells per area)
         pot_start_idx = net.N1 * dest_area_i
         pot_end_idx = net.N1 * (dest_area_i + 1)
         pot = net.pot[pot_start_idx:pot_end_idx]
 
+        # J is a 1d numpy array with 6*6*625*625 elements (areas * areas * cells per area * cells per area)
         k_start_idx = net.NSQR1 * (net.NAREAS * origin_area_j + dest_area_i)
         k_end_idx = k_start_idx + net.NSQR1
         kernels = net.J[k_start_idx:k_end_idx]
 
         # the func modifies it in place, so we create a copy here so we can compare with the post-execution value
         j_before = net.J.copy()
+        pot_before = net.pot.copy()
+        rates_before = net.rates.copy()
 
         print(json.dumps({
             'origin area': origin_area_j,
@@ -65,6 +70,10 @@ class TestTrainProjectionCyclic(unittest.TestCase):
         self.assertFalse(np.allclose(j_before, net.J))
         self.assertTrue(np.allclose(
             j_before[k_end_idx:], net.J[k_end_idx:]))
+
+        # check rates and pot unaffected
+        self.assertTrue(np.allclose(net.rates, rates_before))
+        self.assertTrue(np.allclose(net.pot, pot_before))
 
 
 if __name__ == "__main__":
