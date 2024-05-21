@@ -516,12 +516,12 @@ class StandardNet6Areas:
                     # we need to pass a slice representing the section of J corresponding to the synapses for this area connection
                     # so downstream operations modify it in place
                     # e.g. for the area connection (0,0), J[0:390625]
-                    jSliceIndex = self.NSQR1 * (self.NAREAS * i + i)
-                    self.init_patchy_gauss_kern(self.N11, self.N12, self.NREC1, self.NREC2, self.J[jSliceIndex:jSliceIndex+self.NSQR1],
+                    start_idx = self.NSQR1 * (self.NAREAS * i + i)
+                    self.init_patchy_gauss_kern(self.N11, self.N12, self.NREC1, self.NREC2, self.J[start_idx:start_idx+self.NSQR1],
                                                 self.SIGMAX_REC, self.SIGMAY_REC, self.J_REC_PROB, self.J_UPPER)
                 elif self.K[self.NAREAS * j + i]:  # Does AREA (j+1) --> (i+1)?
-                    jSliceIndex = self.NSQR1 * (self.NAREAS * j + i)
-                    self.init_patchy_gauss_kern(self.N11, self.N12, self.NFFB1, self.NFFB2, self.J[jSliceIndex:jSliceIndex+self.NSQR1],
+                    start_idx = self.NSQR1 * (self.NAREAS * j + i)
+                    self.init_patchy_gauss_kern(self.N11, self.N12, self.NFFB1, self.NFFB2, self.J[start_idx:start_idx+self.NSQR1],
                                                 self.SIGMAX, self.SIGMAY, self.J_PROB, self.J_UPPER)
 
         # There is only 1 inhibitory kernel (FIXED & identical for all)
@@ -727,8 +727,7 @@ class StandardNet6Areas:
                               self.ca_patts[start_idx:end_idx])
                 # Else: NO cells are set to 1 in the 'ca_patts' vector
 
-    # TODO index properly; unit test
-    def train_projection_cyclic(self, pre: np.ndarray, post_pot: np.ndarray, J: np.ndarray, nx: int, ny: int, mx: int, my: int, hrate: float, totLTP: float, totLTD: float):
+    def train_projection_cyclic(self, pre, post_pot, J, nx, ny, mx, my, hrate):
         """Train" all the synapses connecting area X to area Y (incl. X==Y)
 
         Keyword arguments:
@@ -744,48 +743,48 @@ class StandardNet6Areas:
         kx2 = mx // 2
         ky2 = my // 2
         mxy = mx * my
-        kern = J
+
+        kern = J  # Address of 1st (potential) link between X and Y
 
         for i in range(ny):  # For all cells in area Y
-            for j in range(nx):  # For all cells in area X
-                ij = i * nx + j  # "ij" counts total number of cells
+            for j in range(nx):  # ("ij" counts tot. # of cells)
+                ij = i * nx + j
                 for k in range(-ky2, ky2 + 1):  # For all links of 1 kernel
-                    for l in range(-kx2, kx2 + 1):  # "kern" counts total number of links
+                    for l in range(-kx2, kx2 + 1):  # ("kern" counts tot. #links)
                         m = ((i + k + ny) % ny) * nx + \
                             (j + l + nx) % nx  # Get index of cell in X
 
-                        # Check if synapse considered "exists" (i.e., is not equal to NO_SYNAPSE)
-                        if kern[0] != self.NO_SYNAPSE:
+                        # Check if synapse considered "exists" (i.e. is <> 0.0 )
+                        if kern[ij * mxy + k * mx + l] != self.NO_SYNAPSE:
                             # Synapse exists; update its weight using learning rule
-
-                            # Get pre-synaptic activity (firing rate)
+                            # Get pre-synaptic activity (f. rate)
                             pre_D = pre[m]
 
-                            # Check if post-synaptic potential is above LTP threshold
+                            # Check if post-synapt. pot. is above LTP threshold
                             if post_pot[ij] > self.LTP_THRESH:
-                                if pre_D > self.F_THRESH:  # Is there sufficient pre-synaptic activity?
-                                    if kern[0] < self.JMAX:  # Not yet reached MAX synapse weight
-                                        kern[0] += hrate  # Homosynaptic LTP
-                                        # Update total amount of LTP
-                                        totLTP[0] += hrate
-                                else:  # pre_D <= F_THRESH
-                                    if kern[0] > self.JMIN:  # Reached MIN synapse weight
-                                        # "low"-homosynaptic or heterosynaptic LTD
-                                        kern[0] -= hrate
-                                        # Update total amount of LTD
-                                        totLTD[0] += hrate
-                                        if kern[0] < self.JMIN:  # Make sure not to go below JMIN
-                                            kern[0] = self.JMIN
-                            else:  # post_pot <= LTP_THRESH
-                                # Are post_pot and pre_D right for LTD?
-                                if pre_D > self.F_THRESH and post_pot[ij] > self.LTD_THRESH and kern[0] > self.JMIN:
-                                    kern[0] -= hrate  # Homosynaptic LTD
-                                    # Update total amount of LTD
-                                    totLTD[0] += hrate
-                                    if kern[0] < self.JMIN:  # Make sure not to go below JMIN
-                                        kern[0] = self.JMIN
-
-                        kern = kern[1:]  # Move to the next synaptic link
+                                if pre_D > self.F_THRESH:  # Is there suff. pre-syn. activ.?
+                                    # Yes; reached MAX syn. weight?
+                                    if kern[ij * mxy + k * mx + l] < self.JMAX:
+                                        # Not yet: Homosynaptic LTP
+                                        kern[ij * mxy + k * mx + l] += hrate
+                                        self.tot_LTP += hrate  # Update TOT. amount of LTP
+                                else:  # NO (i.e., pre_D <= F_THRESH)
+                                    # Reached MIN synapt. weight?
+                                    if kern[ij * mxy + k * mx + l] > self.JMIN:
+                                        # Not yet: "low"-homo or hetero LTD
+                                        kern[ij * mxy + k * mx + l] -= hrate
+                                        self.tot_LTD += hrate  # Update TOT. amount of LTD
+                                        # Make sure not to go below...
+                                        if kern[ij * mxy + k * mx + l] < self.JMIN:
+                                            kern[ij * mxy + k *
+                                                 mx + l] = self.JMIN
+                            else:  # IN THIS CASE: post_pot <= LTP_THRESH
+                                if (pre_D > self.F_THRESH) and (post_pot[ij] > self.LTD_THRESH) and (kern[ij * mxy + k * mx + l] > self.JMIN):
+                                    # Yes: homosynaptic LTD
+                                    kern[ij * mxy + k * mx + l] -= hrate
+                                    self.tot_LTD += hrate  # Update TOT. amount of LTD
+                                    if kern[ij * mxy + k * mx + l] < self.JMIN:
+                                        kern[ij * mxy + k * mx + l] = self.JMIN
 
     def step(self):
         """
