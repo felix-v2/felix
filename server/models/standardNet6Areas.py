@@ -607,7 +607,7 @@ class StandardNet6Areas:
         if self.sCA_ovlps:
             self.compute_CApatts(self.CA_THRESH)  # re-compute all CAs
             self.compute_CAoverlaps()  # re-compute CA overlaps
-            # TODO self.write_CApatts()  # write CA-cells numbers to file
+            self.write_CApatts()  # write CA-cells numbers to file
             self.sCA_ovlps = False
 
     def compute_new_adaptation(self):
@@ -687,23 +687,23 @@ class StandardNet6Areas:
                     self.ca_ovlps[self.P * (self.P * area + i) +
                                   j] = overlap / float(self.NONES)
 
-    # TODO index properly; unit test
     def write_CApatts(self):
-        """
-        Write no. of CA-cells of all CA.s to file (for all CA.s & areas). 
-        CAs are computed by the above routine "compute_CApatts(thresh)".
-        """
-        with open(self.CA_WR, "a") as fiCA:
-            if fiCA is None:
-                print(
-                    "\n ERROR: Could not open file '{}' for writing.\n".format(self.CA_WR))
-            else:
-                for i in range(self.P):
-                    fiCA.write("\n CA #{}: ".format(i + 1))
-                    for area in range(self.NAREAS):
-                        fiCA.write("{} ".format(
-                            sum(self.N1, self.ca_patts[self.N1*(self.NAREAS*i+area)])))
+        try:
+            with open(self.CA_WR, 'a') as fiCA:  # Open the file for append (or writing)
+                for i in range(self.P):  # For all CAs (patterns)
+                    fiCA.write(f" \n CA #{i + 1}: ")
+                    for area in range(self.NAREAS):  # for all areas
+                        start_idx = self.N1 * (self.NAREAS * i + area)
+                        end_idx = self.N1 * (self.NAREAS * i + area + 1)
+
+                        # Write to file tot. no. of CA cells for this CA and area
+                        sum_cells = util.bSum(
+                            self.N1, self.ca_patts[start_idx: end_idx])
+                        fiCA.write(f"{sum_cells} ")
                 print("\n\n")
+        except IOError:
+            print(
+                f"\n ERROR: Could not open file '{self.CA_WR}' for writing.\n")
 
     def compute_CApatts(self, threshold):
         """
