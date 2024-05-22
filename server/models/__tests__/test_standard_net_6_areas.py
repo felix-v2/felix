@@ -118,17 +118,26 @@ class TestStandardNet6Areas(unittest.TestCase):
         self.assertSilentVector(net.motorInput, net.NYAREAS * net.N1)
         self.assertSilentVector(net.above_thresh, net.NAREAS * net.N1)
         self.assertSilentVector(net.above_hstory, net.NAREAS * net.N1 * net.P)
-        self.assertEqual(net.total_output, 0.0)
-
         self.assertSilentVector(net.freq_distrib, net.P)
 
+        self.assertEqual(net.total_output, 0.0)
         self.assertTrue(sum(1 for element in net.J if element != 0) > 0)
+        self.assertVectorWithActivity(net.sensPatt)
+        self.assertVectorWithActivity(net.motorPatt)
 
         # TODO test that this is initialised properly (need to mock random)
         # self.assertSilentVector(net.diluted, net.NAREAS * net.N1)
 
-        # self.assertVectorWithActivity(net.sensPatt)
-        # self.assertVectorWithActivity(net.motorPatt)
+    def test_step(self):
+        """
+        Nothing to assert for now, just tests that it runs without failing
+        """
+        net = StandardNet6Areas()
+        net.main_init()
+        net.init()
+
+        for i in range(100):
+            net.step()
 
     @patch('random.random')
     def test_SFUNC(self, mock_random):
