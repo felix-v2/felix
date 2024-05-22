@@ -331,7 +331,7 @@ def Correlate_2d_Uni_cyclic(input_matrix: np.ndarray, kernel: np.ndarray, out: n
 
 def equal_noise() -> BaseType:
     """
-    Generates a random BaseTypeing-point number in the range [0, 1)
+    Generates a random floating-point number in the range [0, 1)
     """
     return random.random()
 

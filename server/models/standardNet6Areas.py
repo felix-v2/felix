@@ -4,6 +4,8 @@ import random
 import math
 import util
 import time
+import logging
+import json
 
 
 class StandardNet6Areas:
@@ -260,6 +262,12 @@ class StandardNet6Areas:
     sSInRow: int = 0
     sMInRow: int = 0
 
+    # Python-specific stuff
+    logging.basicConfig()
+    logging.root.setLevel(logging.NOTSET)
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.DEBUG)
+
     def display_K(self):
         """
         Visualise (as text output) the links of connectivity matrix K[].
@@ -279,10 +287,10 @@ class StandardNet6Areas:
     @staticmethod
     def gener_random_bin_patterns(n: int, nones: int, p: int, pats: util.bVectorType):
         """
-        A linearised version of gener_random_bin_patterns. This is the one used. My original translation 
+        A linearised version of gener_random_bin_patterns. This is the one used. My original translation
         vectorised the structure but this won't work with the rest of the logic, so we stick to linearised structures.
         Instead of returning the patterns matrix (12,625), it returns a 1D NumPy array with shape (12*625, ),
-        having a total of 12 * 625 = 7500 elements arranged consecutively in a single dimension. 
+        having a total of 12 * 625 = 7500 elements arranged consecutively in a single dimension.
         Each block of 625 elements represents a single pattern.
         """
         util.Clear_bVector(pats)  # Clear content of ALL patterns
@@ -302,11 +310,10 @@ class StandardNet6Areas:
 
         return pats
 
-    @staticmethod
-    def init_gaussian_kernel(nx: int, ny: int, mx: int, my: int, J: np.ndarray, sigmax: float, sigmay: float, ampl: float):
-        """Initializes nx*ny kernels of size mx*my in the Array J with Gaussian 
-        profile - sigmax and sigmay are standard deviations of the Gaussian in x 
-        and y direction; ampl is scaling factor (= amplit. of the Gaussian function 
+    def init_gaussian_kernel(self, nx: int, ny: int, mx: int, my: int, J: np.ndarray, sigmax: float, sigmay: float, ampl: float):
+        """Initializes nx*ny kernels of size mx*my in the Array J with Gaussian
+        profile - sigmax and sigmay are standard deviations of the Gaussian in x
+        and y direction; ampl is scaling factor (= amplit. of the Gaussian function
         at the center, point (0,0) ).
 
         Keyword arguments:
@@ -316,20 +323,31 @@ class StandardNet6Areas:
         sigmax, sigmay  -- IN: std. deviations
         ampl            -- IN: value at Gaussian center
         """
+        self.logger.info(json.dumps({
+            'func': 'init_gaussian_kernel',
+            'area size (nx*ny)': nx*ny,
+            'kernel size (mx*my)': mx*my,
+            'std devation (sigmax)': sigmax,
+            'std deviation (sigmay)': sigmay,
+            'scaling factor (ampl)': ampl,
+            'J slice len:': len(J),
+        }, sort_keys=False, indent=4))
+
         cx = mx // 2
         cy = my // 2
 
         h1 = 1.0 / (sigmax * sigmax)
         h2 = 1.0 / (sigmay * sigmay)
 
-        # Set up kernel (0,0)
+        # For this area, set up kernel (0,0)
+        # e.g. 25 x 25 = 625
         for x in range(mx):
             for y in range(my):
                 h = (x - cx) * (x - cx) * h1 + (y - cy) * (y - cy) * h2
                 J[y * mx + x:y * mx + x + 1] = ampl * math.exp(-h)
 
         # Copy kernel (0,0) to other locations
-        mm = mx * my
+        mm = mx * my  # e.g. 19 x 19 = 361
         for i in range(1, nx * ny):
             J[i * mm: (i + 1) * mm] = J[:mm]
 
@@ -338,7 +356,7 @@ class StandardNet6Areas:
         J such that the probability of creating a synapse follows a Gaus-
         sian distribution falling with distance from center with standard
         deviations sigmax and sigmay in x and y direction and probability
-        "prob" for the synapses at the center. If a synapse is present,  
+        "prob" for the synapses at the center. If a synapse is present,
         its value will be a random no. in range [0,upper[. Otherwise, the
         synaptic value is set to NO_SYNAPSE (indicating a FIXED synapse).
 
@@ -350,6 +368,16 @@ class StandardNet6Areas:
         prob            -- IN: IN: Gaussian amplitude
         upper           -- IN: upper synaptic value
         """
+        self.logger.info(json.dumps({
+            'func': 'init_patchy_gauss_kern',
+            'area size (1cell<=>1kernel)': nx*ny,
+            'kernel size': mx*my,
+            'std devation (sigmax)': sigmax,
+            'std deviation (sigmay)': sigmay,
+            'scaling factor (prob)': prob,
+            'J slice len:': len(J),
+        }, sort_keys=False, indent=4))
+
         # Checks that max. probability is within bounds
         if prob < 0.0 or prob > 1.0:
             print("ERROR: init_<..>_kernel() probab. not in [0,1]")
@@ -359,21 +387,12 @@ class StandardNet6Areas:
         self.init_gaussian_kernel(nx, ny, mx, my, J, sigmax, sigmay, prob)
 
         # ...then transform them into the requested synaptic values.
-        synapses = 0
         for i in range(nx * ny * mx * my):
-            # passing in `prob` here, instead of any J value.
-            # the c implementation may be doing bool_noise(J[i]) -> which possibly uses the memory address J[i]
-            # to seed the random generator. it should not care about the actual float value of any J element at any point
-            # it just needs to genereate a random connectivity between cells, on initialisation
-            # J[i] = bool_noise(J[i]) ? upper * equal_noise() : NO_SYNAPSE;
-            if util.bool_noise(prob):
-                synapses = synapses + 1
+            if util.bool_noise(J[i]):
                 # random.uniform(0, upper) could be used instead of upper*random.random()
-                J[i:i+1] = upper * random.random()
+                J[i:i+1] = upper * util.equal_noise()
             else:
                 J[i:i+1] = 0  # NO_SYNAPSE
-        print('[init_patchy_gauss_kern] total non-zero synapses in J:',
-              sum(1 for element in self.J if element != 0))
 
     def main_init(self):
         """
@@ -384,6 +403,9 @@ class StandardNet6Areas:
         Note: we could easily move this initialise these values in-line above, but I'm
         leaving as is, in the spirit of "like for like" translation
         """
+        self.logger.info(json.dumps(
+            {'func': 'main_init'}, sort_keys=False, indent=4))
+
         # Random numbers generation
         random.seed(time.time())
         # if STEPSIZE=0.5, noise_fac ~= 6.93
@@ -458,6 +480,9 @@ class StandardNet6Areas:
         Note: I don't think we need to pass the len in here, but I'll leave it for now,
         in the spirit of "like for like" translation
         """
+        self.logger.info(json.dumps(
+            {'func': 'resetNet'}, sort_keys=False, indent=4))
+
         util.Clear_Vector(self.pot)
         util.Clear_Vector(self.inh)
         util.Clear_Vector(self.adapt)
@@ -474,6 +499,9 @@ class StandardNet6Areas:
         init() is called whenever "INIT" or "RUN" buttons in the GUI are
         pressed; it initialises individual simulation runs
         """
+        self.logger.info(json.dumps(
+            {'func': 'init'}, sort_keys=False, indent=4))
+
         util.Clear_Vector(self.pot)
         util.Clear_Vector(self.rates)
         util.Clear_Vector(self.adapt)
