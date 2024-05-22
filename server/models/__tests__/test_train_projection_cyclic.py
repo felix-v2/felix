@@ -9,7 +9,7 @@ class TestTrainProjectionCyclic(unittest.TestCase):
     This snippet from the original C code shows how the func is called, and with which args.
 
     In our Python implementation, for each vector, we pass in the numpy slice.
-    For the LTD/LTP values to be incremented, instead of passing pointer args in, 
+    For the LTD/LTP values to be incremented, instead of passing pointer args in,
     we just reference the class variables inside the func.
 
     /* Yes: train RECurrent kernel projections for this area   */
@@ -62,7 +62,7 @@ class TestTrainProjectionCyclic(unittest.TestCase):
         }, sort_keys=False, indent=4))
 
         net.train_projection_cyclic(
-            rates, pot, kernels, net.N11, net.N12, net.NREC1, net.NREC2, .0001 * 15)
+            rates, pot, kernels, net.N11, net.N12, net.NREC1, net.NREC2, .0001 * 15, net.tot_LTP[dest_area_i:dest_area_i+1], net.tot_LTD[dest_area_i:dest_area_i+1])
 
         # check only the (area 0 -> area 1) section of J has changed
         self.assertTrue(np.allclose(
@@ -74,6 +74,14 @@ class TestTrainProjectionCyclic(unittest.TestCase):
         # check rates and pot unaffected
         self.assertTrue(np.allclose(net.rates, rates_before))
         self.assertTrue(np.allclose(net.pot, pot_before))
+
+        # check LTP and LTD updated only for the dest area
+        self.assertTrue(all(val == 0 for i, val in enumerate(
+            net.tot_LTP) if i != dest_area_i))
+        self.assertTrue(net.tot_LTP[dest_area_i] > 0)
+        self.assertTrue(all(val == 0 for i, val in enumerate(
+            net.tot_LTD) if i != dest_area_i))
+        self.assertTrue(net.tot_LTD[dest_area_i] > 0)
 
 
 if __name__ == "__main__":

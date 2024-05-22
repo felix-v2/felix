@@ -770,7 +770,7 @@ class StandardNet6Areas:
                               self.ca_patts[start_idx:end_idx])
                 # Else: NO cells are set to 1 in the 'ca_patts' vector
 
-    def train_projection_cyclic(self, pre, post_pot, J, nx, ny, mx, my, hrate):
+    def train_projection_cyclic(self, pre, post_pot, J, nx, ny, mx, my, hrate, totLTP, totLTD):
         """Train" all the synapses connecting area X to area Y (incl. X==Y)
 
         Keyword arguments:
@@ -780,8 +780,8 @@ class StandardNet6Areas:
         nx, ny    -- IN: area dimensions (2 areas of same size)
         mx, my    -- IN: kernels' x and y's dimensions
         hrate     -- IN: learning rate (weight increm/decrem.)
-        totLTP    -- OUT: tot. amount of LTP
-        totLTD    -- OUT: tot. amount of LTD
+        totLTP    -- OUT: tot. amount of LTP (PYTHON: pass in slice containing a single index, mutate in place, e.g. self.tot_LTP[i:i+1])
+        totLTD    -- OUT: tot. amount of LTD (PYTHON: pass in slice containing a single index, mutate in place, e.g. self.tot_LTD[i:i+1])
         """
         kx2 = mx // 2
         ky2 = my // 2
@@ -810,13 +810,13 @@ class StandardNet6Areas:
                                     if kern[ij * mxy + k * mx + l] < self.JMAX:
                                         # Not yet: Homosynaptic LTP
                                         kern[ij * mxy + k * mx + l] += hrate
-                                        self.tot_LTP += hrate  # Update TOT. amount of LTP
+                                        totLTP += hrate  # Update TOT. amount of LTP
                                 else:  # NO (i.e., pre_D <= F_THRESH)
                                     # Reached MIN synapt. weight?
                                     if kern[ij * mxy + k * mx + l] > self.JMIN:
                                         # Not yet: "low"-homo or hetero LTD
                                         kern[ij * mxy + k * mx + l] -= hrate
-                                        self.tot_LTD += hrate  # Update TOT. amount of LTD
+                                        totLTD += hrate  # Update TOT. amount of LTD
                                         # Make sure not to go below...
                                         if kern[ij * mxy + k * mx + l] < self.JMIN:
                                             kern[ij * mxy + k *
@@ -825,9 +825,42 @@ class StandardNet6Areas:
                                 if (pre_D > self.F_THRESH) and (post_pot[ij] > self.LTD_THRESH) and (kern[ij * mxy + k * mx + l] > self.JMIN):
                                     # Yes: homosynaptic LTD
                                     kern[ij * mxy + k * mx + l] -= hrate
-                                    self.tot_LTD += hrate  # Update TOT. amount of LTD
+                                    totLTD += hrate  # Update TOT. amount of LTD
                                     if kern[ij * mxy + k * mx + l] < self.JMIN:
                                         kern[ij * mxy + k * mx + l] = self.JMIN
+
+    def compute_learning(self, hrate):
+        if self.slrate > 0:  # Is learning ON?
+            util.Clear_Vector(self.tot_LTP)
+            util.Clear_Vector(self.tot_LTD)
+
+            for i in range(self.NAREAS):  # For all DEST. areas (col. "i" of J[])
+                for j in range(self.NAREAS):  # For all ORIGIN areas (row "j" of J[])
+
+                    # Is ORIGIN == DEST. & does area (j+1) have REC. links?
+                    if j == i and self.K[(self.NAREAS + 1) * j] != 0:
+                        # Yes: train RECurrent kernel projections for this area
+                        self.train_projection_cyclic(
+                            # pre-syn. rates
+                            self.rates[self.N1 * j:self.N1 * (j + 1)],
+                            # post-syn. pot.
+                            self.pot[self.N1 * i:self.N1 * (i + 1)],
+                            # all (j+1)-->(j+1) kernels
+                            self.J[self.NSQR1 * (self.NAREAS + 1) * j:self.NSQR1 * \
+                                   (self.NAREAS + 1) * (j + 1)],
+                            self.N11, self.N12, self.NREC1, self.NREC2, hrate, self.tot_LTP[i:i+1], self.tot_LTD[i:i+1])
+
+                    # Does area (j+1) proj. to (i+1)?
+                    elif self.K[self.NAREAS * j + i] != 0:
+                        self.train_projection_cyclic(
+                            # pre-syn. rates
+                            self.rates[self.N1 * j:self.N1 * (j + 1)],
+                            # post-syn. pot.
+                            self.pot[self.N1 * i:self.N1 * (i + 1)],
+                            # all (j+1)-->(i+1) kernels
+                            self.J[self.NSQR1 * (self.NAREAS * j + i):self.NSQR1 * \
+                                   (self.NAREAS * (j + 1) + i)],
+                            self.N11, self.N12, self.NFFB1, self.NFFB2, hrate, self.tot_LTP[i:i+1], self.tot_LTD[i:i+1])
 
     def step(self):
         """
@@ -855,7 +888,8 @@ class StandardNet6Areas:
         ## COMPUTE NEW ADAPTATION ##
         self.compute_new_adaptation()
 
-        ## TODO LEARNING ##
+        ## LEARNING ##
+        self.compute_learning(hrate)
 
         ## RECORD AVERAGE RESPONSES DURING TRAINING ##
         self.record_average_responses_during_training()
