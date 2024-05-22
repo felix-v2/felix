@@ -830,37 +830,36 @@ class StandardNet6Areas:
                                         kern[ij * mxy + k * mx + l] = self.JMIN
 
     def compute_learning(self, hrate):
-        if self.slrate > 0:  # Is learning ON?
-            util.Clear_Vector(self.tot_LTP)
-            util.Clear_Vector(self.tot_LTD)
+        util.Clear_Vector(self.tot_LTP)
+        util.Clear_Vector(self.tot_LTD)
 
-            for i in range(self.NAREAS):  # For all DEST. areas (col. "i" of J[])
-                for j in range(self.NAREAS):  # For all ORIGIN areas (row "j" of J[])
+        for i in range(self.NAREAS):  # For all DEST. areas (col. "i" of J[])
+            for j in range(self.NAREAS):  # For all ORIGIN areas (row "j" of J[])
 
-                    # Is ORIGIN == DEST. & does area (j+1) have REC. links?
-                    if j == i and self.K[(self.NAREAS + 1) * j] != 0:
-                        # Yes: train RECurrent kernel projections for this area
-                        self.train_projection_cyclic(
-                            # pre-syn. rates
-                            self.rates[self.N1 * j:self.N1 * (j + 1)],
-                            # post-syn. pot.
-                            self.pot[self.N1 * i:self.N1 * (i + 1)],
-                            # all (j+1)-->(j+1) kernels
-                            self.J[self.NSQR1 * (self.NAREAS + 1) * j:self.NSQR1 * \
-                                   (self.NAREAS + 1) * (j + 1)],
-                            self.N11, self.N12, self.NREC1, self.NREC2, hrate, self.tot_LTP[i:i+1], self.tot_LTD[i:i+1])
+                # Is ORIGIN == DEST. & does area (j+1) have REC. links?
+                if j == i and self.K[(self.NAREAS + 1) * j] != 0:
+                    # Yes: train RECurrent kernel projections for this area
+                    self.train_projection_cyclic(
+                        # pre-syn. rates
+                        self.rates[self.N1 * j:self.N1 * (j + 1)],
+                        # post-syn. pot.
+                        self.pot[self.N1 * i:self.N1 * (i + 1)],
+                        # all (j+1)-->(j+1) kernels
+                        self.J[self.NSQR1 * (self.NAREAS + 1) * j:self.NSQR1 * \
+                                (self.NAREAS + 1) * (j + 1)],
+                        self.N11, self.N12, self.NREC1, self.NREC2, hrate, self.tot_LTP[i:i+1], self.tot_LTD[i:i+1])
 
-                    # Does area (j+1) proj. to (i+1)?
-                    elif self.K[self.NAREAS * j + i] != 0:
-                        self.train_projection_cyclic(
-                            # pre-syn. rates
-                            self.rates[self.N1 * j:self.N1 * (j + 1)],
-                            # post-syn. pot.
-                            self.pot[self.N1 * i:self.N1 * (i + 1)],
-                            # all (j+1)-->(i+1) kernels
-                            self.J[self.NSQR1 * (self.NAREAS * j + i):self.NSQR1 * \
-                                   (self.NAREAS * (j + 1) + i)],
-                            self.N11, self.N12, self.NFFB1, self.NFFB2, hrate, self.tot_LTP[i:i+1], self.tot_LTD[i:i+1])
+                # Does area (j+1) proj. to (i+1)?
+                elif self.K[self.NAREAS * j + i] != 0:
+                    self.train_projection_cyclic(
+                        # pre-syn. rates
+                        self.rates[self.N1 * j:self.N1 * (j + 1)],
+                        # post-syn. pot.
+                        self.pot[self.N1 * i:self.N1 * (i + 1)],
+                        # all (j+1)-->(i+1) kernels
+                        self.J[self.NSQR1 * (self.NAREAS * j + i):self.NSQR1 * \
+                                (self.NAREAS * (j + 1) + i)],
+                        self.N11, self.N12, self.NFFB1, self.NFFB2, hrate, self.tot_LTP[i:i+1], self.tot_LTD[i:i+1])
 
     def step(self):
         """
@@ -889,7 +888,8 @@ class StandardNet6Areas:
         self.compute_new_adaptation()
 
         ## LEARNING ##
-        self.compute_learning(hrate)
+        if self.slrate > 0:  # Is learning ON?
+            self.compute_learning(hrate)
 
         ## RECORD AVERAGE RESPONSES DURING TRAINING ##
         self.record_average_responses_during_training()
