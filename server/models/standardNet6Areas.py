@@ -323,15 +323,15 @@ class StandardNet6Areas:
         sigmax, sigmay  -- IN: std. deviations
         ampl            -- IN: value at Gaussian center
         """
-        self.logger.info(json.dumps({
-            'func': 'init_gaussian_kernel',
-            'area size (nx*ny)': nx*ny,
-            'kernel size (mx*my)': mx*my,
-            'std devation (sigmax)': sigmax,
-            'std deviation (sigmay)': sigmay,
-            'scaling factor (ampl)': ampl,
-            'J slice len:': len(J),
-        }, sort_keys=False, indent=4))
+        # self.logger.info(json.dumps({
+        #     'func': 'init_gaussian_kernel',
+        #     'area size (nx*ny)': nx*ny,
+        #     'kernel size (mx*my)': mx*my,
+        #     'std devation (sigmax)': sigmax,
+        #     'std deviation (sigmay)': sigmay,
+        #     'scaling factor (ampl)': ampl,
+        #     'J slice len:': len(J),
+        # }, sort_keys=False, indent=4))
 
         cx = mx // 2
         cy = my // 2
@@ -368,15 +368,15 @@ class StandardNet6Areas:
         prob            -- IN: IN: Gaussian amplitude
         upper           -- IN: upper synaptic value
         """
-        self.logger.info(json.dumps({
-            'func': 'init_patchy_gauss_kern',
-            'area size (1cell<=>1kernel)': nx*ny,
-            'kernel size': mx*my,
-            'std devation (sigmax)': sigmax,
-            'std deviation (sigmay)': sigmay,
-            'scaling factor (prob)': prob,
-            'J slice len:': len(J),
-        }, sort_keys=False, indent=4))
+        # self.logger.info(json.dumps({
+        #     'func': 'init_patchy_gauss_kern',
+        #     'area size (1cell<=>1kernel)': nx*ny,
+        #     'kernel size': mx*my,
+        #     'std devation (sigmax)': sigmax,
+        #     'std deviation (sigmay)': sigmay,
+        #     'scaling factor (prob)': prob,
+        #     'J slice len:': len(J),
+        # }, sort_keys=False, indent=4))
 
         # Checks that max. probability is within bounds
         if prob < 0.0 or prob > 1.0:
@@ -387,12 +387,17 @@ class StandardNet6Areas:
         self.init_gaussian_kernel(nx, ny, mx, my, J, sigmax, sigmay, prob)
 
         # ...then transform them into the requested synaptic values.
-        for i in range(nx * ny * mx * my):
+        pot_synapses = nx * ny * mx * my
+        non_zero = 0
+        for i in range(pot_synapses):
             if util.bool_noise(J[i]):
-                # random.uniform(0, upper) could be used instead of upper*random.random()
+                non_zero = non_zero + 1
                 J[i:i+1] = upper * util.equal_noise()
             else:
                 J[i:i+1] = 0  # NO_SYNAPSE
+        # print('total potential synapses for area-area:', pot_synapses)
+        # print('synapses with non-zero weights:', non_zero)
+        # print("% non zero", round((non_zero/pot_synapses)*100))
 
     def main_init(self):
         """
@@ -407,7 +412,8 @@ class StandardNet6Areas:
             {'func': 'main_init'}, sort_keys=False, indent=4))
 
         # Random numbers generation
-        random.seed(time.time())
+        # random.seed(time.time())
+
         # if STEPSIZE=0.5, noise_fac ~= 6.93
         self.noise_fac = math.sqrt(24.0 / self.STEPSIZE)
 
@@ -553,7 +559,8 @@ class StandardNet6Areas:
                                                 self.SIGMAX, self.SIGMAY, self.J_PROB, self.J_UPPER)
 
         # logging
-        pot_synapses = self.NSQR1 * self.NAREAS * self.NAREAS
+        pot_synapses = self.N1 * \
+            (self.NREC1 * self.NREC1) * (self.NAREAS * self.NAREAS)
         weighted = sum(self.J > 0)
         inactive = sum(self.J == 0)
         non_zero_percent = round((weighted/pot_synapses)*100)
