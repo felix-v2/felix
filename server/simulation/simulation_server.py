@@ -133,10 +133,10 @@ def handle_disconnection():
     The client can disconnect and then connect again, "resuming" the simulation as they left off
     We ensure only one client can be connected at a time
     """
-    global sim_manager
-    if sim_manager is not None:
-        del sim_manager
-        sim_manager = None
+    # global sim_manager
+    # if sim_manager is not None:
+    #     del sim_manager
+    #     sim_manager = None
 
     global active_client_connection
     active_client_connection = None
