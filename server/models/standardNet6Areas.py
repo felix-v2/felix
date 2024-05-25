@@ -872,6 +872,11 @@ class StandardNet6Areas:
         """
         MAIN  "STEP" FUNCTION, executed at each sim. step
         """
+        self.logger.info(json.dumps({
+            'op': 'step',
+            'step': self.stp,
+        }, sort_keys=False, indent=4))
+
         hrate: float = .0001 * self.slrate  # Get & rescale LEARN. rate specif. by slider
         gain = .001 * self.sgain  # Get & rescale GAIN value specif. by slider
         theta = .001 * self.stheta  # Get & rescale THRESH. value "    "   " "
@@ -909,6 +914,7 @@ class StandardNet6Areas:
         ## TODO AUTOMATED TESTING ##
 
         ## TODO ASCII DATA FILE WRITING ##
+        self.stp = self.stp+1
 
     def MAIN_INIT_RANDOM_ACTIVITY(self):
         """

@@ -15,13 +15,20 @@ import { Slider } from '../../components/slider';
 
 import 'react-bootstrap-range-slider/dist/react-bootstrap-range-slider.css';
 
+import { InboundEvent, OutboundEvent, socket } from '../../socket';
+
 export const ControlPanel = ({
-  visible,
   onHide,
+  connectedToServer,
 }: {
   visible: boolean;
   onHide: () => void;
+  connectedToServer: boolean;
 }) => {
+  const connectToServer = () => {
+    socket.connect();
+  };
+
   return (
     <Offcanvas
       show={true}
@@ -42,9 +49,14 @@ export const ControlPanel = ({
           <ProgressBar
             style={{ height: '2rem' }}
             animated
-            variant={'success'}
+            variant={connectedToServer ? 'success' : 'danger'}
             now={100}
-            label={'Simulation in progress'}
+            label={
+              connectedToServer
+                ? 'Server connection established'
+                : 'Connect to server'
+            }
+            onClick={connectToServer}
           />
         </Col>
       </Offcanvas.Header>
@@ -70,22 +82,36 @@ export const ControlPanel = ({
 };
 
 const SimulationControlButtons = () => {
+  const initSimulation = () => {
+    socket.emit(OutboundEvent.InitSimulation);
+  };
+
+  const continueSimulation = () => {
+    socket.emit(OutboundEvent.ContinueSimulation);
+  };
+
   return (
     <Card>
       <Card.Body>
         <Card.Title style={{ fontSize: '1rem' }}>Controls</Card.Title>
         <ButtonGroup size="sm" className="mb-2">
-          <Button style={{ marginRight: 10 }} variant="light">
+          <Button
+            style={{ marginRight: 10 }}
+            variant="light"
+            onClick={initSimulation}
+          >
             Init
           </Button>
-          <Button style={{ marginRight: 10 }} variant="danger">
-            Stop
+          <Button style={{ marginRight: 10 }} onClick={continueSimulation}>
+            Continue
           </Button>
-          <Button style={{ marginRight: 10 }} variant="info">
+          <Button style={{ marginRight: 10 }} variant="info" disabled={true}>
             Steps
           </Button>
-          <Button style={{ marginRight: 10 }}>Continue</Button>
-          <Button style={{ marginRight: 10 }} variant="success">
+          <Button style={{ marginRight: 10 }} variant="danger" disabled={true}>
+            Stop
+          </Button>
+          <Button style={{ marginRight: 10 }} variant="success" disabled={true}>
             Run
           </Button>
         </ButtonGroup>
@@ -130,6 +156,7 @@ const SimulationSwitches = () => {
               variant={'primary'}
               id="tbg-btn-1"
               value={1}
+              disabled={true}
             >
               saveNet
             </ToggleButton>
@@ -140,6 +167,7 @@ const SimulationSwitches = () => {
               variant={'primary'}
               id="tbg-btn-1"
               value={1}
+              disabled={true}
             >
               loadNet
             </ToggleButton>
@@ -148,6 +176,7 @@ const SimulationSwitches = () => {
               variant={'primary'}
               id="tbg-btn-2"
               value={1}
+              disabled={true}
             >
               trainNet
             </ToggleButton>
@@ -156,6 +185,7 @@ const SimulationSwitches = () => {
               variant={'primary'}
               id="tbg-btn-1"
               value={1}
+              disabled={true}
             >
               printNet
             </ToggleButton>
@@ -166,6 +196,7 @@ const SimulationSwitches = () => {
               variant={'primary'}
               id="tbg-btn-1"
               value={1}
+              disabled={true}
             >
               computeCA/Ovlps
             </ToggleButton>

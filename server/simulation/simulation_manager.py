@@ -1,95 +1,89 @@
 import threading
 import time
 from queue import Queue
-from abc import ABC, abstractmethod
 from flask_socketio import SocketIO
 from ..models.standardNet6Areas import StandardNet6Areas
+from .util import randomActivity
+import logging
+import json
 
-
-# All we need to do is ensure the actual neural net - StandardArea6Net - adheres to this "interface"
-# Then in simulation-server.py we can instantiate it and pass it to the SimulationManager
-# SimulationManager(standardNet6Areas, socket)
-class Model(ABC):
-
-    @abstractmethod
-    def step(self):
-        pass
-
-    @abstractmethod
-    def update_config(self, new_config):
-        pass
+logging.basicConfig()
+logging.root.setLevel(logging.NOTSET)
+logger = logging.getLogger('simulation-manager')
+logger.setLevel(logging.DEBUG)
 
 
 # Interface between the socket layer and the model
 # Handles threading and queueing to allow realtime bidirectional between the neural net and the gui
 # Gives us a generic socket interface/server, into which we can plug and pull different neural networks as we wish
 class SimulationManager:
-    def __init__(self, model, socket):
-        self.model: StandardNet6Areas = model
+    def __init__(self, socket):
         self.socket: SocketIO = socket
 
         self.config_queue = Queue()
         self.simulation_lock = threading.Lock()
-        self.simulation_running = False
+        self.simulation_condition = threading.Condition(self.simulation_lock)
+        self.model_running = False
         self.simulation_thread = None
+
+        self.model = StandardNet6Areas()
+        self.model.main_init()
+
+        self.model_initialised = False
+
+    def init_simulation(self):
+        """
+        Initialises the model to run in a background thread
+
+        Init ->
+        """
+        with self.simulation_lock:
+            if self.model_running:
+                logger.error(json.dumps({
+                    'op': 'init_simulation',
+                    'error': 'Cannot start simulation: model already running!',
+                }, sort_keys=False, indent=4))
+                return
+
+            logger.info(json.dumps({
+                'op': 'init_simulation',
+                'info': 'Initialising model in background',
+            }, sort_keys=False, indent=4))
+
+            self.model.init()
+            self.model_initialised = True
+
+            simulation_thread = threading.Thread(
+                target=self.execute_model)
+            simulation_thread.start()
+
+    def continue_simulation(self):
+        with self.simulation_lock:
+            if not self.model_running:
+                self.model_running = True
+                self.simulation_condition.notify_all()
+
+    def execute_model(self):
+        print('execute model')
+        with self.simulation_condition:
+            while not self.model_running:
+                self.simulation_condition.wait()
+
+        print('model running:', self.model_running)
+        while self.model_running:
+            print('step')
+            self.model.step()
+            self.socket.emit('new-activity', {
+                'sensoryInput1': [],
+                'area1': randomActivity(),
+                'area2': randomActivity(),
+                'area3': randomActivity(),
+                'area4': randomActivity(),
+                'area5': randomActivity(),
+                'area6': randomActivity(),
+                'motorInput1': [],
+            })
+            time.sleep(1)  # Sleep to simulate a delay between steps
 
     def current_step(self):
         return self.model.stp
-
-    def config(self):
-        return {"sdilue": self.model.sdilute}
-
-    # todo: reinstantiate the model?
-    def reset_simulation(self):
-        pass
-
-    # todo: I think it's ok to stop and start the tread like this and maintain the model state over time
-    # e.g. restarting the thread doesn't reset the model state
-    def start_simulation(self, config):
-
-        with self.simulation_lock:
-            self.config_queue.put(config)
-
-            if not self.simulation_running:
-                self.simulation_running = True
-                simulation_thread = threading.Thread(
-                    target=self.execute_model)
-                simulation_thread.start()
-                print('Simulation started!')
-
-            print('Simulation-start request received but simulation already running!')
-
-    def stop_simulation(self):
-        with self.simulation_lock:
-            if self.simulation_running:
-                self.simulation_running = False
-                print('Simulation stopped!')
-
-            print('Simulation-stop request received but simulation is not running!')
-
-    def resume_simulation(self, config):
-        self.start_simulation(config)
-
-    def update_config(self, new_config):
-        with self.simulation_lock:
-            if self.simulation_running:
-                self.config_queue.put(new_config)
-            print('Update-config request received but simulation is not running!')
-
-    def execute_model(self):
-        while self.simulation_running:
-            # Check for updated config from the main thread
-            if not self.config_queue.empty():
-                new_config = self.config_queue.get()
-                self.model.update_config(new_config)
-
-            # Perform simulation computation using simulation_config
-            result_data = self.model.step()
-
-            # Send the result_data to the client
-            self.socket.emit('new-activity', result_data)
-
-            # Sleep to simulate a delay between steps
-            time.sleep(1)
-
-        print('Execute-model request received but simulation is not running!')

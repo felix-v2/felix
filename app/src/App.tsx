@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { io } from 'socket.io-client';
+import { socket, InboundEvent } from './socket';
 import { Col, Row } from 'react-bootstrap';
 
 import 'react-bootstrap-range-slider/dist/react-bootstrap-range-slider.css';
@@ -9,34 +9,16 @@ import { CellAssembly } from './sections/cell-assembly';
 import { CellAssemblyPotentialsOverlaps } from './sections/cell-assembly-potentials-overlaps';
 import { ControlPanel } from './sections/control-panel';
 import { Totals } from './sections/totals';
+import { randActivity } from './util';
 import TransientToast from './components/toast';
-
-const socket = io('ws://localhost:5000', { autoConnect: true });
-
-// generates a 2d matrix of X x Y neurons, each with a random activity value between 0 and 1
-export const randActivity = (
-  opts: {
-    neuronsX?: number;
-    neuronsY?: number;
-    silent?: boolean;
-  } = { neuronsX: 25, neuronsY: 25 },
-) => {
-  return Array.from(Array(opts.neuronsX)).map(() =>
-    Array.from(Array(opts.neuronsY)).map(() =>
-      opts.silent ? 0 : Math.random(),
-    ),
-  );
-};
 
 /**
  * @todo Refactor state into objects, use Zod schemas, validate in websocket handlers, and declare state locally
- * @todo Refactor socket-io interface https://socket.io/how-to/use-with-react
  * @todo Responsivity?
  */
 export default function App() {
   // server connection
   const [connected, setConnected] = useState(socket.connected);
-  const [running, setRunning] = useState(false);
 
   // activity
   const silence = randActivity({ silent: true });
@@ -50,58 +32,22 @@ export default function App() {
   const [area6, setArea6] = useState<number[][]>(silence);
   const [motorInput1, setMotorInput1] = useState<number[][]>(silence);
 
-  // control panel
-  const [showControlPanel, setShowControlPanel] = useState(false);
-
-  /**
-   * @todo refactor, this was hacked for demo purposes. should live in control
-   */
-  const [applySensoryInput, setApplySensoryInput] = useState<boolean>(true);
-  const [applyMotorInput, setApplyMotorInput] = useState<boolean>(true);
-
   useEffect(() => {
-    console.log('input change');
-    socket.emit('update-config', {
-      applySensoryInput,
-      applyMotorInput,
-    });
-  }, [applySensoryInput, applyMotorInput]);
-
-  // simulation functions
-  useEffect(() => {
-    if (running) {
-      socket.emit('start-simulation', {
-        applySensoryInput,
-        applyMotorInput,
-      });
-    }
-
-    if (connected && !running) {
-      socket.emit('stop-simulation');
-      // socket.disconnect();
-      // socket.connect();
-    }
-  }, [socket, running]);
-
-  useEffect(() => {
-    socket.on('connect', () => {
+    const onConnect = () => {
       setConnected(true);
-    });
+    };
 
-    socket.on('disconnect', () => {
+    const onDisconnect = () => {
+      setArea1(silence);
+      setArea2(silence);
+      setArea3(silence);
+      setArea4(silence);
+      setArea5(silence);
+      setArea6(silence);
       setConnected(false);
-      // setSensoryInput1(silence);
-      // setArea1(silence);
-      // setArea2(silence);
-      // setArea3(silence);
-      // setArea4(silence);
-      // setArea5(silence);
-      // setArea6(silence);
-      // setMotorInput1(silence);
-    });
+    };
 
-    socket.on('new-activity', (data) => {
-      console.log('New activity received from server', { area1: data.area1 });
+    const onNewActivity = (data: any) => {
       setSensoryInput1(data.sensoryInput1);
       setArea1(data.area1);
       setArea2(data.area2);
@@ -110,13 +56,27 @@ export default function App() {
       setArea5(data.area5);
       setArea6(data.area6);
       setMotorInput1(data.motorInput1);
-    });
-  }, [socket, connected]);
+    };
+
+    socket.on(InboundEvent.Connect, onConnect);
+    socket.on(InboundEvent.Disconnect, onDisconnect);
+    socket.on(InboundEvent.NewActivity, onNewActivity);
+
+    return () => {
+      socket.off(InboundEvent.Connect, onConnect);
+      socket.off(InboundEvent.Disconnect, onDisconnect);
+      socket.off(InboundEvent.NewActivity, onNewActivity);
+    };
+  }, []);
 
   return (
     <div className="App">
       {/* <TransientToast error={true} /> */}
-      <ControlPanel visible={true} onHide={() => console.log('Hide')} />
+      <ControlPanel
+        visible={true}
+        connectedToServer={connected}
+        onHide={() => console.log('Hide')}
+      />
       <Col xs={10} style={{ marginTop: '40px' }}>
         <Row
           style={{

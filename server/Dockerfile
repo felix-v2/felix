@@ -6,4 +6,4 @@ RUN pip3 install --upgrade pip && pip3 install -r requirements.txt
 COPY . .
 EXPOSE 5000
 
-CMD ["python3", "simulation/simulation-server.py"]
+CMD ["python3", "simulation/simulation_server.py"]
