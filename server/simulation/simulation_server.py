@@ -134,7 +134,9 @@ def handle_disconnection():
     We ensure only one client can be connected at a time
     """
     global sim_manager
-    sim_manager = None
+    if sim_manager is not None:
+        del sim_manager
+        sim_manager = None
 
     global active_client_connection
     active_client_connection = None
