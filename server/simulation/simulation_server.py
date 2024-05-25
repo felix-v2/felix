@@ -1,5 +1,5 @@
-from model import MockNeuralNet
-from simulation_manager import SimulationManager
+from ..models.standardNet6Areas import StandardNet6Areas
+from .simulation_manager import SimulationManager
 from flask_socketio import SocketIO
 from flask import Flask, request
 import eventlet
@@ -48,7 +48,7 @@ def handle_connection():
     print(
         f'Simulation {"is" if sim_manager and sim_manager.simulation_running else "is not"} running!')
     print(
-        f'Model execution is at step {model.current_step if model else 0}.')
+        f'Model execution is at step {sim_manager.current_step() if model else 0}.')
 
 
 """
@@ -80,10 +80,10 @@ def handle_update_config(new_config):
 
     if sim_manager:
         if model:
-            print(f'\n\Model step: {model.current_step}')
+            print(f'\n\Model step: {sim_manager.current_step()}')
 
         sim_manager.update_config(new_config)
-        print(f'\n\nUpdated model config: {model.config}')
+        print(f'\n\nUpdated model config: {sim_manager.config()}')
 
 
 """
@@ -104,18 +104,22 @@ def handle_start_simulation(initial_config):
     # Resume a simulation that's already running, picking up the model state where it left off
     if model and sim_manager:
         print(f'\n\Simulation resuming: {sim_manager.simulation_running}')
-        print(f'\n\Model step: {model.current_step}')
+        print(f'\n\Model step: {sim_manager.current_step()}')
         sim_manager.resume_simulation(initial_config)
         return True
 
     # Initialise a new simulation
     if not model or not sim_manager:
-        model = MockNeuralNet()  # StandardNet6Areas()
+        print(f'\n\Initialising new model')
+
+        model = StandardNet6Areas()
+        model.main_init()
+        model.init()
         sim_manager = SimulationManager(model, socketio)
         sim_manager.start_simulation(initial_config)
 
         print(f'\n\Simulation running: {sim_manager.simulation_running}')
-        print(f'\n\Model step: {model.current_step}')
+        print(f'\n\Model step: {sim_manager.current_step()}')
 
 
 """
@@ -129,7 +133,7 @@ Pauses execution of the model (the model state will persist as long as the serve
 def handle_stop_simulation():
     global sim_manager
     if sim_manager and sim_manager.simulation_running:
-        print(f'\n\Model stopping at step: {model.current_step}')
+        print(f'\n\Model stopping at step: {sim_manager.current_step()}')
         sim_manager.stop_simulation()
         print(f'\n\Simulation running: {sim_manager.simulation_running}')
 
@@ -145,7 +149,7 @@ Resume execution of the model
 # def handle_resume_simulation():
 #     global sim_manager
 #     if sim_manager and not sim_manager.simulation_running:
-#         print(f'\n\Model resuming at step: {model.current_step}')
+#         print(f'\n\Model resuming at step: {sim_manager.current_step()}')
 #         sim_manager.resume_simulation()
 #         print(f'\n\Simulation running: {sim_manager.simulation_running}')
 

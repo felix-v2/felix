@@ -3,6 +3,7 @@ import time
 from queue import Queue
 from abc import ABC, abstractmethod
 from flask_socketio import SocketIO
+from ..models.standardNet6Areas import StandardNet6Areas
 
 
 # All we need to do is ensure the actual neural net - StandardArea6Net - adheres to this "interface"
@@ -24,13 +25,19 @@ class Model(ABC):
 # Gives us a generic socket interface/server, into which we can plug and pull different neural networks as we wish
 class SimulationManager:
     def __init__(self, model, socket):
-        self.model: Model = model
+        self.model: StandardNet6Areas = model
         self.socket: SocketIO = socket
 
         self.config_queue = Queue()
         self.simulation_lock = threading.Lock()
         self.simulation_running = False
         self.simulation_thread = None
+
+    def current_step(self):
+        return self.model.stp
+
+    def config(self):
+        return {"sdilue": self.model.sdilute}
 
     # todo: reinstantiate the model?
     def reset_simulation(self):

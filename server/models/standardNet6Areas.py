@@ -2,9 +2,8 @@ import io
 import numpy as np
 import random
 import math
-import util
-import time
 import logging
+from ..models import util
 import json
 
 
