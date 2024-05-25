@@ -914,7 +914,36 @@ class StandardNet6Areas:
         ## TODO AUTOMATED TESTING ##
 
         ## TODO ASCII DATA FILE WRITING ##
+
         self.stp = self.stp+1
+        return self.get_current_activity()
+
+    def get_current_activity(self):
+        # TODO replace with real potentials
+        def randomActivity():
+            neurons = range(25 * 25)
+            sample = random.sample(neurons, random.randint(1, 100))
+            matrix = []
+            for i in range(25):
+                row = []
+                for j in range(25):
+                    neuron = (i+1)*(j+1)
+                    row.append(
+                        0 if neuron not in sample else random.uniform(0, 1))
+                matrix.append(row)
+            return matrix
+
+        return {
+            'currentStep': self.stp,
+            'sensInput': self.sensInput.tolist(),
+            'motorInput': self.motorInput.tolist(),
+            'area1': randomActivity(),
+            'area2': randomActivity(),
+            'area3': randomActivity(),
+            'area4': randomActivity(),
+            'area5': randomActivity(),
+            'area6': randomActivity(),
+        }
 
     def MAIN_INIT_RANDOM_ACTIVITY(self):
         """

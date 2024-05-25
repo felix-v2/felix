@@ -3,7 +3,6 @@ import time
 from queue import Queue
 from flask_socketio import SocketIO
 from ..models.standardNet6Areas import StandardNet6Areas
-from .util import randomActivity
 import logging
 import json
 
@@ -69,16 +68,17 @@ class SimulationManager:
                 self.simulation_condition.wait()
 
         while self.model_running:
-            self.model.step()
+            current_activity = self.model.step()
             self.socket.emit('new-activity', {
-                'sensoryInput1': [],
-                'area1': randomActivity(),
-                'area2': randomActivity(),
-                'area3': randomActivity(),
-                'area4': randomActivity(),
-                'area5': randomActivity(),
-                'area6': randomActivity(),
-                'motorInput1': [],
+                'currentStep': current_activity['currentStep'],
+                'sensoryInput1': current_activity['sensInput'],
+                'motorInput1': current_activity['motorInput'],
+                'area1': current_activity['area1'],
+                'area2': current_activity['area2'],
+                'area3': current_activity['area3'],
+                'area4': current_activity['area4'],
+                'area5': current_activity['area5'],
+                'area6': current_activity['area6'],
             })
             time.sleep(1)  # Sleep to simulate a delay between steps
 

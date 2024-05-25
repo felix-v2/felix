@@ -1,6 +1,5 @@
 import logging
 import json
-from ..models.standardNet6Areas import StandardNet6Areas
 from .simulation_manager import SimulationManager
 from flask_socketio import SocketIO
 from flask import Flask, request
@@ -125,7 +124,7 @@ def handle_start_simulation():
     }, sort_keys=False, indent=4))
 
 
-@ socketio.on('disconnect')
+@socketio.on('disconnect')
 def handle_disconnection():
     """
     Disconnect

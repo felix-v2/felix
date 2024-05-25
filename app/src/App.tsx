@@ -44,18 +44,23 @@ export default function App() {
       setArea4(silence);
       setArea5(silence);
       setArea6(silence);
+
+      setSensoryInput1(sensoryInput1);
+      setMotorInput1(motorInput1);
+
       setConnected(false);
     };
 
     const onNewActivity = (data: any) => {
       setSensoryInput1(data.sensoryInput1);
+      setMotorInput1(data.motorInput1);
+
       setArea1(data.area1);
       setArea2(data.area2);
       setArea3(data.area3);
       setArea4(data.area4);
       setArea5(data.area5);
       setArea6(data.area6);
-      setMotorInput1(data.motorInput1);
     };
 
     socket.on(InboundEvent.Connect, onConnect);
@@ -102,13 +107,13 @@ export default function App() {
           <Col xs={12}>
             <Potentials
               sensoryInput1={sensoryInput1}
+              motorInput1={motorInput1}
               area1={area1}
               area2={area2}
               area3={area3}
               area4={area4}
               area5={area5}
               area6={area6}
-              motorInput1={motorInput1}
             ></Potentials>
           </Col>
         </Row>
