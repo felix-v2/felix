@@ -23,13 +23,13 @@ class SimulationManager:
         self.config_queue = Queue()
         self.simulation_lock = threading.Lock()
         self.simulation_condition = threading.Condition(self.simulation_lock)
-        self.model_running = False
         self.simulation_thread = None
 
         self.model = StandardNet6Areas()
         self.model.main_init()
 
         self.model_initialised = False
+        self.model_running = False
 
     def init_simulation(self):
         """
@@ -64,14 +64,11 @@ class SimulationManager:
                 self.simulation_condition.notify_all()
 
     def execute_model(self):
-        print('execute model')
         with self.simulation_condition:
             while not self.model_running:
                 self.simulation_condition.wait()
 
-        print('model running:', self.model_running)
         while self.model_running:
-            print('step')
             self.model.step()
             self.socket.emit('new-activity', {
                 'sensoryInput1': [],
