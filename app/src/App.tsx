@@ -22,15 +22,16 @@ export default function App() {
 
   // activity
   const silence = randActivity({ silent: true });
+  const full = randActivity({ full: true });
 
-  const [sensoryInput1, setSensoryInput1] = useState<number[][]>(silence);
+  const [sensoryInput1, setSensoryInput1] = useState<number[][]>(full);
+  const [motorInput1, setMotorInput1] = useState<number[][]>(full);
   const [area1, setArea1] = useState<number[][]>(silence);
   const [area2, setArea2] = useState<number[][]>(silence);
   const [area3, setArea3] = useState<number[][]>(silence);
   const [area4, setArea4] = useState<number[][]>(silence);
-  const [area5, setArea5] = useState<number[][]>(silence);
   const [area6, setArea6] = useState<number[][]>(silence);
-  const [motorInput1, setMotorInput1] = useState<number[][]>(silence);
+  const [area5, setArea5] = useState<number[][]>(silence);
 
   useEffect(() => {
     const onConnect = () => {
@@ -45,8 +46,8 @@ export default function App() {
       setArea5(silence);
       setArea6(silence);
 
-      setSensoryInput1(sensoryInput1);
-      setMotorInput1(motorInput1);
+      setSensoryInput1(full);
+      setMotorInput1(full);
 
       setConnected(false);
     };

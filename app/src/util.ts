@@ -4,11 +4,12 @@ export const randActivity = (
     neuronsX?: number;
     neuronsY?: number;
     silent?: boolean;
+    full?: boolean;
   } = { neuronsX: 25, neuronsY: 25 },
 ) => {
   return Array.from(Array(opts.neuronsX)).map(() =>
     Array.from(Array(opts.neuronsY)).map(() =>
-      opts.silent ? 0 : Math.random(),
+      opts.silent ? 0 : opts.full ? 1 : Math.random(),
     ),
   );
 };
