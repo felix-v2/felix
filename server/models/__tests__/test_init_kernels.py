@@ -1,7 +1,7 @@
 import unittest
-from standardNet6Areas import StandardNet6Areas
+from ..standardNet6Areas import StandardNet6Areas
 import numpy as np
-from util import Get_Vector
+from ..util import Get_Vector
 
 
 class TestInitKernels(unittest.TestCase):

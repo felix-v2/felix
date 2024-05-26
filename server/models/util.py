@@ -200,7 +200,7 @@ def bSum(n: int, v: bVectorType):
     # return sum(chunk_sums)
 
 
-def Sum(n: int, v: VectorType):
+def Sum(v: VectorType):
     """
     Calculates the sum of elements in a vector in parallel (originally using OpenMP), where each thread handles a 
     portion of the vector elements. The sum is computed using a reduction operation to efficiently combine 
@@ -276,56 +276,48 @@ def leaky_integrate(tau: BaseType, obj: BaseType, expr: BaseType, step_size: Bas
     return obj
 
 
-def Correlate_2d_cyclic(input_matrix: np.ndarray, kernel: np.ndarray, out: np.ndarray) -> np.ndarray:
-    """
-    Performs a cyclic correlation operation between the input matrix and the kernel matrix, 
-    taking into account the cyclic boundary conditions, and stores the result in the output matrix
-    """
-    x, y = input_matrix.shape
-    kx, ky = kernel.shape
+# TODO fix indexing errors
+def Correlate_2d_cyclic(in_matrix, kern, x, y, kx, ky, out):
+    left = -((kx - 1) // 2)
+    right = kx // 2
+    upper = -((ky - 1) // 2)
+    lower = ky // 2
 
-    for i in range(y):  # Iterate over rows
-        for j in range(x):  # Iterate over columns
-            left = -(kx - 1) // 2
-            right = kx // 2
-            upper = -(ky - 1) // 2
-            lower = ky // 2
-
+    for i in range(y):  # rows
+        ix = i * x
+        for j in range(x):  # columns
+            pkern = kern[ix + j]
             h = 0.0
-            for k in range(upper, lower + 1):  # Iterate over kernel rows
-                for l in range(left, right + 1):  # Iterate over kernel columns
-                    pkern = kernel[(k + (ky - 1) // 2), (l + (kx - 1) // 2)]
-                    h += pkern * input_matrix[(i + k) % y, (j + l) % x]
-
-            out[i, j] = h
-
+            for k in range(upper, lower + 1):
+                for l in range(left, right + 1):
+                    in_index = ((i + k) % y) * x + ((j + l) % x)
+                    kern_index = (k - upper) * kx + (l - left)
+                    h += pkern[kern_index] * in_matrix[in_index]
+            out[ix + j] = h
     return out
 
 
-def Correlate_2d_Uni_cyclic(input_matrix: np.ndarray, kernel: np.ndarray, out: np.ndarray) -> np.ndarray:
+def Correlate_2d_Uni_cyclic(in_matrix: VectorType, kern: VectorType, x: int, y: int, kx: int, ky: int, out: VectorType):
     """
     Performs a cyclic correlation operation between the input matrix and the uniform kernel, 
     taking into account the cyclic boundary conditions, and stores the result in the output matrix
     """
-    y, x = input_matrix.shape
-    ky, kx = kernel.shape
-    oy, ox = out.shape
-
-    left = -(kx - 1) // 2
+    left = -((kx - 1) // 2)
     right = kx // 2
-    upper = -(ky - 1) // 2
+    upper = -((ky - 1) // 2)
     lower = ky // 2
 
-    for i in range(oy):  # Iterate over rows of out
-        for j in range(ox):  # Iterate over columns of out
+    pkern = kern.copy()
+
+    for i in range(y):  # rows
+        for j in range(x):  # columns
             h = 0.0
-            for k in range(upper, lower + 1):  # Iterate over kernel rows
-                for l in range(left, right + 1):  # Iterate over kernel columns
-                    h += kernel[k + (ky - 1) // 2, l + (kx - 1) // 2] * \
-                        input_matrix[(i + k) % oy, (j + l) % ox]
-
-            out[i, j] = h
-
+            for k in range(upper, lower + 1):
+                for l in range(left, right + 1):
+                    in_index = ((y + i + k) % y) * x + ((x + j + l) % x)
+                    kern_index = (k - upper) * kx + (l - left)
+                    h += pkern[kern_index] * in_matrix[in_index]
+            out[i * x + j] = h
     return out
 
 

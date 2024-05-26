@@ -3,7 +3,7 @@ import numpy as np
 import random
 import math
 import logging
-from ..models import util
+from . import util
 import json
 
 
@@ -260,6 +260,13 @@ class StandardNet6Areas:
     sMInp: bool = False
     sSInRow: int = 0
     sMInRow: int = 0
+    sSInCol: int = 0
+    sMInCol: int = 0
+    sSI0: int = 0
+    sMI0: int = 0
+    sJffb: int = 0
+    sJinh: int = 0
+    sJrec: int = 0
 
     # Python-specific stuff
     logging.basicConfig()
@@ -868,6 +875,97 @@ class StandardNet6Areas:
                                    (self.NAREAS * (j + 1) + i)],
                             self.N11, self.N12, self.NFFB1, self.NFFB2, hrate, self.tot_LTP[i:i+1], self.tot_LTD[i:i+1])
 
+    def compute_new_membrane_potentials(self):
+        for area in range(self.NAREAS):
+            # get the slices of activity for this area (the 625 cells in area)
+            ppot = self.pot[self.N1 * area:self.N1 * (area + 1)]
+            pinh = self.inh[self.N1 * area:self.N1 * (area + 1)]
+            pdil = self.diluted[self.N1 * area:self.N1 * (area + 1)]
+
+            # Clear vectors containing incoming input to current area
+            util.Clear_Vector(self.linkffb)   # From OTHER areas
+            util.Clear_Vector(self.linkrec)   # From THIS area
+            util.Clear_Vector(self.linkinh)   # From inhib. layer
+            # auxiliary (used for OTHER areas)
+            util.Clear_Vector(self.tempffb)
+            # from sensory/OR/motor inp. patt.
+            util.Clear_Vector(self.clampSMIn)
+
+            ### Sensorimotor input ###
+
+            # Is this area (possibly) receiving a sensory pattern as input?
+            if area % self.NXAREAS == self.sSInCol - 1:
+                # Yes: give any current sens. pattern as input to this area
+                for i in range(self.N1):
+                    # Note: sensInput[] is a column of NYAREAS elem. of size N1
+                    self.clampSMIn[i] = self.sSI0 * \
+                        self.sensInput[self.N1 * (area // self.NXAREAS) + i]
+            elif area % self.NXAREAS == self.sMInCol - 1:  # Area receiving motor patt.?
+                for i in range(self.N1):
+                    # NB: motorInput[] is a column of NYAREAS elem. of size N1
+                    self.clampSMIn[i] = self.sMI0 * \
+                        self.motorInput[self.N1 * (area // self.NXAREAS) + i]
+
+            ### FF/fb (between area) input ###
+
+            for j in range(self.NAREAS):  # Check all areas (column "area" of K[])
+                # Is "j" NOT same as "area" and does area (j+1)-->(area+1)?..
+                if j != area and self.K[self.NAREAS * j + area]:
+                    # Compute area (j+1)'s contrib. to TOT. input to (area+1)
+                    util.Correlate_2d_cyclic(
+                        self.rates[self.N1 * j: self.N1 * (j + 1)],
+                        self.J[self.NSQR1 * (self.NAREAS * j + area): self.NSQR1 * (self.NAREAS * (j + 1) + area)],
+                        self.N11, self.N12, self.NFFB1, self.NFFB2, self.tempffb
+                    )
+
+                    # Add this contribution to the TOTAL EPSP to current area
+                    for i in range(self.N1):
+                        self.linkffb[i] = self.tempffb[i]
+
+                    # Reset the temp. vector of results
+                    util.Clear_Vector(self.tempffb)
+
+            ### RECurrent (within area) input ###
+
+            # Calculate linkrec[i] (total pre-synaptic pot. converging from
+            # within-area cells to cell i) for all cells of area "area+1".
+            if self.K[(self.NAREAS + 1) * area]:  # Does area have REC links?
+                util.Correlate_2d_cyclic(
+                    self.rates[self.N1 * area: self.N1 * (area + 1)],
+                    self.J[self.NSQR1 * (self.NAREAS + 1) *
+                           area: self.NSQR1 * (self.NAREAS + 1) * (area + 1)],
+                    self.N11, self.N12, self.NREC1, self.NREC2, self.linkrec
+                )
+
+            ### INHibitory (within area) input ###
+
+            # Calculate linkinh[i] (tot. activity from excitat. cells which
+            # is being projected to each underlying inhibitory cell "i")
+            util.Correlate_2d_Uni_cyclic(
+                self.rates[self.N1 * area: self.N1 * (area + 1)],
+                self.Jinh,
+                self.N11, self.N12, self.NINH1, self.NINH2, self.linkinh
+            )
+
+            ### LEAKY INTEGRATIONS ###
+
+            # Inhibitory cells: The total output from excit. cells (linkinh[i]) is now inte-
+            # grated (ie, weight=1) into inhib. cell "i"'s membr. potential
+            for i in range(self.N1):
+                self.linkinh[i] = util.leaky_integrate(
+                    self.TAU2, pinh[i], self.linkinh[i], self.STEPSIZE)
+
+            # Slow/global inhibition/activity control
+            self.slowinh[area] = util.leaky_integrate(self.TAUSLOW, self.slowinh[area], util.Sum(
+                self.rates[self.N1 * area]), self.STEPSIZE)
+
+            # Excitatory cells
+            for i in range(self.N1):  # For all cells of current area
+                ppot[i] = util.leaky_integrate(self.TAU1, ppot[i], .01 * (self.sI0 + self.clampSMIn[i] + self.sJffb * self.linkffb[i] +
+                                                                          self.sJrec * self.linkrec[i] - self.sJinh * self.FUNCI(pinh[i]) -
+                                                                          self.sJslow * self.slowinh[area] - 1000 * pdil[i] +
+                                                                          self.snoise * self.noise_fac * (util.equal_noise() - .5)), self.STEPSIZE)
+
     def step(self):
         """
         MAIN  "STEP" FUNCTION, executed at each sim. step
@@ -892,6 +990,7 @@ class StandardNet6Areas:
         self.set_up_current_sensorimotor_input(noise)
 
         ## TODO COMPUTE NEW MEMBRANE POTENTIALS ##
+        # self.compute_new_membrane_potentials(self)
 
         ## COMPUTE FIRING RATES (OUTPUTS) ##
         self.compute_firing_rates(gain, theta)

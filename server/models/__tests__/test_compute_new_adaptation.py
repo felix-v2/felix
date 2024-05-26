@@ -1,7 +1,7 @@
 import unittest
-from standardNet6Areas import StandardNet6Areas
+from ..standardNet6Areas import StandardNet6Areas
 import numpy as np
-import util
+from .. import util
 
 
 class TestComputeNewAdaptation(unittest.TestCase):

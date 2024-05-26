@@ -1,5 +1,5 @@
 import unittest
-from standardNet6Areas import StandardNet6Areas
+from ..standardNet6Areas import StandardNet6Areas
 import json
 import numpy as np
 
