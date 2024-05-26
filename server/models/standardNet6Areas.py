@@ -236,37 +236,35 @@ class StandardNet6Areas:
 
     ## GUI variables - not in the original C implementation ##
 
-    # sliders (typical numeric) TODO clarify types (and initialisation values ?)
-    sdiluteprob: float = 0.1
-    slrate: float = 0.0
-    sgain: float = 0.0
-    stheta: float = 0.0
-    snoise: float = 0.0
+    # sliders
+    sdiluteprob: int = 0
+    slrate: int = 0
+    sgain: int = 1000
+    stheta: int = 0
+    snoise: int = 100
     spatno: int = 0
     sdilutearea: int = 1
-    sJslow: int = 0
+    sJslow: int = 18
     sI0: int = 0
+    sSInRow: int = 1
+    sSInCol: int = 1
+    sMInRow: int = 1
+    sMInCol: int = 6
+    sSI0: int = 0
+    sMI0: int = 0
+    sJffb: int = 500
+    sJinh: int = 500
+    sJrec: int = 500
 
-    # switches (bools)
+    # switches
+    sSInp: bool = False
+    sMInp: bool = False
     sdilute: bool = False
     ssaveNet: bool = False
     sloadNet: bool = False
     strainNet: bool = False
     sCA_ovlps: bool = False
-    sSInp: bool = False
     sPrintTest: bool = False
-
-    # these are referenced in conditionals, but do not seem to be set or modified anywhere
-    sMInp: bool = False
-    sSInRow: int = 0
-    sMInRow: int = 0
-    sSInCol: int = 0
-    sMInCol: int = 0
-    sSI0: int = 0
-    sMI0: int = 0
-    sJffb: int = 0
-    sJinh: int = 0
-    sJrec: int = 0
 
     # Python-specific stuff
     logging.basicConfig()
@@ -1018,30 +1016,18 @@ class StandardNet6Areas:
         return self.get_current_activity()
 
     def get_current_activity(self):
-        # TODO replace with real potentials
-        def randomActivity():
-            neurons = range(25 * 25)
-            sample = random.sample(neurons, random.randint(1, 100))
-            matrix = []
-            for i in range(25):
-                row = []
-                for j in range(25):
-                    neuron = (i+1)*(j+1)
-                    row.append(
-                        0 if neuron not in sample else random.uniform(0, 1))
-                matrix.append(row)
-            return matrix
-
+        # TODO is this the correct way to reshape (e.g. order), based on the linearised data?
+        potentials = self.pot.reshape(6, 25, 25).tolist()
         return {
             'currentStep': self.stp,
-            'sensInput': self.sensInput.tolist(),
-            'motorInput': self.motorInput.tolist(),
-            'area1': randomActivity(),
-            'area2': randomActivity(),
-            'area3': randomActivity(),
-            'area4': randomActivity(),
-            'area5': randomActivity(),
-            'area6': randomActivity(),
+            'sensInput': self.sensInput.reshape(25, 25).tolist(),
+            'motorInput': self.motorInput.reshape(25, 25).tolist(),
+            'area1': potentials[0],
+            'area2': potentials[1],
+            'area3': potentials[2],
+            'area4': potentials[3],
+            'area5': potentials[4],
+            'area6': potentials[5],
         }
 
     def MAIN_INIT_RANDOM_ACTIVITY(self):

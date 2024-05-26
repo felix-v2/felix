@@ -80,7 +80,7 @@ class SimulationManager:
                 'area5': current_activity['area5'],
                 'area6': current_activity['area6'],
             })
-            time.sleep(0.05)  # Sleep to simulate a delay between steps
+            time.sleep(0.01)
 
     def current_step(self):
         return self.model.stp
