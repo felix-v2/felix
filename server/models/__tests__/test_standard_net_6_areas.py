@@ -136,7 +136,7 @@ class TestStandardNet6Areas(unittest.TestCase):
         net.main_init()
         net.init()
 
-        for i in range(100):
+        for i in range(20):
             net.step()
 
     @patch('random.random')

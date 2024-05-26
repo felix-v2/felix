@@ -989,8 +989,8 @@ class StandardNet6Areas:
         ## SET UP THE CURRENT SENSORIMOTOR INPUT ##
         self.set_up_current_sensorimotor_input(noise)
 
-        ## TODO COMPUTE NEW MEMBRANE POTENTIALS ##
-        # self.compute_new_membrane_potentials(self)
+        ## COMPUTE NEW MEMBRANE POTENTIALS ##
+        self.compute_new_membrane_potentials()
 
         ## COMPUTE FIRING RATES (OUTPUTS) ##
         self.compute_firing_rates(gain, theta)
