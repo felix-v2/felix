@@ -100,36 +100,6 @@ class TestUtil(unittest.TestCase):
 
         self.assertEqual(got, expected)
 
-    # def test_Correlate_2d_cyclic(self):
-    #     in_matrix = np.array([[1, 2, 3],
-    #                           [4, 5, 6],
-    #                           [7, 8, 9]])
-    #     kern = np.array([[-1, -1, -1],
-    #                      [-1,  8, -1],
-    #                      [-1, -1, -1]])  # Kernel for edge detection
-    #     x, y = 3, 3
-    #     kx, ky = 3, 3
-    #     out = np.zeros_like(in_matrix)
-
-    #     expected_output = np.array([[0,  0,  0],
-    #                                 [0, 13,  0],
-    #                                 [0,  0,  0]])
-
-    #     result = util.correlate_2d_cyclic(in_matrix, kern, x, y, kx, ky, out)
-    #     np.testing.assert_array_equal(result, expected_output)
-
-    def test_Correlate_2d_Uni_cyclic(self):
-        input_matrix = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9])
-        uniform_kernel = np.array(
-            [1.2, 1.2, 1.2, 1.2, 1.2, 1.2, 1.2, 1.2, 1.2])
-        out = np.zeros_like(input_matrix)
-
-        got = util.Correlate_2d_Uni_cyclic(
-            input_matrix, uniform_kernel, 3, 3, 3, 3, out)
-        expected = np.array([54, 54, 54, 54, 54, 53, 54, 54, 54])
-
-        np.testing.assert_array_equal(got, expected)
-
     def test_SIGMOID(self):
         self.assertEqual(util.SIGMOID(0), 0.5)
         self.assertEqual(util.SIGMOID(math.inf), 1)

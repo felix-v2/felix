@@ -3,7 +3,7 @@ import numpy as np
 import random
 import math
 import logging
-from . import util
+from . import util, correlation
 import json
 
 
@@ -912,7 +912,7 @@ class StandardNet6Areas:
                 # Is "j" NOT same as "area" and does area (j+1)-->(area+1)?..
                 if j != area and self.K[self.NAREAS * j + area]:
                     # Compute area (j+1)'s contrib. to TOT. input to (area+1)
-                    util.Correlate_2d_cyclic(
+                    correlation.Correlate_2d_cyclic_python(
                         self.rates[self.N1 * j: self.N1 * (j + 1)],
                         self.J[self.NSQR1 * (self.NAREAS * j + area): self.NSQR1 * (self.NAREAS * (j + 1) + area)],
                         self.N11, self.N12, self.NFFB1, self.NFFB2, self.tempffb
@@ -930,7 +930,7 @@ class StandardNet6Areas:
             # Calculate linkrec[i] (total pre-synaptic pot. converging from
             # within-area cells to cell i) for all cells of area "area+1".
             if self.K[(self.NAREAS + 1) * area]:  # Does area have REC links?
-                util.Correlate_2d_cyclic(
+                correlation.Correlate_2d_cyclic_python(
                     self.rates[self.N1 * area: self.N1 * (area + 1)],
                     self.J[self.NSQR1 * (self.NAREAS + 1) *
                            area: self.NSQR1 * (self.NAREAS + 1) * (area + 1)],
@@ -941,7 +941,7 @@ class StandardNet6Areas:
 
             # Calculate linkinh[i] (tot. activity from excitat. cells which
             # is being projected to each underlying inhibitory cell "i")
-            util.Correlate_2d_Uni_cyclic(
+            correlation.Correlate_2d_Uni_cyclic(
                 self.rates[self.N1 * area: self.N1 * (area + 1)],
                 self.Jinh,
                 self.N11, self.N12, self.NINH1, self.NINH2, self.linkinh
