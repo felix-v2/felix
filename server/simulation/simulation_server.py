@@ -124,6 +124,40 @@ def handle_start_simulation():
     }, sort_keys=False, indent=4))
 
 
+@socketio.on('update-noise')
+def handle_update_noise(new_noise):
+    """
+    update-noise
+
+    Updates the noise level of the initialised model 
+    """
+    logger.info(json.dumps({
+        'socket-event': 'update-noise',
+        'client id': request.sid,
+        'active client id': active_client_connection,
+        'incoming noise': new_noise
+    }, sort_keys=False, indent=4))
+
+    global sim_manager
+    if not sim_manager or (sim_manager and not sim_manager.model_initialised):
+        logger.error(json.dumps({
+            'socket-event': 'update-noise',
+            'error': 'Model not yet initialised! Run "Init" first',
+        }, sort_keys=False, indent=4))
+
+    original_noise = sim_manager.model.snoise
+
+    # Resume the simulation run, executing the next step of an initialised model
+    sim_manager.config_set_noise(new_noise)
+
+    logger.info(json.dumps({
+        'socket-event': 'update-noise',
+        'original noise': original_noise,
+        'new noise': sim_manager.model.snoise,
+        'model step': sim_manager.model.stp
+    }, sort_keys=False, indent=4))
+
+
 @socketio.on('disconnect')
 def handle_disconnection():
     """

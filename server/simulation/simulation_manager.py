@@ -11,10 +11,11 @@ logging.root.setLevel(logging.NOTSET)
 logger = logging.getLogger('simulation-manager')
 logger.setLevel(logging.DEBUG)
 
-
 # Interface between the socket layer and the model
 # Handles threading and queueing to allow realtime bidirectional between the neural net and the gui
 # Gives us a generic socket interface/server, into which we can plug and pull different neural networks as we wish
+
+
 class SimulationManager:
     def __init__(self, socket):
         self.socket: SocketIO = socket
@@ -68,6 +69,11 @@ class SimulationManager:
                 self.simulation_condition.wait()
 
         while self.model_running:
+            # Check for updated config from the main thread
+            if not self.config_queue.empty():
+                new_config = self.config_queue.get()
+                self.model.config_set_noise(new_config)
+
             current_activity = self.model.step()
             self.socket.emit('new-activity', {
                 'currentStep': current_activity['currentStep'],
@@ -81,6 +87,10 @@ class SimulationManager:
                 'area6': current_activity['potentials']['area6'],
             })
             time.sleep(0.01)
+
+    def config_set_noise(self, new_noise):
+        with self.simulation_lock:
+            self.config_queue.put(new_noise)
 
     def current_step(self):
         return self.model.stp

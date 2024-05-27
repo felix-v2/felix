@@ -229,6 +229,10 @@ const SimulationModelParameters = () => {
   const [jInh, setJInh] = useState<number>(0);
   const [jSlow, setJSlow] = useState<number>(0);
 
+  const serverUpdateNoise = () => {
+    socket.emit(OutboundEvent.UpdateNoise, noise);
+  };
+
   return (
     <>
       <Card style={{ fontSize: '0.8rem' }}>
@@ -255,6 +259,7 @@ const SimulationModelParameters = () => {
                 max={1000}
                 value={noise}
                 setValue={setNoise}
+                onAfterChange={serverUpdateNoise}
               ></Slider>
             </Col>
           </Row>
