@@ -55,7 +55,7 @@ export default function App() {
 
       setTotalActivity((prevTotalActivity) => {
         const updatedArray = [...prevTotalActivity, data.totalActivity];
-        return updatedArray.length > 10 ? updatedArray.slice(1) : updatedArray;
+        return updatedArray.length > 100 ? updatedArray.slice(1) : updatedArray;
       });
 
       setGlobalInhibition((prevGlobalInhibition) => {
@@ -63,7 +63,7 @@ export default function App() {
           ...prevGlobalInhibition,
           data.globalInhibition.area1,
         ];
-        return updatedArray.length > 10 ? updatedArray.slice(1) : updatedArray;
+        return updatedArray.length > 100 ? updatedArray.slice(1) : updatedArray;
       });
 
       setSensoryInput1(data.sensoryInput1);

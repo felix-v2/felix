@@ -45,12 +45,14 @@ export const TimeSeriesGraph = ({
         xaxis: {
           showgrid: false,
           zeroline: false,
-          visible: false,
+          visible: true,
+          tickvals: [],
         },
         yaxis: {
           showgrid: false,
-          zeroline: false,
-          visible: false,
+          zeroline: true,
+          visible: true,
+          tickvals: [0, 3000],
         },
       }}
     />
