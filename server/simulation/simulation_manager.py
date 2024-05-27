@@ -73,12 +73,12 @@ class SimulationManager:
                 'currentStep': current_activity['currentStep'],
                 'sensoryInput1': current_activity['sensInput'],
                 'motorInput1': current_activity['motorInput'],
-                'area1': current_activity['area1'],
-                'area2': current_activity['area2'],
-                'area3': current_activity['area3'],
-                'area4': current_activity['area4'],
-                'area5': current_activity['area5'],
-                'area6': current_activity['area6'],
+                'area1': current_activity['potentials']['area1'],
+                'area2': current_activity['potentials']['area2'],
+                'area3': current_activity['potentials']['area3'],
+                'area4': current_activity['potentials']['area4'],
+                'area5': current_activity['potentials']['area5'],
+                'area6': current_activity['potentials']['area6'],
             })
             time.sleep(0.01)
 

@@ -912,7 +912,8 @@ class StandardNet6Areas:
                     # Compute area (j+1)'s contrib. to TOT. input to (area+1)
                     correlation.Correlate_2d_cyclic_python(
                         self.rates[self.N1 * j: self.N1 * (j + 1)],
-                        self.J[self.NSQR1 * (self.NAREAS * j + area): self.NSQR1 * (self.NAREAS * (j + 1) + area)],
+                        self.J[self.NSQR1 * (self.NAREAS * j + area)
+                                             : self.NSQR1 * (self.NAREAS * (j + 1) + area)],
                         self.N11, self.N12, self.NFFB1, self.NFFB2, self.tempffb
                     )
 
@@ -1016,18 +1017,22 @@ class StandardNet6Areas:
         return self.get_current_activity()
 
     def get_current_activity(self):
+        print('g inhb:', self.slowinh)
+        print('total activity:', self.total_output)
         # TODO is this the correct way to reshape (e.g. order), based on the linearised data?
         potentials = self.pot.reshape(6, 25, 25).tolist()
         return {
             'currentStep': self.stp,
             'sensInput': self.sensInput.reshape(25, 25).tolist(),
             'motorInput': self.motorInput.reshape(25, 25).tolist(),
-            'area1': potentials[0],
-            'area2': potentials[1],
-            'area3': potentials[2],
-            'area4': potentials[3],
-            'area5': potentials[4],
-            'area6': potentials[5],
+            'potentials': {
+                'area1': potentials[0],
+                'area2': potentials[1],
+                'area3': potentials[2],
+                'area4': potentials[3],
+                'area5': potentials[4],
+                'area6': potentials[5],
+            }
         }
 
     def MAIN_INIT_RANDOM_ACTIVITY(self):
