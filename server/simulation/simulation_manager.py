@@ -71,8 +71,13 @@ class SimulationManager:
         while self.model_running:
             # Check for updated config from the main thread
             if not self.config_queue.empty():
-                new_config = self.config_queue.get()
-                self.model.config_set_noise(new_config)
+                config_change = self.config_queue.get()
+                param = config_change['param']
+                value = config_change['value']
+                if param == 'noise':
+                    self.model.config_set_noise(value)
+                elif param == 'global-inhibition':
+                    self.model.config_set_global_inhibition(value)
 
             current_activity = self.model.step()
             self.socket.emit('new-activity', {
@@ -88,9 +93,9 @@ class SimulationManager:
             })
             time.sleep(0.01)
 
-    def config_set_noise(self, new_noise):
+    def update_config_parameter(self, param, new_value):
         with self.simulation_lock:
-            self.config_queue.put(new_noise)
+            self.config_queue.put({'param': param, 'value': new_value})
 
     def current_step(self):
         return self.model.stp

@@ -11,5 +11,5 @@ export enum InboundEvent {
 export enum OutboundEvent {
   InitSimulation = 'init-simulation',
   ContinueSimulation = 'continue-simulation',
-  UpdateNoise = 'update-noise',
+  UpdateConfig = 'update-config',
 }

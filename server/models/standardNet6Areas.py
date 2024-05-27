@@ -1039,6 +1039,9 @@ class StandardNet6Areas:
     def config_set_noise(self, new_noise):
         self.snoise = new_noise
 
+    def config_set_global_inhibition(self, new_global_inhibition):
+        self.sJslow = new_global_inhibition
+
     def MAIN_INIT_RANDOM_ACTIVITY(self):
         """
         For unit testing: generate activity vectors to pre-empt resetNet

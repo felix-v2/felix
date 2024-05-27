@@ -230,7 +230,11 @@ const SimulationModelParameters = () => {
   const [jSlow, setJSlow] = useState<number>(0);
 
   const serverUpdateNoise = () => {
-    socket.emit(OutboundEvent.UpdateNoise, noise);
+    socket.emit(OutboundEvent.UpdateConfig, 'noise', noise);
+  };
+
+  const serverUpdateGlobalInhibition = () => {
+    socket.emit(OutboundEvent.UpdateConfig, 'global-inhibition', jSlow);
   };
 
   return (
@@ -441,6 +445,7 @@ const SimulationModelParameters = () => {
                 max={5000}
                 value={jSlow}
                 setValue={setJSlow}
+                onAfterChange={serverUpdateGlobalInhibition}
               ></Slider>
             </Col>
           </Row>
