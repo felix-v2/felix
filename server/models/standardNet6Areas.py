@@ -696,6 +696,7 @@ class StandardNet6Areas:
         """
         COMPUTE FIRING RATES (OUTPUTS)
         """
+        self.total_output = 0.0
         for area in range(self.NAREAS):  # For ALL areas in the network
             # "Define some helpful pointers (mostly for speed)"
             ppot = self.pot[self.N1 * area:self.N1 * (area + 1)]
