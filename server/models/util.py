@@ -2,6 +2,19 @@ import numpy as np
 from numpy.typing import NDArray
 import random
 import math
+import time
+
+
+def time_it(func):
+    def wrapper(*args, **kwargs):
+        start_time = time.perf_counter()
+        result = func(*args, **kwargs)
+        end_time = time.perf_counter()
+        execution_time = end_time - start_time
+        print(f"Execution time of {func.__name__}: {execution_time} seconds")
+        return result
+    return wrapper
+
 
 BaseType = np.float64
 VectorType = NDArray[BaseType]

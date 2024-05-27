@@ -5,6 +5,7 @@ import math
 import logging
 from . import util, correlation
 import json
+import time
 
 
 class StandardNet6Areas:
@@ -874,6 +875,7 @@ class StandardNet6Areas:
                                    (self.NAREAS * (j + 1) + i)],
                             self.N11, self.N12, self.NFFB1, self.NFFB2, hrate, self.tot_LTP[i:i+1], self.tot_LTD[i:i+1])
 
+    @util.time_it
     def compute_new_membrane_potentials(self):
         for area in range(self.NAREAS):
             # get the slices of activity for this area (the 625 cells in area)
@@ -913,8 +915,7 @@ class StandardNet6Areas:
                     # Compute area (j+1)'s contrib. to TOT. input to (area+1)
                     correlation.Correlate_2d_cyclic_python(
                         self.rates[self.N1 * j: self.N1 * (j + 1)],
-                        self.J[self.NSQR1 * (self.NAREAS * j + area)
-                                             : self.NSQR1 * (self.NAREAS * (j + 1) + area)],
+                        self.J[self.NSQR1 * (self.NAREAS * j + area): self.NSQR1 * (self.NAREAS * (j + 1) + area)],
                         self.N11, self.N12, self.NFFB1, self.NFFB2, self.tempffb
                     )
 
@@ -1017,15 +1018,25 @@ class StandardNet6Areas:
         self.stp = self.stp+1
         return self.get_current_activity()
 
+    # TODO is this the correct way to reshape (e.g. order), based on the linearised data?
     def get_current_activity(self):
         print('g inhb:', self.slowinh)
         print('total activity:', self.total_output)
-        # TODO is this the correct way to reshape (e.g. order), based on the linearised data?
         potentials = self.pot.reshape(6, 25, 25).tolist()
+        global_inhibition = self.slowinh.tolist()
         return {
             'currentStep': self.stp,
+            'totalActivity': self.total_output,
             'sensInput': self.sensInput.reshape(25, 25).tolist(),
             'motorInput': self.motorInput.reshape(25, 25).tolist(),
+            'globalInhibition': {
+                'area1': global_inhibition[0],
+                'area2': global_inhibition[1],
+                'area3': global_inhibition[2],
+                'area4': global_inhibition[3],
+                'area5': global_inhibition[4],
+                'area6': global_inhibition[5],
+            },
             'potentials': {
                 'area1': potentials[0],
                 'area2': potentials[1],

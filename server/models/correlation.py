@@ -1,4 +1,5 @@
 from .util import VectorType
+import numpy as np
 
 """
 Functions like correlate_2d_cyclic, from the original C implementation, 
@@ -52,7 +53,10 @@ def Correlate_2d_cyclic_python(in_vector, kern, width, height, kernel_width, ker
     """
     Performs a cyclic 2D correlation on a 2D data structure represented as a 1D array.
     The original C implementation, replicated in Correlate_2d_cyclic_original_C, doesn't work
-    with our 1d numpy arrays
+    with our 1d numpy arrays.
+
+    TODO this takes 0.055s, which in turn leads to compute_new_membrane_potentials taking 0.9.s.
+    We will need to vectorise it to speed it up.
     """
     for i in range(height):
         for j in range(width):

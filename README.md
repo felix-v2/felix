@@ -11,6 +11,16 @@ Run server:
   
 `python3 server/server.py`
 
+# Running model unit tests
+
+```bash
+cd server
+python3 -m unittest
+
+# running a specific suite/file
+python3 -m unittest models.__tests__.test_init_kernels
+```
+
 # Running the React app
 
 Dependencies:
