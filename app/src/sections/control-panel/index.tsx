@@ -209,25 +209,25 @@ const SimulationSwitches = () => {
 
 const SimulationModelParameters = () => {
   const [io, setIo] = useState<number>(0);
-  const [noise, setNoise] = useState<number>(0);
+  const [noise, setNoise] = useState<number>(5);
   const [steps, setSteps] = useState<number>(0);
   const [displaySteps, setDisplaySteps] = useState<number>(0);
   const [sensoryInputRow, setSensoryInputRow] = useState<number>(0);
   const [sensoryInputCol, setSensoryInputCol] = useState<number>(0);
   const [motorInputRow, setMotorInputRow] = useState<number>(0);
   const [motorInputCol, setMotorInputCol] = useState<number>(0);
-  const [gain, setGain] = useState<number>(0);
+  const [gain, setGain] = useState<number>(1000);
   const [theta, setTheta] = useState<number>(0);
-  const [sensoryStimAmp, setSensoryStimAmp] = useState<number>(0);
-  const [motorStimAmp, setMotorStimAmp] = useState<number>(0);
+  const [sensoryStimAmp, setSensoryStimAmp] = useState<number>(300);
+  const [motorStimAmp, setMotorStimAmp] = useState<number>(300);
   const [pattern, setPattern] = useState<number>(0);
   const [learn, setLearn] = useState<number>(0);
   const [diluteProb, setDiluteProb] = useState<number>(0);
   const [diluteArea, setDiluteArea] = useState<number>(0);
-  const [jFfb, setJffb] = useState<number>(0);
-  const [jRec, setJRec] = useState<number>(0);
-  const [jInh, setJInh] = useState<number>(0);
-  const [jSlow, setJSlow] = useState<number>(0);
+  const [jFfb, setJffb] = useState<number>(500);
+  const [jRec, setJRec] = useState<number>(500);
+  const [jInh, setJInh] = useState<number>(500);
+  const [jSlow, setJSlow] = useState<number>(60);
 
   const serverUpdateNoise = () => {
     socket.emit(OutboundEvent.UpdateConfig, 'noise', noise);
