@@ -1,4 +1,4 @@
-# Running the Flask server
+# Running the simulation server
 
 Dependencies:
 
@@ -7,9 +7,11 @@ Dependencies:
 - Flask 3.0.0
 - Flask SocketIO 5.3.6
 
-Run server:
+# Run server from the repo root:
   
-`python3 server/server.py`
+```bash
+python3 -m server.simulation.simulation_server
+```
 
 # Running model unit tests
 

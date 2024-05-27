@@ -82,14 +82,11 @@ class SimulationManager:
             current_activity = self.model.step()
             self.socket.emit('new-activity', {
                 'currentStep': current_activity['currentStep'],
+                'totalActivity': current_activity['totalActivity'],
                 'sensoryInput1': current_activity['sensInput'],
                 'motorInput1': current_activity['motorInput'],
-                'area1': current_activity['potentials']['area1'],
-                'area2': current_activity['potentials']['area2'],
-                'area3': current_activity['potentials']['area3'],
-                'area4': current_activity['potentials']['area4'],
-                'area5': current_activity['potentials']['area5'],
-                'area6': current_activity['potentials']['area6'],
+                'potentials': current_activity['potentials'],
+                'globalInhibition': current_activity['globalInhibition'],
             })
             time.sleep(0.01)
 

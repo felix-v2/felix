@@ -17,15 +17,22 @@ import TransientToast from './components/toast';
  * @todo Responsivity?
  */
 export default function App() {
-  // server connection
   const [connected, setConnected] = useState(socket.connected);
 
-  // activity
   const silence = randActivity({ silent: true });
   const full = randActivity({ full: true });
 
+  const [currentStep, setCurrentStep] = useState<number>(0);
+
+  // time-series data (1 area, 1d)
+  const [totalActivity, setTotalActivity] = useState<number[]>([]);
+  const [globalInhibition, setGlobalInhibition] = useState<number[]>([]);
+
+  // neural activity (1 area, 2d)
   const [sensoryInput1, setSensoryInput1] = useState<number[][]>(full);
   const [motorInput1, setMotorInput1] = useState<number[][]>(full);
+
+  // neural activity (1 area, 2d)
   const [area1, setArea1] = useState<number[][]>(silence);
   const [area2, setArea2] = useState<number[][]>(silence);
   const [area3, setArea3] = useState<number[][]>(silence);
@@ -39,29 +46,35 @@ export default function App() {
     };
 
     const onDisconnect = () => {
-      setArea1(silence);
-      setArea2(silence);
-      setArea3(silence);
-      setArea4(silence);
-      setArea5(silence);
-      setArea6(silence);
-
-      setSensoryInput1(full);
-      setMotorInput1(full);
-
       setConnected(false);
     };
 
     const onNewActivity = (data: any) => {
+      console.log(JSON.stringify(data));
+      setCurrentStep(data.currentStep);
+
+      setTotalActivity((prevTotalActivity) => {
+        const updatedArray = [...prevTotalActivity, data.totalActivity];
+        return updatedArray.length > 10 ? updatedArray.slice(1) : updatedArray;
+      });
+
+      setGlobalInhibition((prevGlobalInhibition) => {
+        const updatedArray = [
+          ...prevGlobalInhibition,
+          data.globalInhibition.area1,
+        ];
+        return updatedArray.length > 10 ? updatedArray.slice(1) : updatedArray;
+      });
+
       setSensoryInput1(data.sensoryInput1);
       setMotorInput1(data.motorInput1);
 
-      setArea1(data.area1);
-      setArea2(data.area2);
-      setArea3(data.area3);
-      setArea4(data.area4);
-      setArea5(data.area5);
-      setArea6(data.area6);
+      setArea1(data.potentials.area1);
+      setArea2(data.potentials.area2);
+      setArea3(data.potentials.area3);
+      setArea4(data.potentials.area4);
+      setArea5(data.potentials.area5);
+      setArea6(data.potentials.area6);
     };
 
     socket.on(InboundEvent.Connect, onConnect);
@@ -125,7 +138,10 @@ export default function App() {
             marginRight: '100px',
           }}
         >
-          <Totals />
+          <Totals
+            totalActivity={totalActivity}
+            globalInhibition={globalInhibition}
+          />
         </Row>
         <Row
           style={{

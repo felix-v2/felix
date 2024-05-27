@@ -1,22 +1,31 @@
 import Plot from 'react-plotly.js';
 
-// Function to compute values of normal distribution
-const normalDistribution = (x: number, mean: number, stdDev: number) => {
-  return (
-    (1 / (stdDev * Math.sqrt(2 * Math.PI))) *
-    Math.exp(-Math.pow(x - mean, 2) / (2 * Math.pow(stdDev, 2)))
-  );
+const prepareDataForPlot = (data: number[]) => {
+  const yData = data;
+  const xData = data.map((_, i) => i);
+
+  const mean = data.reduce((acc, val) => acc + val, 0) / data.length;
+
+  const variance =
+    data.reduce((acc, val) => acc + Math.pow(val - mean, 2), 0) / data.length;
+  const standardDeviation = Math.sqrt(variance);
+
+  return { yData, xData, mean, standardDeviation };
 };
 
-export const TimeSeriesGraph = ({ title }: { title: string }) => {
-  const xData = Array.from({ length: 151 }, (_, index) => index);
-  const mean = 50;
-  const stdDev = 10;
-  const yData = xData.map((x) => normalDistribution(x, mean, stdDev));
+export const TimeSeriesGraph = ({
+  title,
+  data,
+}: {
+  title: string;
+  data: number[];
+}) => {
+  console.log({ data });
+  const { xData, yData } = prepareDataForPlot(data);
 
   return (
     <Plot
-      style={{ width: '300px', height: '200px' }}
+      style={{ width: '300px', height: '200px', border: '1px' }}
       config={{ displayModeBar: false, editable: false, staticPlot: true }}
       data={[
         {
@@ -24,7 +33,7 @@ export const TimeSeriesGraph = ({ title }: { title: string }) => {
           y: yData,
           type: 'scatter',
           mode: 'lines',
-          marker: { color: 'blue' },
+          marker: { color: 'black' },
           line: { width: 1 }, // Adjust line width,
           hoverinfo: 'none',
           showlegend: false,
