@@ -121,6 +121,31 @@ const SimulationControlButtons = () => {
 };
 
 const SimulationSwitches = () => {
+  const [sensIn, setSensIn] = useState<boolean>(false);
+  const [motorIn, setMotorIn] = useState<boolean>(false);
+
+  const handleSensInChange = () => {
+    const newSensIn = !sensIn;
+    setSensIn(newSensIn);
+
+    socket.emit(
+      OutboundEvent.UpdateConfig,
+      'is-receiving-sensory-input',
+      newSensIn,
+    );
+  };
+
+  const handleMotorInChange = () => {
+    const newMotorIn = !motorIn;
+    setMotorIn(newMotorIn);
+
+    socket.emit(
+      OutboundEvent.UpdateConfig,
+      'is-receiving-motor-input',
+      newMotorIn,
+    );
+  };
+
   return (
     <>
       <Card>
@@ -131,7 +156,10 @@ const SimulationSwitches = () => {
               style={{ marginRight: 10 }}
               variant={'primary'}
               id="tbg-btn-1"
-              value={1}
+              type="checkbox"
+              checked={sensIn}
+              value={sensIn.toString()} // required string/number, but doesn't impact the functionality directly
+              onChange={handleSensInChange}
             >
               sensIn
             </ToggleButton>
@@ -139,7 +167,10 @@ const SimulationSwitches = () => {
               style={{ marginRight: 10 }}
               variant={'primary'}
               id="tbg-btn-2"
-              value={1}
+              type="checkbox"
+              checked={motorIn}
+              value={motorIn.toString()}
+              onChange={handleMotorInChange}
             >
               motorIn
             </ToggleButton>

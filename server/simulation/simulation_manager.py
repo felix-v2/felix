@@ -80,6 +80,10 @@ class SimulationManager:
                     self.model.config_set_global_inhibition(value)
                 elif param == 'pattern-number':
                     self.model.config_set_pattern_number(value)
+                elif param == 'is-receiving-sensory-input':
+                    self.model.config_set_is_receiving_sensory_input(value)
+                elif param == 'is-receiving-motor-input':
+                    self.model.config_set_is_receiving_motor_input(value)
 
             current_activity = self.model.step()
             self.socket.emit('new-activity', {

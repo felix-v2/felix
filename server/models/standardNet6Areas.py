@@ -1055,6 +1055,12 @@ class StandardNet6Areas:
     def config_set_pattern_number(self, new_pattern_number):
         self.spatno = new_pattern_number
 
+    def config_set_is_receiving_sensory_input(self, is_receiving_sens_input):
+        self.sSInp = is_receiving_sens_input
+
+    def config_set_is_receiving_motor_input(self, is_receiving_motor_input):
+        self.sMInp = is_receiving_motor_input
+
     def MAIN_INIT_RANDOM_ACTIVITY(self):
         """
         For unit testing: generate activity vectors to pre-empt resetNet
