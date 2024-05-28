@@ -10,13 +10,14 @@ Dependencies:
 # Run server from the repo root:
   
 ```bash
+export PYTHONPATH=$PYTHONPATH:/Users/callummessiter/workspace/felix/server
 python3 -m server.simulation.simulation_server
 ```
 
-# Running model unit tests
+# Running model unit tests from repo root
 
 ```bash
-cd server
+export PYTHONPATH=$PYTHONPATH:/Users/callummessiter/workspace/felix/serve
 python3 -m unittest
 
 # running a specific suite/file

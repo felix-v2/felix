@@ -237,6 +237,10 @@ const SimulationModelParameters = () => {
     socket.emit(OutboundEvent.UpdateConfig, 'global-inhibition', jSlow);
   };
 
+  const serverUpdatePatternNumber = () => {
+    socket.emit(OutboundEvent.UpdateConfig, 'pattern-number', pattern);
+  };
+
   return (
     <>
       <Card style={{ fontSize: '0.8rem' }}>
@@ -404,6 +408,7 @@ const SimulationModelParameters = () => {
                 max={13}
                 value={pattern}
                 setValue={setPattern}
+                onAfterChange={serverUpdatePatternNumber}
               ></Slider>
             </Col>
           </Row>

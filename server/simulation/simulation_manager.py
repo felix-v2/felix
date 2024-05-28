@@ -78,6 +78,8 @@ class SimulationManager:
                     self.model.config_set_noise(value)
                 elif param == 'global-inhibition':
                     self.model.config_set_global_inhibition(value)
+                elif param == 'pattern-number':
+                    self.model.config_set_pattern_number(value)
 
             current_activity = self.model.step()
             self.socket.emit('new-activity', {

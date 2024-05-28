@@ -242,7 +242,7 @@ class StandardNet6Areas:
     slrate: int = 0
     sgain: int = 1000
     stheta: int = 0
-    snoise: int = 100
+    snoise: int = 5
     spatno: int = 0
     sdilutearea: int = 1
     sJslow: int = 18
@@ -892,7 +892,7 @@ class StandardNet6Areas:
             # from sensory/OR/motor inp. patt.
             util.Clear_Vector(self.clampSMIn)
 
-            ### Sensorimotor input ###
+            ### Sensorimotor input ##
 
             # Is this area (possibly) receiving a sensory pattern as input?
             if area % self.NXAREAS == self.sSInCol - 1:
@@ -915,7 +915,8 @@ class StandardNet6Areas:
                     # Compute area (j+1)'s contrib. to TOT. input to (area+1)
                     correlation.Correlate_2d_cyclic_python(
                         self.rates[self.N1 * j: self.N1 * (j + 1)],
-                        self.J[self.NSQR1 * (self.NAREAS * j + area): self.NSQR1 * (self.NAREAS * (j + 1) + area)],
+                        self.J[self.NSQR1 * (self.NAREAS * j + area)
+                                             : self.NSQR1 * (self.NAREAS * (j + 1) + area)],
                         self.N11, self.N12, self.NFFB1, self.NFFB2, self.tempffb
                     )
 
@@ -1020,8 +1021,6 @@ class StandardNet6Areas:
 
     # TODO is this the correct way to reshape (e.g. order), based on the linearised data?
     def get_current_activity(self):
-        print('g inhb:', self.slowinh)
-        print('total activity:', self.total_output)
         potentials = self.pot.reshape(6, 25, 25).tolist()
         global_inhibition = self.slowinh.tolist()
         return {
@@ -1052,6 +1051,9 @@ class StandardNet6Areas:
 
     def config_set_global_inhibition(self, new_global_inhibition):
         self.sJslow = new_global_inhibition
+
+    def config_set_pattern_number(self, new_pattern_number):
+        self.spatno = new_pattern_number
 
     def MAIN_INIT_RANDOM_ACTIVITY(self):
         """
