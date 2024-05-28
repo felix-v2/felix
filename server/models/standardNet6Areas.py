@@ -1061,6 +1061,12 @@ class StandardNet6Areas:
     def config_set_is_receiving_motor_input(self, is_receiving_motor_input):
         self.sMInp = is_receiving_motor_input
 
+    def config_set_sensory_stimulation_amplitude(self, sensory_stimulation_amplitude):
+        self.sSI0 = sensory_stimulation_amplitude
+    
+    def config_set_motor_stimulation_amplitude(self, motor_stimulation_amplitude):
+        self.sMI0 = motor_stimulation_amplitude
+
     def MAIN_INIT_RANDOM_ACTIVITY(self):
         """
         For unit testing: generate activity vectors to pre-empt resetNet

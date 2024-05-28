@@ -272,6 +272,22 @@ const SimulationModelParameters = () => {
     socket.emit(OutboundEvent.UpdateConfig, 'pattern-number', pattern);
   };
 
+  const serverUpdateSensoryStimulationAmplitude = () => {
+    socket.emit(
+      OutboundEvent.UpdateConfig,
+      'sensory-stimulation-amplitude',
+      sensoryStimAmp,
+    );
+  };
+
+  const serverUpdateMotorStimulationAmplitude = () => {
+    socket.emit(
+      OutboundEvent.UpdateConfig,
+      'motor-stimulation-amplitude',
+      motorStimAmp,
+    );
+  };
+
   return (
     <>
       <Card style={{ fontSize: '0.8rem' }}>
@@ -410,6 +426,7 @@ const SimulationModelParameters = () => {
                 max={1000}
                 value={sensoryStimAmp}
                 setValue={setSensoryStimAmp}
+                onAfterChange={serverUpdateSensoryStimulationAmplitude}
               ></Slider>
             </Col>
             <Col xs={6}>
@@ -419,6 +436,7 @@ const SimulationModelParameters = () => {
                 max={1000}
                 value={motorStimAmp}
                 setValue={setMotorStimAmp}
+                onAfterChange={serverUpdateMotorStimulationAmplitude}
               ></Slider>
             </Col>
           </Row>

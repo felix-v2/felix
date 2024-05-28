@@ -84,6 +84,10 @@ class SimulationManager:
                     self.model.config_set_is_receiving_sensory_input(value)
                 elif param == 'is-receiving-motor-input':
                     self.model.config_set_is_receiving_motor_input(value)
+                elif param == 'sensory-stimulation-amplitude':
+                    self.model.config_set_sensory_stimulation_amplitude(value)
+                elif param == 'motor-stimulation-amplitude':
+                    self.model.config_set_motor_stimulation_amplitude(value)
 
             current_activity = self.model.step()
             self.socket.emit('new-activity', {
