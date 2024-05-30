@@ -94,6 +94,7 @@ export default function App() {
       <ControlPanel
         visible={true}
         connectedToServer={connected}
+        currentSimulationStep={currentStep}
         onHide={() => console.log('Hide')}
       />
       <Col xs={10} style={{ marginTop: '40px' }}>

@@ -20,10 +20,12 @@ import { InboundEvent, OutboundEvent, socket } from '../../socket';
 export const ControlPanel = ({
   onHide,
   connectedToServer,
+  currentSimulationStep,
 }: {
   visible: boolean;
   onHide: () => void;
   connectedToServer: boolean;
+  currentSimulationStep: number;
 }) => {
   const connectToServer = () => {
     socket.connect();
@@ -53,7 +55,7 @@ export const ControlPanel = ({
             now={100}
             label={
               connectedToServer
-                ? 'Server connection established'
+                ? `Simulation step: ${currentSimulationStep}`
                 : 'Connect to server'
             }
             onClick={connectToServer}
