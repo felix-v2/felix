@@ -5,7 +5,10 @@ services:
     build: ./app
     container_name: felix-app
     volumes:
-        - ./app:/app # mount the app directory into the container
+        # mount the app directory - except node_modules - into the container
+        # this ensures node_modules is not overwritten on the container
+        - ./app:/app:delegated
+        - /app/node_modules
     ports:
         - "3000:3000" # maps host port to container port
 
