@@ -65,7 +65,7 @@ export const ControlPanel = ({
       <Offcanvas.Body>
         <Row style={{ paddingTop: 20 }}>
           <Col xs={12}>
-            <SimulationControlButtons />
+            <SimulationControlButtons connectedToServer={connectedToServer} />
           </Col>
         </Row>
         <Row style={{ paddingTop: 40 }}>
@@ -83,7 +83,11 @@ export const ControlPanel = ({
   );
 };
 
-const SimulationControlButtons = () => {
+const SimulationControlButtons = ({
+  connectedToServer,
+}: {
+  connectedToServer: boolean;
+}) => {
   const initSimulation = () => {
     socket.emit(OutboundEvent.InitSimulation);
   };
@@ -101,10 +105,15 @@ const SimulationControlButtons = () => {
             style={{ marginRight: 10 }}
             variant="light"
             onClick={initSimulation}
+            disabled={!connectedToServer}
           >
             Init
           </Button>
-          <Button style={{ marginRight: 10 }} onClick={continueSimulation}>
+          <Button
+            style={{ marginRight: 10 }}
+            onClick={continueSimulation}
+            disabled={!connectedToServer}
+          >
             Continue
           </Button>
           <Button style={{ marginRight: 10 }} variant="info" disabled={true}>

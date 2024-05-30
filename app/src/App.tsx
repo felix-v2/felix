@@ -19,6 +19,16 @@ import TransientToast from './components/toast';
 export default function App() {
   const [connected, setConnected] = useState(socket.connected);
 
+  const [errorNotification, setErrorNotification] = useState<{
+    show: boolean;
+    msg: string;
+  }>({ show: false, msg: '' });
+
+  const [infoNotification, setInfoNotification] = useState<{
+    show: boolean;
+    msg: string;
+  }>({ show: false, msg: '' });
+
   const silence = randActivity({ silent: true });
   const full = randActivity({ full: true });
 
@@ -77,20 +87,53 @@ export default function App() {
       setArea6(data.potentials.area6);
     };
 
+    const onErrorNotification = (data: { msg: string }) => {
+      setErrorNotification({ show: true, msg: data.msg });
+
+      // Hide the toast after 3 seconds
+      setTimeout(() => {
+        setErrorNotification({ show: false, msg: '' });
+      }, 3000);
+    };
+
+    const onInfoNotification = (data: { msg: string }) => {
+      setInfoNotification({ show: true, msg: data.msg });
+
+      // Hide the toast after 3 seconds
+      setTimeout(() => {
+        setInfoNotification({ show: false, msg: '' });
+      }, 3000);
+    };
+
     socket.on(InboundEvent.Connect, onConnect);
     socket.on(InboundEvent.Disconnect, onDisconnect);
     socket.on(InboundEvent.NewActivity, onNewActivity);
+    socket.on(InboundEvent.ErrorNotification, onErrorNotification);
+    socket.on(InboundEvent.InfoNotification, onInfoNotification);
 
     return () => {
       socket.off(InboundEvent.Connect, onConnect);
       socket.off(InboundEvent.Disconnect, onDisconnect);
       socket.off(InboundEvent.NewActivity, onNewActivity);
+      socket.off(InboundEvent.ErrorNotification, onErrorNotification);
+      socket.off(InboundEvent.InfoNotification, onInfoNotification);
     };
   }, []);
 
   return (
     <div className="App">
-      {/* <TransientToast error={true} /> */}
+      <TransientToast
+        show={errorNotification.show}
+        error={true}
+        msg={errorNotification.msg}
+        onClose={() => setErrorNotification({ show: false, msg: '' })}
+      />
+      <TransientToast
+        show={infoNotification.show}
+        error={false}
+        msg={infoNotification.msg}
+        onClose={() => setInfoNotification({ show: false, msg: '' })}
+      />
       <ControlPanel
         visible={true}
         connectedToServer={connected}

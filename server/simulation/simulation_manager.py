@@ -38,7 +38,7 @@ class SimulationManager:
         Init ->
         """
         with self.simulation_lock:
-            if self.model_running:
+            if self.model_running or self.model_initialised:
                 logger.error(json.dumps({
                     'op': 'init_simulation',
                     'error': 'Cannot start simulation: model already running!',

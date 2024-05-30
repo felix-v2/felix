@@ -82,9 +82,16 @@ def handle_init_simulation():
             'error': 'Model already initialised!',
         }, sort_keys=False, indent=4))
 
+        socketio.emit('error-notification',
+                      {'msg': 'Network already initialised!'})
+        return
+
     # Setup a new simulation with the model initialised
     sim_manager = SimulationManager(socketio)
     sim_manager.init_simulation()
+
+    socketio.emit('info-notification',
+                  {'msg': 'Network initialised!'})
 
     logger.info(json.dumps({
         'socket-event': 'init-simulation',
@@ -112,6 +119,10 @@ def handle_start_simulation():
             'socket-event': 'continue-simulation',
             'error': 'Model not yet initialised! Run "Init" first',
         }, sort_keys=False, indent=4))
+
+        socketio.emit('error-notification',
+                      {'msg': 'Network not initialised!'})
+        return
 
     # Resume the simulation run, executing the next step of an initialised model
     sim_manager.continue_simulation()

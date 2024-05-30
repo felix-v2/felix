@@ -6,6 +6,8 @@ export enum InboundEvent {
   Connect = 'connect',
   Disconnect = 'disconnect',
   NewActivity = 'new-activity',
+  ErrorNotification = 'error-notification',
+  InfoNotification = 'info-notification',
 }
 
 export enum OutboundEvent {
