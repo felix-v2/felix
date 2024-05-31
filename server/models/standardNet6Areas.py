@@ -5,7 +5,6 @@ import math
 import logging
 from . import util, correlation
 import json
-import time
 
 
 class StandardNet6Areas:
@@ -1063,7 +1062,7 @@ class StandardNet6Areas:
 
     def config_set_sensory_stimulation_amplitude(self, sensory_stimulation_amplitude):
         self.sSI0 = sensory_stimulation_amplitude
-    
+
     def config_set_motor_stimulation_amplitude(self, motor_stimulation_amplitude):
         self.sMI0 = motor_stimulation_amplitude
 
