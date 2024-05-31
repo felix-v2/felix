@@ -16,6 +16,6 @@ services:
       build: ./server
       container_name: felix-net
       volumes:
-          - ./server:/server # mount the server directory into the container
+          - ./server:/felix/server # mount the server directory into the container
       ports:
           - "5000:5000" # maps host port to container port
