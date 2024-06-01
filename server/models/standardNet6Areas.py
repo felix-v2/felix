@@ -595,9 +595,7 @@ class StandardNet6Areas:
                     # A "1" in vector "diluted" will mean that cell is damaged
                     for i in range(self.N1):
                         pdil[i] = int(util.bool_noise(h))
-            # SET_SWITCH(sdilute, FALSEs)
-            # TODO emit event to GUI
-            self.sdilute = False
+            self.sdilute = False  # SET_SWITCH(sdilute, FALSE)
 
         self.training_phase = 0  # Init. training phase (used in TRAINING)
         self.stps_2b_avgd = 0    # Reset averaging steps count (4 TRAINING)
@@ -914,8 +912,7 @@ class StandardNet6Areas:
                     # Compute area (j+1)'s contrib. to TOT. input to (area+1)
                     correlation.Correlate_2d_cyclic_python(
                         self.rates[self.N1 * j: self.N1 * (j + 1)],
-                        self.J[self.NSQR1 * (self.NAREAS * j + area)
-                                             : self.NSQR1 * (self.NAREAS * (j + 1) + area)],
+                        self.J[self.NSQR1 * (self.NAREAS * j + area)                               : self.NSQR1 * (self.NAREAS * (j + 1) + area)],
                         self.N11, self.N12, self.NFFB1, self.NFFB2, self.tempffb
                     )
 
@@ -958,7 +955,7 @@ class StandardNet6Areas:
 
             # Slow/global inhibition/activity control
             self.slowinh[area] = util.leaky_integrate(self.TAUSLOW, self.slowinh[area], util.Sum(
-                self.rates[self.N1 * area]), self.STEPSIZE)
+                self.rates[self.N1 * area: self.N1 * (area + 1)]), self.STEPSIZE)
 
             # Excitatory cells
             for i in range(self.N1):  # For all cells of current area
@@ -966,6 +963,72 @@ class StandardNet6Areas:
                                                                           self.sJrec * self.linkrec[i] - self.sJinh * self.FUNCI(pinh[i]) -
                                                                           self.sJslow * self.slowinh[area] - 1000 * pdil[i] +
                                                                           self.snoise * self.noise_fac * (util.equal_noise() - .5)), self.STEPSIZE)
+
+    def manage_network_training(self):
+        if self.strainNet:  # Is the "network training" switch pressed?
+            if self.training_phase == 0:  # PHASE 0: prepare for a "PAUSE" phase
+                self.last_stp = self.stp  # record current time step
+                # SET_SLIDER(self.spatno, self.P + 1)  # pattern no. P+1 == noise
+                self.spatno = self.P + 1
+                # SET_SWITCH(self.ssaveNet, True)  # Force writing data (net0.dat)
+                self.ssaveNet = True
+                self.training_phase += 1  # move to next phase
+
+            # PHASE 1: PAUSE -- wait until an "INPUT" phase is due..
+            elif self.training_phase == 1:
+                # levels decayed enough?
+                # and glob. inhibition
+                if (self.stp - self.last_stp >= self.PAUSE_TIME and self.slowinh[self.SLOWAREA1] < self.MAXINHIB1 and self.slowinh[self.SLOWAREA2] < self.MAXINHIB2):
+                    # Pseudo-randomly select a number betw. 1 and P, ensuring
+                    # that the patterns freq. distribution is approx. uniform
+                    patt_no = int(1234.56 * util.equal_noise())
+                    while True:
+                        patt_no = (patt_no % self.P) + 1
+                        if self.freq_distrib[patt_no - 1] <= self.freq_distrib[(patt_no % self.P)]:
+                            break
+
+                    self.spatno = patt_no  # SET_SLIDER(self.spatno, patt_no)
+
+                    self.stps_2b_avgd = self.AVG_RATES_TIME  # Set averaging steps-counter
+                    # Update presentation freq.
+                    self.freq_distrib[patt_no - 1] += 1
+                    self.last_stp = self.stp  # record current time step
+                    self.training_phase += 1
+
+            # PHASE 2: INPUT -- wait until a "PAUSE" phase is due..
+            elif self.training_phase == 2:
+                if (self.stp - self.last_stp) >= self.INPUT_TIME:  # Have enough steps passed?
+                    # Is it time to save data or stop current simulation?
+                    frq = self.freq_distrib[0]  # get patt.#1's frequency
+                    if frq > self.TOT_TRAINING:  # Enough presentations?
+                        self.training_phase += 1  # YES: END OF TRAINING - STOP
+                    else:
+                        # If no. presentations is multiple of SAVE_CYCLE OR is
+                        # < SAVE_CYCLE && multiple of 100, save the net. data
+                        if (frq > 0 and
+                            (frq % self.SAVE_CYCLE == 0 or
+                             (frq <= 50 and frq % 10 == 0) or
+                             (frq < self.SAVE_CYCLE and frq % 100 == 0))):
+                            # Will write data to file
+                            self.ssaveNet = True  # SET_SWITCH(ssaveNet, True)
+
+                            # spatno==P+1 ==> white noise
+                            # SET_SLIDER(self.spatno, self.P + 1)
+                            self.spatno = self.P + 1
+
+                        self.last_stp = self.stp  # Record current time
+                        # re-compute all CAs
+                        self.compute_CApatts(self.CA_THRESH)
+                        self.compute_CAoverlaps()  # re-compute CA overlaps
+                        # Start (or continue) learning
+                        # SET_SLIDER(self.slrate, self.LEARN_RATE)
+                        self.slrate = self.LEARN_RATE
+                        self.training_phase = 1  # GO BACK to PHASE 1
+
+            else:  # Otherwise STOP the training (when stp reaches TOT_TRAINING)
+                self.strainNet = False  # SET_SWITCH(self.strainNet, False)
+                print("\n End of training phase. \n")
+                exit(0)
 
     def step(self):
         """
@@ -985,7 +1048,8 @@ class StandardNet6Areas:
 
         ## TODO Load entire network from file (incl. input patts.) ##
 
-        ## TODO MANAGE network TRAINING ##
+        ## MANAGE network TRAINING ##
+        self.manage_network_training()
 
         ## SET UP THE CURRENT SENSORIMOTOR INPUT ##
         self.set_up_current_sensorimotor_input(noise)
@@ -1018,12 +1082,17 @@ class StandardNet6Areas:
         self.stp = self.stp+1
         return self.get_current_activity()
 
-    # TODO is this the correct way to reshape (e.g. order), based on the linearised data?
     def get_current_activity(self):
         potentials = self.pot.reshape(6, 25, 25).tolist()
         global_inhibition = self.slowinh.tolist()
         return {
             'currentStep': self.stp,
+            'config': dict({
+                'patternNumber': self.spatno,
+                'learningRate': self.slrate,
+                'shouldSaveNetwork': self.ssaveNet,
+                'networkTrainingActivated': self.strainNet,
+            }),
             'totalActivity': self.total_output,
             'sensInput': self.sensInput.reshape(25, 25).tolist(),
             'motorInput': self.motorInput.reshape(25, 25).tolist(),
@@ -1065,6 +1134,9 @@ class StandardNet6Areas:
 
     def config_set_motor_stimulation_amplitude(self, motor_stimulation_amplitude):
         self.sMI0 = motor_stimulation_amplitude
+
+    def config_set_network_training_activated(self, network_training_activated):
+        self.strainNet = network_training_activated
 
     def MAIN_INIT_RANDOM_ACTIVITY(self):
         """

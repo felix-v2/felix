@@ -20,7 +20,6 @@ export const TimeSeriesGraph = ({
   title: string;
   data: number[];
 }) => {
-  console.log({ data });
   const { xData, yData } = prepareDataForPlot(data);
 
   return (

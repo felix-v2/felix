@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Button,
   ButtonGroup,
@@ -15,17 +15,27 @@ import { Slider } from '../../components/slider';
 
 import 'react-bootstrap-range-slider/dist/react-bootstrap-range-slider.css';
 
-import { InboundEvent, OutboundEvent, socket } from '../../socket';
+import { OutboundEvent, socket } from '../../socket';
 
 export const ControlPanel = ({
   onHide,
   connectedToServer,
   currentSimulationStep,
+  patternNumber,
+  setPatternNumber,
+  onPatternNumberChange,
+  networkTrainingActivated,
+  onNetworkTrainingActivatedChange,
 }: {
   visible: boolean;
   onHide: () => void;
   connectedToServer: boolean;
   currentSimulationStep: number;
+  patternNumber: number;
+  setPatternNumber: (patternNumber: number) => void;
+  onPatternNumberChange: (patternNumber: number) => void;
+  networkTrainingActivated: boolean;
+  onNetworkTrainingActivatedChange: (newTrainNet: boolean) => void;
 }) => {
   const connectToServer = () => {
     socket.connect();
@@ -70,12 +80,21 @@ export const ControlPanel = ({
         </Row>
         <Row style={{ paddingTop: 40 }}>
           <Col xs={12}>
-            <SimulationSwitches />
+            <SimulationSwitches
+              networkTrainingActivated={networkTrainingActivated}
+              onNetworkTrainingActivatedChange={
+                onNetworkTrainingActivatedChange
+              }
+            />
           </Col>
         </Row>
         <Row style={{ paddingTop: 30 }}>
           <Col xs={12}>
-            <SimulationModelParameters />
+            <SimulationModelParameters
+              patternNumber={patternNumber}
+              setPatternNumber={setPatternNumber}
+              onPatternNumberChange={onPatternNumberChange}
+            />
           </Col>
         </Row>
       </Offcanvas.Body>
@@ -131,7 +150,13 @@ const SimulationControlButtons = ({
   );
 };
 
-const SimulationSwitches = () => {
+const SimulationSwitches = ({
+  networkTrainingActivated,
+  onNetworkTrainingActivatedChange,
+}: {
+  networkTrainingActivated: boolean;
+  onNetworkTrainingActivatedChange: (newTrainNet: boolean) => void;
+}) => {
   const [sensIn, setSensIn] = useState<boolean>(false);
   const [motorIn, setMotorIn] = useState<boolean>(false);
 
@@ -157,6 +182,10 @@ const SimulationSwitches = () => {
     );
   };
 
+  const handleUserChangeNetworkTrainingActivated = () => {
+    onNetworkTrainingActivatedChange(!networkTrainingActivated);
+  };
+
   return (
     <>
       <Card>
@@ -166,7 +195,7 @@ const SimulationSwitches = () => {
             <ToggleButton
               style={{ marginRight: 10 }}
               variant={'primary'}
-              id="tbg-btn-1"
+              id="tbg-btn-sensIn"
               type="checkbox"
               checked={sensIn}
               value={sensIn.toString()} // required string/number, but doesn't impact the functionality directly
@@ -177,7 +206,7 @@ const SimulationSwitches = () => {
             <ToggleButton
               style={{ marginRight: 10 }}
               variant={'primary'}
-              id="tbg-btn-2"
+              id="tbg-btn-motorIn"
               type="checkbox"
               checked={motorIn}
               value={motorIn.toString()}
@@ -188,16 +217,17 @@ const SimulationSwitches = () => {
             <ToggleButton
               style={{ marginRight: 10 }}
               variant={'primary'}
-              id="tbg-btn-1"
-              value={1}
+              id="tbg-btn-dilute"
+              value={'dilute'}
+              disabled={true}
             >
               dilute
             </ToggleButton>
             <ToggleButton
               style={{ marginRight: 10 }}
               variant={'primary'}
-              id="tbg-btn-1"
-              value={1}
+              id="tbg-btn-saveNet"
+              value={'saveNet'}
               disabled={true}
             >
               saveNet
@@ -207,8 +237,8 @@ const SimulationSwitches = () => {
             <ToggleButton
               style={{ marginRight: 10 }}
               variant={'primary'}
-              id="tbg-btn-1"
-              value={1}
+              id="tbg-btn-loadNet"
+              value={'loadNet'}
               disabled={true}
             >
               loadNet
@@ -216,17 +246,18 @@ const SimulationSwitches = () => {
             <ToggleButton
               style={{ marginRight: 10 }}
               variant={'primary'}
-              id="tbg-btn-2"
-              value={1}
-              disabled={true}
+              id="tbg-btn-trainNet"
+              checked={networkTrainingActivated}
+              value={networkTrainingActivated.toString()}
+              onClick={handleUserChangeNetworkTrainingActivated}
             >
               trainNet
             </ToggleButton>
             <ToggleButton
               style={{ marginRight: 10 }}
               variant={'primary'}
-              id="tbg-btn-1"
-              value={1}
+              id="tbg-btn-printNet"
+              value={'printNet'}
               disabled={true}
             >
               printNet
@@ -236,8 +267,8 @@ const SimulationSwitches = () => {
             <ToggleButton
               style={{ marginRight: 10 }}
               variant={'primary'}
-              id="tbg-btn-1"
-              value={1}
+              id="tbg-btn-computeCA/Ovlps"
+              value={'computeCA/Ovlps'}
               disabled={true}
             >
               computeCA/Ovlps
@@ -249,7 +280,15 @@ const SimulationSwitches = () => {
   );
 };
 
-const SimulationModelParameters = () => {
+const SimulationModelParameters = ({
+  patternNumber,
+  setPatternNumber,
+  onPatternNumberChange,
+}: {
+  patternNumber: number;
+  setPatternNumber: (patterNumber: number) => void;
+  onPatternNumberChange: (patterNumber: number) => void;
+}) => {
   const [io, setIo] = useState<number>(0);
   const [noise, setNoise] = useState<number>(5);
   const [steps, setSteps] = useState<number>(0);
@@ -262,7 +301,6 @@ const SimulationModelParameters = () => {
   const [theta, setTheta] = useState<number>(0);
   const [sensoryStimAmp, setSensoryStimAmp] = useState<number>(300);
   const [motorStimAmp, setMotorStimAmp] = useState<number>(300);
-  const [pattern, setPattern] = useState<number>(0);
   const [learn, setLearn] = useState<number>(0);
   const [diluteProb, setDiluteProb] = useState<number>(0);
   const [diluteArea, setDiluteArea] = useState<number>(0);
@@ -279,10 +317,6 @@ const SimulationModelParameters = () => {
     socket.emit(OutboundEvent.UpdateConfig, 'global-inhibition', jSlow);
   };
 
-  const serverUpdatePatternNumber = () => {
-    socket.emit(OutboundEvent.UpdateConfig, 'pattern-number', pattern);
-  };
-
   const serverUpdateSensoryStimulationAmplitude = () => {
     socket.emit(
       OutboundEvent.UpdateConfig,
@@ -297,6 +331,10 @@ const SimulationModelParameters = () => {
       'motor-stimulation-amplitude',
       motorStimAmp,
     );
+  };
+
+  const handleUserChangePatternNumber = (patternNumber: number) => {
+    onPatternNumberChange(patternNumber);
   };
 
   return (
@@ -466,9 +504,11 @@ const SimulationModelParameters = () => {
                 title="Pattern #"
                 min={0}
                 max={13}
-                value={pattern}
-                setValue={setPattern}
-                onAfterChange={serverUpdatePatternNumber}
+                value={patternNumber}
+                setValue={setPatternNumber}
+                onAfterChange={(e) =>
+                  handleUserChangePatternNumber(Number(e.target.value))
+                }
               ></Slider>
             </Col>
           </Row>

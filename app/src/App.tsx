@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { socket, InboundEvent } from './socket';
+import { socket, InboundEvent, OutboundEvent } from './socket';
 import { Col, Row } from 'react-bootstrap';
 
 import 'react-bootstrap-range-slider/dist/react-bootstrap-range-slider.css';
@@ -34,6 +34,11 @@ export default function App() {
 
   const [currentStep, setCurrentStep] = useState<number>(0);
 
+  // control panel config
+  const [patternNumber, setPatternNumber] = useState<number>(0);
+  const [networkTrainingActivated, setNetworkTrainingActivated] =
+    useState<boolean>(false);
+
   // time-series data (1 area, 1d)
   const [totalActivity, setTotalActivity] = useState<number[]>([]);
   const [globalInhibition, setGlobalInhibition] = useState<number[]>([]);
@@ -60,8 +65,11 @@ export default function App() {
     };
 
     const onNewActivity = (data: any) => {
-      console.log(JSON.stringify(data));
       setCurrentStep(data.currentStep);
+      console.log(data.config);
+
+      setPatternNumber(data.config.patternNumber);
+      setNetworkTrainingActivated(data.config.networkTrainingActivated);
 
       setTotalActivity((prevTotalActivity) => {
         const updatedArray = [...prevTotalActivity, data.totalActivity];
@@ -120,6 +128,26 @@ export default function App() {
     };
   }, []);
 
+  /**
+   * @todo careful here
+   * these values can be changed by the server during training
+   * they can also be changed by the user in the GUI
+   * beware of update loops: server -> new value -> update state -> render new state -> trigger on-change event -> emit update back to server
+   */
+  const handleNetworkTrainingActivatedChange = (newTrainNet: boolean) => {
+    setNetworkTrainingActivated(newTrainNet);
+    socket.emit(
+      OutboundEvent.UpdateConfig,
+      'network-training-activated',
+      newTrainNet,
+    );
+  };
+
+  const handlePatternNumberChange = (newPatternNumber: number) => {
+    setPatternNumber(newPatternNumber);
+    socket.emit(OutboundEvent.UpdateConfig, 'pattern-number', newPatternNumber);
+  };
+
   return (
     <div className="App">
       <TransientToast
@@ -138,6 +166,11 @@ export default function App() {
         visible={true}
         connectedToServer={connected}
         currentSimulationStep={currentStep}
+        patternNumber={patternNumber}
+        setPatternNumber={setPatternNumber}
+        onPatternNumberChange={handlePatternNumberChange}
+        networkTrainingActivated={networkTrainingActivated}
+        onNetworkTrainingActivatedChange={handleNetworkTrainingActivatedChange}
         onHide={() => console.log('Hide')}
       />
       <Col xs={10} style={{ marginTop: '40px' }}>

@@ -88,10 +88,13 @@ class SimulationManager:
                     self.model.config_set_sensory_stimulation_amplitude(value)
                 elif param == 'motor-stimulation-amplitude':
                     self.model.config_set_motor_stimulation_amplitude(value)
+                elif param == 'network-training-activated':
+                    self.model.config_set_network_training_activated(value)
 
             current_activity = self.model.step()
             self.socket.emit('new-activity', {
                 'currentStep': current_activity['currentStep'],
+                'config': current_activity['config'],
                 'totalActivity': current_activity['totalActivity'],
                 'sensoryInput1': current_activity['sensInput'],
                 'motorInput1': current_activity['motorInput'],
