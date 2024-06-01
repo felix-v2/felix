@@ -98,8 +98,10 @@ class SimulationManager:
                 'totalActivity': current_activity['totalActivity'],
                 'sensoryInput1': current_activity['sensInput'],
                 'motorInput1': current_activity['motorInput'],
-                'potentials': current_activity['potentials'],
                 'globalInhibition': current_activity['globalInhibition'],
+                'longTermPotentiation': current_activity['longTermPotentiation'],
+                'longTermDepression': current_activity['longTermDepression'],
+                'potentials': current_activity['potentials'],
             })
             time.sleep(0.01)
 

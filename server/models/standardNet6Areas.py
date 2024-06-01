@@ -915,7 +915,8 @@ class StandardNet6Areas:
                     # Compute area (j+1)'s contrib. to TOT. input to (area+1)
                     correlation.Correlate_2d_cyclic_python(
                         self.rates[self.N1 * j: self.N1 * (j + 1)],
-                        self.J[self.NSQR1 * (self.NAREAS * j + area): self.NSQR1 * (self.NAREAS * (j + 1) + area)],
+                        self.J[self.NSQR1 * (self.NAREAS * j + area)
+                                             : self.NSQR1 * (self.NAREAS * (j + 1) + area)],
                         self.N11, self.N12, self.NFFB1, self.NFFB2, self.tempffb
                     )
 
@@ -1089,9 +1090,12 @@ class StandardNet6Areas:
         self.stp = self.stp+1
         return self.get_current_activity()
 
+    # TODO delegate this to the simulation_manager
     def get_current_activity(self):
         potentials = self.pot.reshape(6, 25, 25).tolist()
         global_inhibition = self.slowinh.tolist()
+        long_term_potentiation = self.tot_LTP.tolist()
+        long_term_depression = self.tot_LTD.tolist()
         return {
             'currentStep': self.stp,
             'config': dict({
@@ -1103,6 +1107,22 @@ class StandardNet6Areas:
             'totalActivity': self.total_output,
             'sensInput': self.sensInput.reshape(25, 25).tolist(),
             'motorInput': self.motorInput.reshape(25, 25).tolist(),
+            'longTermPotentiation': {
+                'area1': long_term_potentiation[0],
+                'area2': long_term_potentiation[1],
+                'area3': long_term_potentiation[2],
+                'area4': long_term_potentiation[3],
+                'area5': long_term_potentiation[4],
+                'area6': long_term_potentiation[5],
+            },
+            'longTermDepression': {
+                'area1': long_term_depression[0],
+                'area2': long_term_depression[1],
+                'area3': long_term_depression[2],
+                'area4': long_term_depression[3],
+                'area5': long_term_depression[4],
+                'area6': long_term_depression[5],
+            },
             'globalInhibition': {
                 'area1': global_inhibition[0],
                 'area2': global_inhibition[1],

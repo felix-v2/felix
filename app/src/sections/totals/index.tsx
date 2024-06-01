@@ -4,9 +4,13 @@ import { TimeSeriesGraph } from '../../components/graphs/line';
 export const Totals = ({
   totalActivity,
   globalInhibition,
+  longTermPotentiation,
+  longTermDepression,
 }: {
   totalActivity: number[];
   globalInhibition: number[];
+  longTermPotentiation: number[];
+  longTermDepression: number[];
 }) => {
   return (
     <>
@@ -18,10 +22,10 @@ export const Totals = ({
           <CollapsibleTimeSeries title="Slow Inhb" data={globalInhibition} />
         </Col>
         <Col xs={3}>
-          <CollapsibleTimeSeries title="LTP" data={[]} />
+          <CollapsibleTimeSeries title="LTP" data={longTermPotentiation} />
         </Col>
         <Col xs={3}>
-          <CollapsibleTimeSeries title="LTD" data={[]} />
+          <CollapsibleTimeSeries title="LTD" data={longTermDepression} />
         </Col>
       </Row>
     </>

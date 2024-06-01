@@ -42,6 +42,10 @@ export default function App() {
   // time-series data (1 area, 1d)
   const [totalActivity, setTotalActivity] = useState<number[]>([]);
   const [globalInhibition, setGlobalInhibition] = useState<number[]>([]);
+  const [longTermPotentiation, setLongTermPotentiation] = useState<number[]>(
+    [],
+  );
+  const [longTermDepression, setLongTermDepression] = useState<number[]>([]);
 
   // neural activity (1 area, 2d)
   const [sensoryInput1, setSensoryInput1] = useState<number[][]>(full);
@@ -80,6 +84,22 @@ export default function App() {
         const updatedArray = [
           ...prevGlobalInhibition,
           data.globalInhibition.area1,
+        ];
+        return updatedArray.length > 100 ? updatedArray.slice(1) : updatedArray;
+      });
+
+      setLongTermPotentiation((prevLongTermPotentiation) => {
+        const updatedArray = [
+          ...prevLongTermPotentiation,
+          data.longTermPotentiation.area1,
+        ];
+        return updatedArray.length > 100 ? updatedArray.slice(1) : updatedArray;
+      });
+
+      setLongTermDepression((prevLongTermDepression) => {
+        const updatedArray = [
+          ...prevLongTermDepression,
+          data.longTermDepression.area1,
         ];
         return updatedArray.length > 100 ? updatedArray.slice(1) : updatedArray;
       });
@@ -218,6 +238,8 @@ export default function App() {
           <Totals
             totalActivity={totalActivity}
             globalInhibition={globalInhibition}
+            longTermPotentiation={longTermPotentiation}
+            longTermDepression={longTermDepression}
           />
         </Row>
         <Row
