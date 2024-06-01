@@ -90,6 +90,8 @@ class SimulationManager:
                     self.model.config_set_motor_stimulation_amplitude(value)
                 elif param == 'network-training-activated':
                     self.model.config_set_network_training_activated(value)
+                elif param == 'compute-ca-overlaps':
+                    self.model.config_set_compute_ca_overlaps(value)
 
             current_activity = self.model.step()
             self.socket.emit('new-activity', {
@@ -102,6 +104,7 @@ class SimulationManager:
                 'longTermPotentiation': current_activity['longTermPotentiation'],
                 'longTermDepression': current_activity['longTermDepression'],
                 'potentials': current_activity['potentials'],
+                'cellAssemblyOverlaps': current_activity['cellAssemblyOverlaps']
             })
             time.sleep(0.01)
 

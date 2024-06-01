@@ -915,8 +915,7 @@ class StandardNet6Areas:
                     # Compute area (j+1)'s contrib. to TOT. input to (area+1)
                     correlation.Correlate_2d_cyclic_python(
                         self.rates[self.N1 * j: self.N1 * (j + 1)],
-                        self.J[self.NSQR1 * (self.NAREAS * j + area)
-                                             : self.NSQR1 * (self.NAREAS * (j + 1) + area)],
+                        self.J[self.NSQR1 * (self.NAREAS * j + area)                               : self.NSQR1 * (self.NAREAS * (j + 1) + area)],
                         self.N11, self.N12, self.NFFB1, self.NFFB2, self.tempffb
                     )
 
@@ -1096,6 +1095,8 @@ class StandardNet6Areas:
         global_inhibition = self.slowinh.tolist()
         long_term_potentiation = self.tot_LTP.tolist()
         long_term_depression = self.tot_LTD.tolist()
+        cell_assembly_overlaps = self.ca_ovlps.reshape(6, 12, 12, order='C').tolist()
+
         return {
             'currentStep': self.stp,
             'config': dict({
@@ -1103,6 +1104,7 @@ class StandardNet6Areas:
                 'learningRate': self.slrate,
                 'shouldSaveNetwork': self.ssaveNet,
                 'networkTrainingActivated': self.strainNet,
+                'computeCaOverlaps': self.sCA_ovlps
             }),
             'totalActivity': self.total_output,
             'sensInput': self.sensInput.reshape(25, 25).tolist(),
@@ -1138,6 +1140,14 @@ class StandardNet6Areas:
                 'area4': potentials[3],
                 'area5': potentials[4],
                 'area6': potentials[5],
+            },
+            'cellAssemblyOverlaps': {
+                'area1': cell_assembly_overlaps[0],
+                'area2': cell_assembly_overlaps[1],
+                'area3': cell_assembly_overlaps[2],
+                'area4': cell_assembly_overlaps[3],
+                'area5': cell_assembly_overlaps[4],
+                'area6': cell_assembly_overlaps[5],
             }
         }
 
@@ -1164,6 +1174,9 @@ class StandardNet6Areas:
 
     def config_set_network_training_activated(self, network_training_activated):
         self.strainNet = network_training_activated
+
+    def config_set_compute_ca_overlaps(self, compute_ca_overlaps):
+        self.sCA_ovlps = compute_ca_overlaps
 
     def MAIN_INIT_RANDOM_ACTIVITY(self):
         """

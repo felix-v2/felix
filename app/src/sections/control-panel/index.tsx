@@ -26,6 +26,8 @@ export const ControlPanel = ({
   onPatternNumberChange,
   networkTrainingActivated,
   onNetworkTrainingActivatedChange,
+  computeCaOverlaps,
+  onComputeCaOverlapsChange,
 }: {
   visible: boolean;
   onHide: () => void;
@@ -36,6 +38,8 @@ export const ControlPanel = ({
   onPatternNumberChange: (patternNumber: number) => void;
   networkTrainingActivated: boolean;
   onNetworkTrainingActivatedChange: (newTrainNet: boolean) => void;
+  computeCaOverlaps: boolean;
+  onComputeCaOverlapsChange: (newComputeCaOverlaps: boolean) => void;
 }) => {
   const connectToServer = () => {
     socket.connect();
@@ -85,6 +89,8 @@ export const ControlPanel = ({
               onNetworkTrainingActivatedChange={
                 onNetworkTrainingActivatedChange
               }
+              computeCaOverlaps={computeCaOverlaps}
+              onComputeCaOverlapsChange={onComputeCaOverlapsChange}
             />
           </Col>
         </Row>
@@ -153,9 +159,13 @@ const SimulationControlButtons = ({
 const SimulationSwitches = ({
   networkTrainingActivated,
   onNetworkTrainingActivatedChange,
+  computeCaOverlaps,
+  onComputeCaOverlapsChange,
 }: {
   networkTrainingActivated: boolean;
   onNetworkTrainingActivatedChange: (newTrainNet: boolean) => void;
+  computeCaOverlaps: boolean;
+  onComputeCaOverlapsChange: (newComputeCaOverlaps: boolean) => void;
 }) => {
   const [sensIn, setSensIn] = useState<boolean>(false);
   const [motorIn, setMotorIn] = useState<boolean>(false);
@@ -184,6 +194,10 @@ const SimulationSwitches = ({
 
   const handleUserChangeNetworkTrainingActivated = () => {
     onNetworkTrainingActivatedChange(!networkTrainingActivated);
+  };
+
+  const handleUserChangeComputeCaOverlaps = () => {
+    onComputeCaOverlapsChange(!computeCaOverlaps);
   };
 
   return (
@@ -268,8 +282,9 @@ const SimulationSwitches = ({
               style={{ marginRight: 10 }}
               variant={'primary'}
               id="tbg-btn-computeCA/Ovlps"
-              value={'computeCA/Ovlps'}
-              disabled={true}
+              checked={computeCaOverlaps}
+              value={computeCaOverlaps.toString()}
+              onClick={handleUserChangeComputeCaOverlaps}
             >
               computeCA/Ovlps
             </ToggleButton>

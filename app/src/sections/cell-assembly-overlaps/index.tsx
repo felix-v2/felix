@@ -4,9 +4,19 @@ import 'react-bootstrap-range-slider/dist/react-bootstrap-range-slider.css';
 import { Heatmap } from '../../components/graphs/heatmap';
 
 export const CellAssemblyOverlaps = ({
-  activity,
+  area1,
+  area2,
+  area3,
+  area4,
+  area5,
+  area6,
 }: {
-  activity: number[][];
+  area1: number[][];
+  area2: number[][];
+  area3: number[][];
+  area4: number[][];
+  area5: number[][];
+  area6: number[][];
 }) => {
   return (
     <Accordion
@@ -24,42 +34,42 @@ export const CellAssemblyOverlaps = ({
               A1
               {Heatmap({
                 title: 'A1',
-                activity: [],
+                activity: area1,
               })}
             </Col>
             <Col style={{ paddingLeft: 0, paddingRight: 0 }}>
               A2
               {Heatmap({
                 title: 'A2',
-                activity: [],
+                activity: area2,
               })}
             </Col>
             <Col style={{ paddingLeft: 0, paddingRight: 0 }}>
               A3
               {Heatmap({
                 title: 'A3',
-                activity: [],
+                activity: area3,
               })}
             </Col>
             <Col style={{ paddingLeft: 0, paddingRight: 0 }}>
               A4
               {Heatmap({
                 title: 'A4',
-                activity: [],
+                activity: area4,
               })}
             </Col>
             <Col style={{ paddingLeft: 0, paddingRight: 0 }}>
               A5
               {Heatmap({
                 title: 'A5',
-                activity: [],
+                activity: area5,
               })}
             </Col>
             <Col style={{ paddingLeft: 0, paddingRight: 0 }}>
               A6
               {Heatmap({
                 title: 'A6',
-                activity: [],
+                activity: area6,
               })}
             </Col>
           </Row>

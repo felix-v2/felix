@@ -38,6 +38,7 @@ export default function App() {
   const [patternNumber, setPatternNumber] = useState<number>(0);
   const [networkTrainingActivated, setNetworkTrainingActivated] =
     useState<boolean>(false);
+  const [computeCaOverlaps, setComputeCaOverlaps] = useState<boolean>(false);
 
   // time-series data (1 area, 1d)
   const [totalActivity, setTotalActivity] = useState<number[]>([]);
@@ -52,12 +53,20 @@ export default function App() {
   const [motorInput1, setMotorInput1] = useState<number[][]>(full);
 
   // neural activity (1 area, 2d)
-  const [area1, setArea1] = useState<number[][]>(silence);
-  const [area2, setArea2] = useState<number[][]>(silence);
-  const [area3, setArea3] = useState<number[][]>(silence);
-  const [area4, setArea4] = useState<number[][]>(silence);
-  const [area6, setArea6] = useState<number[][]>(silence);
-  const [area5, setArea5] = useState<number[][]>(silence);
+  const [area1Potentials, setArea1Potentials] = useState<number[][]>(silence);
+  const [area2Potentials, setArea2Potentials] = useState<number[][]>(silence);
+  const [area3Potentials, setArea3Potentials] = useState<number[][]>(silence);
+  const [area4Potentials, setArea4Potentials] = useState<number[][]>(silence);
+  const [area5Potentials, setArea5Potentials] = useState<number[][]>(silence);
+  const [area6Potentials, setArea6Potentials] = useState<number[][]>(silence);
+
+  // cell assembly overlaps (6 areas, 2d - 12x12)
+  const [area1CaOverlaps, setArea1CaOverlaps] = useState<number[][]>(silence);
+  const [area2CaOverlaps, setArea2CaOverlaps] = useState<number[][]>(silence);
+  const [area3CaOverlaps, setArea3CaOverlaps] = useState<number[][]>(silence);
+  const [area4CaOverlaps, setArea4CaOverlaps] = useState<number[][]>(silence);
+  const [area5CaOverlaps, setArea5CaOverlaps] = useState<number[][]>(silence);
+  const [area6CaOverlaps, setArea6CaOverlaps] = useState<number[][]>(silence);
 
   useEffect(() => {
     const onConnect = () => {
@@ -74,6 +83,7 @@ export default function App() {
 
       setPatternNumber(data.config.patternNumber);
       setNetworkTrainingActivated(data.config.networkTrainingActivated);
+      setComputeCaOverlaps(data.config.computeCaOverlaps);
 
       setTotalActivity((prevTotalActivity) => {
         const updatedArray = [...prevTotalActivity, data.totalActivity];
@@ -107,12 +117,19 @@ export default function App() {
       setSensoryInput1(data.sensoryInput1);
       setMotorInput1(data.motorInput1);
 
-      setArea1(data.potentials.area1);
-      setArea2(data.potentials.area2);
-      setArea3(data.potentials.area3);
-      setArea4(data.potentials.area4);
-      setArea5(data.potentials.area5);
-      setArea6(data.potentials.area6);
+      setArea1Potentials(data.potentials.area1);
+      setArea2Potentials(data.potentials.area2);
+      setArea3Potentials(data.potentials.area3);
+      setArea4Potentials(data.potentials.area4);
+      setArea5Potentials(data.potentials.area5);
+      setArea6Potentials(data.potentials.area6);
+
+      setArea1CaOverlaps(data.cellAssemblyOverlaps.area1);
+      setArea2CaOverlaps(data.cellAssemblyOverlaps.area2);
+      setArea3CaOverlaps(data.cellAssemblyOverlaps.area3);
+      setArea4CaOverlaps(data.cellAssemblyOverlaps.area4);
+      setArea5CaOverlaps(data.cellAssemblyOverlaps.area5);
+      setArea6CaOverlaps(data.cellAssemblyOverlaps.area6);
     };
 
     const onErrorNotification = (data: { msg: string }) => {
@@ -163,6 +180,15 @@ export default function App() {
     );
   };
 
+  const handleComputeCaOverlapsChange = (newComputeCaOverlaps: boolean) => {
+    setComputeCaOverlaps(newComputeCaOverlaps);
+    socket.emit(
+      OutboundEvent.UpdateConfig,
+      'compute-ca-overlaps',
+      newComputeCaOverlaps,
+    );
+  };
+
   const handlePatternNumberChange = (newPatternNumber: number) => {
     setPatternNumber(newPatternNumber);
     socket.emit(OutboundEvent.UpdateConfig, 'pattern-number', newPatternNumber);
@@ -191,6 +217,8 @@ export default function App() {
         onPatternNumberChange={handlePatternNumberChange}
         networkTrainingActivated={networkTrainingActivated}
         onNetworkTrainingActivatedChange={handleNetworkTrainingActivatedChange}
+        computeCaOverlaps={computeCaOverlaps}
+        onComputeCaOverlapsChange={handleComputeCaOverlapsChange}
         onHide={() => console.log('Hide')}
       />
       <Col xs={10} style={{ marginTop: '40px' }}>
@@ -219,12 +247,12 @@ export default function App() {
             <Potentials
               sensoryInput1={sensoryInput1}
               motorInput1={motorInput1}
-              area1={area1}
-              area2={area2}
-              area3={area3}
-              area4={area4}
-              area5={area5}
-              area6={area6}
+              area1={area1Potentials}
+              area2={area2Potentials}
+              area3={area3Potentials}
+              area4={area4Potentials}
+              area5={area5Potentials}
+              area6={area6Potentials}
             ></Potentials>
           </Col>
         </Row>
@@ -250,7 +278,14 @@ export default function App() {
           }}
         >
           <Col xs={6}>
-            <CellAssemblyOverlaps activity={[]}></CellAssemblyOverlaps>
+            <CellAssemblyOverlaps
+              area1={area1CaOverlaps}
+              area2={area2CaOverlaps}
+              area3={area3CaOverlaps}
+              area4={area4CaOverlaps}
+              area5={area5CaOverlaps}
+              area6={area6CaOverlaps}
+            ></CellAssemblyOverlaps>
           </Col>
         </Row>
         <Row
